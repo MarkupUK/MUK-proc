@@ -8,7 +8,7 @@
       <abstract>
 	 <para>
 	    XForms
-	    <link linkend="xf">[XF1</link>][<link linkend="xf2">XF2</link>] is
+	    [<link linkend="xf1">XF1</link>][<link linkend="xf2">XF2</link>] is
 	    a declarative programming language, with a different programming
 	    paradigm compared to traditional programming languages. Since it
 	    requires a new way of thinking about programming, learning
