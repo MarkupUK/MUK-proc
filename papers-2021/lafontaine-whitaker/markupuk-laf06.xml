@@ -203,7 +203,7 @@
         <para>The last three columns show how the two diffs are combined. Note that the yellow match
             shows where all three files align - and this is important because it is the data between
             these alignment points that are considered as units of change. Now we can look at the
-            diff3 output using the -m
+            diff3 output using the ‘-m’
             option:<screen xml:space="preserve" language="diff3">1
 4
 5
