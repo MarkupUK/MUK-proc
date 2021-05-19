@@ -20,7 +20,7 @@
                 half a job. The prevalence of GUIs also suggest that the actual syntax of a diff
                 file is not as important as it was in that the emphasis has changed from human
                 readability to interchange between two applications, for example between a git
-                'merge driver' and a git 'mergetool'. For these reasons it seemed better to consider
+                ‘merge driver’ and a git ‘mergetool’. For these reasons it seemed better to consider
                 a different approach using the tools and formats that are now in common use, for
                 example XML or JSON.</para>
             <para>What might diff3 look like as an XML format? Would the advantages of a new format
@@ -33,7 +33,7 @@
                 <surname>La Fontaine</surname>
             </personname>
             <personblurb>
-                <para>Robin is the founder and CEO of DeltaXML. Robin's original academic training
+                <para>Robin is the founder and CEO of DeltaXML. Robin’s original academic training
                     was in Engineering Science from Oxford University and an MSc in Computer
                     Science. His background includes computer aided design software in mechanical,
                     electrical and electronic applications, and solar energy system simulation.
@@ -69,7 +69,7 @@
             format rather than the diff3 executable application. In this paper we will develop an
             XML alternative to the diff3 format from GNU diffutils [<biblioref linkend="diffutils"/>].
             There are many possible outputs from diff3 but the one we are interested in is the one
-            that provides a merged file result with conflicts marked up, i.e. the '-m' option on the
+            that provides a merged file result with conflicts marked up, i.e. the ‘-m’ option on the
             command line. </para>
         <para>Many users do not view diff3 data directly or invoke diff3 itself, instead it is often
             invoked by a version control systems such as git or mercurial when the users merge a
@@ -79,8 +79,8 @@
       zero, so the diff file tends to resemble the original files. This is desirable in that minimal
       processing is needed for few changes and human understanding is improved simply because when
       the diff and the original files are very similar they will look very similar.</para>
-        <para>We distinguish between the 'carrier' syntax which is the diff3 alternative, and the
-            'payload' which is the content of the file(s) being compared or merged.</para>
+        <para>We distinguish between the ‘carrier’ syntax which is the diff3 alternative, and the
+            ‘payload’ which is the content of the file(s) being compared or merged.</para>
         <para>In our previous paper, we considered both XML and JSON as a candidate for the carrier
             syntax and established that XML is a more natural fit, with the payload of the original
             files being, typically, not XML. However, of course this could be applied to XML itself
@@ -149,7 +149,7 @@
       represent a richer view of the differences. For clarity we repeat the example here. The
       example is based on this paper, "A Formal Investigation of Diff3" [<biblioref linkend="FormalDiff3"
       />]. The example consists of three text files with numbers on each line, the files are denoted
-      A.txt, B.txt and the 'old' file O.txt as shown below:<table frame="all" rowsep="1" colsep="1" xml:id="mismatched-sequences">
+      A.txt, B.txt and the ‘old’ file O.txt as shown below:<table frame="all" rowsep="1" colsep="1" xml:id="mismatched-sequences">
         <title>Mismatched sequences</title>
         <tgroup cols="3" align="left">
           <colspec colname="c1" colnum="1" colwidth="1*"/>
@@ -205,7 +205,7 @@
             shows where all three files align - and this is important because it is the data between
             these alignment points that are considered as units of change. Now we can look at the
             diff3 output using the -m
-            option:<screen xml:space="preserve">1
+            option:<screen xml:space="preserve" language="diff3">1
 4
 5
 2
@@ -244,7 +244,7 @@
             <para>Now that we have moved into an XML syntax world, we have the opportunity for a
                 richer representation to show non-conflicting changes. It is often useful to see
                 these to understand how a merge has been handled and provides more context when
-                resolving conflicts. In this example we could show the origin of the '4 5' data that
+                resolving conflicts. In this example we could show the origin of the ‘4 5’ data that
                 was added by A.</para>
             <para>To show this we need to have elements defined for the limited combinations of the
                 three input files. We can do this as <code language="xml">&lt;ao></code> for data in both O and A, and similarly
@@ -331,7 +331,7 @@ ws = *(
                 this is not how diff3 would process the above files which each have a single line.
                 However the result below could be generated by careful use of line breaks in the
                 input files.
-                <screen xml:space="preserve">[
+                <screen xml:space="preserve" language="diff3">[
 &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; A.txt
 [
 ||||||| O.txt
@@ -369,16 +369,16 @@ ws = *(
                 diff3 file because of the extra whitespace lines that have to be inserted to make
                 this work.</para>
             <para>We introduce here a way to connect the relevant consistent choices so that if the
-                '[' is selected then the appropriate choice of the end ']' is also made
+                ‘[’ is selected then the appropriate choice of the end ‘]’ is also made
                 automatically. </para>
             <para>A choice consists of one or more options. An option may have an id. An option may
                 also have a select attribute which provides a boolean value made up of one or a
-                combination of other ids and if these are 'true', i.e. have been chosen to be
+                combination of other ids and if these are ‘true’, i.e. have been chosen to be
                 included, then this option is selected automatically. </para>
             <para>This could be represented in diff3x as shown below. We show here the id attribute
         on an option to identify it uniquely within the file. We then use that id to reference that
-        option where another option needs to be linked to it. In this case, the '[' in the A.txt has
-                <code>id="a42"</code> and this is then referenced in the select attribute of the corresponding ']' option
+        option where another option needs to be linked to it. In this case, the ‘[’ in the A.txt has
+                <code>id="a42"</code> and this is then referenced in the select attribute of the corresponding ‘]’ option
         later in the file. Similarly the pair of square brackets in B.txt are linked with the id
         "b44".<programlisting language="xml">&lt;diff3x a="A.txt" b="B.txt" o="O.txt">
 [
@@ -397,7 +397,7 @@ ws = *(
 &lt;b select="b44">]&lt;/b>
 &lt;ao/>&lt;/choice2>
 ]&lt;/diff3x></programlisting></para>
-            <para>Note that the '[' in A could be selected either instead of or as well as the '['
+            <para>Note that the ‘[’ in A could be selected either instead of or as well as the ‘[’
         in B even though they are at the same position in the array. Whichever choice is made, the
         other choices with a select attribute identifying the same id are chosen and the result is
         syntactically correct. This is a powerful way to represent connected choices.</para>
@@ -408,7 +408,7 @@ ws = *(
                 either the start or the end of each item (member for object and value for array)
                 because if there is only one item then no separator is needed. Therefore maintaining
                 correct syntax when items are added or deleted is not trivial. As mentioned above,
-                the diff3 format does not allow consecutive choices without 'anchor' data between,
+                the diff3 format does not allow consecutive choices without ‘anchor’ data between,
                 so it is necessary to group consecutive items that may be added or deleted into one
                 choice. This apparent restriction does lead to a greater likelihood of the syntax of
                 each choice being consistent.</para>
@@ -441,9 +441,9 @@ ws = *(
                         </tbody>
                     </tgroup>
                 </table>This could be represented as shown below. Note here that we are not showing
-                the result of running 'diff3 -m' but rather we have run an XML aware comparison so
+                the result of running ‘diff3 -m’ but rather we have run an XML aware comparison so
                 we have results that we want to express in the diff3 format.
-                <screen xml:space="preserve">[
+                <screen xml:space="preserve" language="diff3">[
 &lt;&lt;&lt;&lt;&lt;&lt;&lt; A.txt
 "one", "two"
 ||||||| O.txt
@@ -601,7 +601,7 @@ duplicated&lt;/italic>
                 ensure consistent choices. In this case we have given the options within the two
                 connected choices an id value. Thus if option <code language="xml">&lt;a></code> is selected in one choice with
                 id="a42" then the choice with id="a420" is automatically selected. We have also
-                added 'vice versa' attributes so that the same would happen the other way round: if
+                added ‘vice versa’ attributes so that the same would happen the other way round: if
                 the end tag was selected then the corresponding start tag would also be
                 selected.<programlisting language="xml">&lt;diff3x a="A.txt" b="B.txt" o="O.txt">&lt;![CDATA[&lt;p>This is a long paragraph 
 where ]]&gt;
@@ -634,7 +634,7 @@ duplicated
                 improved using an XML representation. </para>
             <para>It is worth noting an issue with the diff3 format in this situation, because it is
                 quite subtle but one that we can resolve in diff3x. The lines in the input files at
-                which all three files align (the lines are all equal) are considered 'anchor'
+                which all three files align (the lines are all equal) are considered ‘anchor’
                 points. All of the lines between anchor points is considered to be a single choice -
                 and when there is some kind of conflict then the choice is left for the user to
                 select. The interesting consequence of this structure is that it is not possible to
@@ -712,7 +712,7 @@ dir="&lt;choice3>&lt;a>rtr&lt;/a>
         <title>Nested Changes</title>
         <para>As diff3x is an XML representation we here consider going one step further and making
             use of the fact that the representation is hierarchical to support hierarchical or
-            'nested' change. A nested change is a change in one branch that modifies something that
+            ‘nested’ change. A nested change is a change in one branch that modifies something that
             has been removed in another branch.</para>
         <para>We will look at an XML example, showing nested changes. </para>
         <table frame="all" rowsep="1" colsep="1">
@@ -951,7 +951,7 @@ dir="&lt;choice3>&lt;a>rtr&lt;/a>
           <tbody>
             <row>
               <entry>
-                <screen xml:space="preserve">1
+                <screen xml:space="preserve" language="diff3">1
 4
 5
 2
@@ -1078,7 +1078,7 @@ dir="&lt;choice3>&lt;a>rtr&lt;/a>
       <para>In previous conferences and events we have shown and discussed different approaches to
       resolving and processing merge results using XML based technologies. We have shown a conflict
       resolver using an OxygenXML plugin and one based on Schematron Quick Fixes (SQF) <biblioref
-        linkend="SQF"/>. These work well with an XML payload, but aren't directly usable with other
+        linkend="SQF"/>. These work well with an XML payload, but aren’t directly usable with other
       forms of structured content such as JSON. At DeltaXML we are finding that customers want to
       evaluate our tools in the browser and fewer users are willing to download and install a ZIP
       package with our code/APIs. We have tools/services for XML and JSON and display comparison and
@@ -1114,7 +1114,7 @@ dir="&lt;choice3>&lt;a>rtr&lt;/a>
         <para>In a related paper [<biblioref linkend="git-prague"/>] we identified some issues in version
             control systems that caused inconsistency and confusion to users. One solution to those
             issues relies on separating the merge driver from subsequent conflict resolution tools
-            or 'merge tools'. The diff3x format proposed here would work well for data exchange
+            or ‘merge tools’. The diff3x format proposed here would work well for data exchange
             between these two steps. This is important because it separates knowledge of the format
             and structure of a file from a GUI designed to allow the acceptance of changes or the
             resolution of conflict thus enabling a single GUI to handle many different file
