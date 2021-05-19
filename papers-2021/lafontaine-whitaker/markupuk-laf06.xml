@@ -648,9 +648,9 @@ duplicated
                 <table frame="all" rowsep="1" colsep="1">
                     <title>XML Attribute value change</title>
                     <tgroup cols="3" align="left">
-                        <colspec colname="c1" colnum="1" colwidth="1.05*"/>
+                        <colspec colname="c1" colnum="1" colwidth="1*"/>
                         <colspec colname="c2" colnum="2" colwidth="1*"/>
-                        <colspec colname="c3" colnum="3" colwidth="1.1*"/>
+                        <colspec colname="c3" colnum="3" colwidth="1.3*"/>
                         <thead>
                             <row>
                                 <entry>A.txt</entry>
