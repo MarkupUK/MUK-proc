@@ -182,7 +182,7 @@
       <figure>
 	 <title>A simplified partial dependency graph</title>
         <mediaobject><imageobject>
-          <imagedata fileref="dependency.png" width="100%" scalefit="1" contentdepth="100%" />
+          <imagedata fileref="dependency.png" scale="50" />
         </imageobject></mediaobject>
       </figure>
     </para>
@@ -357,7 +357,7 @@
       <screenshot>
       <title>Selecting a chapter</title>
         <mediaobject><imageobject>
-          <imagedata fileref="nav1.png" width="100%" scalefit="1" contentdepth="100%" />
+          <imagedata fileref="nav1.png" scale="50" />
         </imageobject></mediaobject>
       </screenshot>
     </para>
@@ -368,7 +368,7 @@
       <screenshot>
 	 <title>The initial chapter, with no previous</title>
          <mediaobject><imageobject>
-          <imagedata fileref="nav2.png" width="100%" scalefit="1" contentdepth="100%" />
+          <imagedata fileref="nav2.png" scale="50" />
         </imageobject></mediaobject>
       </screenshot>
     </para>
