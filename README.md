@@ -30,9 +30,9 @@ This contains the code for the Markup UK Proceedings, including a couple of file
 Automated formatting requires Apache Ant and AH Formatter.
 
 1. Check that the properties defined in `properties.xml` are correct for your installation.
- - If a property needs to be changed for everyone, edit `properties.xml` and then commit your changes
- - If a property, such as for the location of a file, needs to be changed only for your installation, copy `properties.xml` to `properties.local.xml` and edit that file so that it contains only your property overrides. The definitions in `properties.local.xml` (if it exists) have precedence over the properties in `properties.xml` because Ant reads `properties.local.xml` before `properties.xml`.
- - If you want to set a property only for the current run, specify it on the command line; for example, `-Dforce=yes` to set `${force}` to `yes`.
+   - If a property needs to be changed for everyone, edit `properties.xml` and then commit your changes
+   - If a property, such as for the location of a file, needs to be changed only for your installation, copy `properties.xml` to `properties.local.xml` and edit that file so that it contains only your property overrides. The definitions in `properties.local.xml` (if it exists) have precedence over the properties in `properties.xml` because Ant reads `properties.local.xml` before `properties.xml`.
+   - If you want to set a property only for the current run, specify it on the command line; for example, `-Dforce=yes` to set `${force}` to `yes`.
 1. Run Ant:
    ```
    ant -emacs
