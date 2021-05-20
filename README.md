@@ -32,6 +32,7 @@ Automated formatting requires Apache Ant and AH Formatter.
 1. Check that the properties defined in `properties.xml` are correct for your installation.
  - If a property needs to be changed for everyone, edit `properties.xml` and then commit your changes
  - If a property, such as for the location of a file, needs to be changed only for your installation, copy `properties.xml` to `properties.local.xml` and edit that file so that it contains only your property overrides. The definitions in `properties.local.xml` (if it exists) have precedence over the properties in `properties.xml` because Ant reads `properties.local.xml` before `properties.xml`.
+ - If you want to set a property only for the current run, specify it on the command line; for example, `-Dforce=yse` to set `${force}` to `yes`.
 1. Run Ant:
    ```
    ant -emacs
@@ -40,6 +41,24 @@ Automated formatting requires Apache Ant and AH Formatter.
    ```
    ant -emacs -Dforce=yes
    ```
+
+#### Ant targets
+
+The default target is `pdf.single`. To run a different target, specify it on the Ant command line.
+
+- **`pdf.single`**
+  Generate PDF from the DocBook XML file specified by `${single}`.
+  The result is generated in the `xsl` directory (at present).
+- **`fo.single`**
+  Generate XSL-FO from the DocBook XML file specified by `${single}`. The file can be viewed (on Windows) using the AH Formatter GUI.
+  The result is generated in the `xsl` directory (at present).
+- **`gui.single`**
+  On Windows only, opens the XSL-FO file from `fo.single` in the AH Formatter GUI. If AH Formatter GUI is already running, the file will open in that GUI. If the file is already open in the GUI, the file will reopen at the current page.
+
+#### Ant properties
+
+- **`${single}`**
+  DocBook XML file to process
 
 ### Submitting changes to the `muk2019` branch
 
@@ -51,7 +70,7 @@ When you have changes that are *not* in the `xsl` subdirectory:
    1. If your branch is out of date, there will be an indication of how many commits your branch is behind
    1. Click on 'Fetch upstream' and then 'Fetch and merge' to merge upstream changes into your fork:
 	  ![](fetch-and-merge.png)
-   1. Pull the upstream changes to your local repository:
+   1. Pull those upstream changes to your local repository:
       ```
 	  git pull origin muk2019
 	  ```
