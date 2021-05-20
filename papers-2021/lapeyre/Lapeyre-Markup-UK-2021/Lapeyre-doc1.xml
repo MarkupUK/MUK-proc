@@ -878,7 +878,7 @@ Parameter Entities, like elements and attributes, get a page apiece. There are m
 <listitem><para>Names obscure (&lt;csd> - as part of an address)</para></listitem>
 <listitem><para>Definitions do not adequately disambiguate
 (&lt;pub-no> and &lt;doc-no>)</para></listitem>
-<listitem><para>There is no match, you are looking for best approximation(&lt;surname> and &lt;given-names>)</para></listitem>
+<listitem><para>There is no match, you are looking for best approximation (&lt;surname> and &lt;given-names>)</para></listitem>
 </itemizedlist>
 
 <para> To misquote Liam Quin only slightly: <quote>
