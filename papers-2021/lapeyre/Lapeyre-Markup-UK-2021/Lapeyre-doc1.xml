@@ -244,7 +244,7 @@ establishes elements and attributes from which tag sets for multiple document ty
 </imageobject>
 </mediaobject></para>
 <itemizedlist>
-<listitem><para>Cross references to elements are the element tag name (generic identifier), surrounded by delimiters (&lt;abstract>). Almost all element names, including those in the Context and natural language Content Model Descriptions are live links to the specific element  page. </para></listitem>
+<listitem><para>Cross references to elements are the element tag name (generic identifier), surrounded by delimiters (&lt;abstract>). Almost all element names, including those in the Context and natural language Content Model Descriptions, are live links to the specific element page. </para></listitem>
 <listitem><para>Attribute references appear as the attribute name, prefaced with an at sign (@specific-use). These link directly to the specific attribute page.</para></listitem>
 <listitem><para>Parameter Entity (PE)  references are the name of the PE, prefaced by a percent sign and closed with a semicolon (%list.class;). These link directly to the parameter entity page.</para></listitem>
 <listitem><para>References to narrative sections of the Tag Library are preceded by the word <quote>See</quote>, and link to sections in the narrative text. <mediaobject>
