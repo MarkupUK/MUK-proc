@@ -228,17 +228,8 @@ establishes elements and attributes from which tag sets for multiple document ty
 <title>Opening and closing subsections on a page</title>
 <para>Small diamonds on the top right of each page provide accordion folding inside the body of most pages:</para>
 <itemizedlist>
-<listitem><para>The hollow diamond  (<inlinemediaobject>
-<imageobject>
- 
-<imagedata fileref="images/HollowDiamond.png"  format="png"/>
-</imageobject>
-</inlinemediaobject>) opens all subheadings on the page.</para></listitem>
-<listitem><para>The solid diamond (<inlinemediaobject>
-<imageobject>
-<imagedata fileref="images/SolidDiamond.png"   format="png"/>
-</imageobject>
-</inlinemediaobject>) closes all  subheadings <emphasis role="ital">that can be closed</emphasis>. Best Practice sections are left open and do not close.</para></listitem>
+<listitem><para>The hollow diamond  (&#x25C7;) opens all subheadings on the page.</para></listitem>
+<listitem><para>The solid diamond (&#x25C6;) closes all  subheadings <emphasis role="ital">that can be closed</emphasis>. Best Practice sections are left open and do not close.</para></listitem>
 <listitem><para>The diamonds are <quote>sticky</quote>, meaning that the next page you open will come up with the last setting you used. This is viewed as an accessibility feature, set it and forget it.</para></listitem>
 </itemizedlist>
 </section>
