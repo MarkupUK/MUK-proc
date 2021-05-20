@@ -189,7 +189,7 @@
     <para>
       It is worth pointing out that there is some leeway in even the
       partial ordering that the dependency graph generates, because
-      rather than completely covering all the  antecedents of a topic
+      rather than completely covering all the antecedents of a topic
       first, you can use progressive disclosure
       [<link linkend="pd">pd</link>]; for instance you could partially
       cover validity, talking only about types, and then extend it later
