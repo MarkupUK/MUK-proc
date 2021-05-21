@@ -52,10 +52,10 @@
 			the back of the paper, after the references. The combination of a two-column layout plus
 			floating figures generally takes fewer pages than if all text, headings, and figures
 			span the width of the page.</para>
-	<para>The changes fall into three areas: Markup UK look-and-feel; not going to print; and
+	<para>The changes fall into three areas: Markup UK ‘look and feel’; not going to print; and
 		accessibility.</para>
 	<section>
-		<title>Markup UK look-and-feel</title>
+		<title>Markup UK ‘look and feel’</title>
 		<para>As stated previously, the 2018 proceedings used a Garamond font. It was initially
 			intended to continue to use the Garamond in the restyling, but this Garamond has only
 			regular and italic styles and does not have a bold weight. This was almost okay, because
@@ -68,7 +68,7 @@
 			title in the website, while minor heading and titles of tables and figures use the font
 			with black text.</para>
 		<figure pgwide="1">
-			<title>Website 'look-and-feel' applied to proceedings</title>
+			<title>Website 'look and feel’ applied to proceedings</title>
 			<mediaobject>
 				<imageobject>
 					<imagedata fileref="img/website-compare.jpg" width="100%"/>
@@ -399,7 +399,7 @@
 				<para>The customisation enables the option in the DocBook XSLT 1.0 Stylesheets to
 					perform syntax highlighting on program listings using the XSLTHL syntax
 					highlighting utility. <biblioref linkend="xslthl"/></para>
-				<para>XSLTHL feels like a good fit for use with XSLT because it is an extension function for the XSLT processor, it does not require any other programming language, and its configuration files are XML. In reality: it is quite old; development on SourceForge had stalled and no new languages had been added for several years; it only works with Xalan, Saxon 6.5, and SaxonB (up to around Saxon 9.1) and only on Java.<footnote>
+				<para>XSLTHL feels like a good fit for use with XSLT because: it is an extension function for the XSLT processor; it does not require any other programming language; and its configuration files are XML. In reality: it is quite old; development on SourceForge had stalled and no new languages had been added for several years; it only works with Xalan, Saxon 6.5, and SaxonB (up to around Saxon 9.1) and only on Java.<footnote>
 					<para>Antenna House has contributed a PR that lets XSLTHL work with Saxon versions up to 9.9, but that is not in any official release.</para>
 				</footnote></para>
 				<para>Highlighters for XQuery, DTDs and batch files were added to the
@@ -428,7 +428,7 @@
 		<para>The support for authoring went through three stages:
 		<itemizedlist>
 			<listitem>
-				<para>The extension framework and the Schematron file were available from the GitHub repository. <biblioref linkend="MUK-xsl" /> The Schematron was not used by the validation scenario defined in the framework.</para>
+				<para>The extension framework and the Schematron file were available from the GitHub repository. <biblioref linkend="MUK-docbook" /> The Schematron was not used by the validation scenario defined in the framework.</para>
 				<para>Using the framework would require cloning the GitHub repository and configuring Oxygen to look for framework files in the cloned directory.</para>
 			</listitem>
 			<listitem>
