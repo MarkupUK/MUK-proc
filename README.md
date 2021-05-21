@@ -7,21 +7,13 @@ This contains the code for the Markup UK Proceedings, including a couple of file
 ### Getting the code
 
 1. Fork the `MarkupUK/MUK-proc` repository on GitHub
-1. Clone your fork to your computer:
+1. Clone the `muk2019` branch of your fork to your computer:
    ```
-   git clone https://github.com/your-username/MUK-proc.git
+   git clone --recurse-submodules -b muk2019 https://github.com/your-username/MUK-proc.git
    ```
 1. Change directory to the new clone:
    ```
    cd MUK-proc
-   ```
-1. Checkout the `muk2019` branch:
-   ```
-   git checkout muk2019
-   ```
-1. Pull both the `muk2019` branch and the `MUK-xsl` submodule that it uses:
-   ```
-   git pull --recurse-submodules origin muk2019
    ```
 1. Format the proceedings and/or make changes to the XML and XSLT
 
