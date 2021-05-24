@@ -1,6 +1,8 @@
-# README for MUK Proceedings
+# Markup UK Proceedings
 
-This contains the code for the Markup UK Proceedings, including a couple of files that customise a modified v 1.79 of the DocBook XSLT 1.0 stylesheets.
+This contains the code for the Markup UK Proceedings, including a couple of files that customise a modified v 1.79 of the DocBook XSLT 1.0 stylesheets. The style of the proceedings is based on the styles of the Markup UK website.
+
+![](sample-pages.jpg)
 
 ## Working on the 'muk2019' branch
 
