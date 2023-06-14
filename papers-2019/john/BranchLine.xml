@@ -1,0 +1,1186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://www.oxygenxml.com/docbook/xml/5.0/rng/dbsvg.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+    <title>&lt;Angle-brackets/> on the Branch Line</title>
+    <subtitle>(Model) railway engineering with XML technologies</subtitle>
+    <info>
+        <date>2019mar10</date>
+        <author>
+            <personname>
+                <firstname>John</firstname>
+                <surname>Lumley</surname>
+            </personname>
+            <affiliation>
+                <jobtitle>Director</jobtitle>
+                <orgname>jωL Research, </orgname>
+            </affiliation>
+            <!-- <affiliation>
+                <jobtitle>Contributor</jobtitle>
+                <orgname>Saxonica</orgname>
+            </affiliation>-->
+            <address>
+                <street>6 Raleigh Rise, Portishead</street>
+                <city>Bristol</city>
+                <postcode>BS20 6LA</postcode>
+                <country>United Kingdom</country>
+            </address>
+            <email>john@jwlresearch.com</email>
+        </author>
+        <keywordset>
+            <keyword>XSLT</keyword>
+            <keyword>SVG</keyword>
+            <keyword>CAD</keyword>
+            <keyword>Model railways</keyword>
+        </keywordset>
+        <abstract>
+            <para>As a retirement 'hobby', somewhat removed from the computing <emphasis>milieu</emphasis>, the author has started building a model
+                railway in his garden. Surveying the extant tools for designing such layouts and finding them <quote>not quite right</quote>, he
+                started building a design tool himself, using the familiar technologies of XSLT3 and SVG executing in a browser, employing Saxon-JS as
+                the processing platform. By adding animations, the tool expanded beyond simple design to in effect become an active model train
+                system. The results of this were demonstrated, with some success, at Markup UK in 2018. This paper describes the design of this tool
+                in some detail, as well as possible developments since that demonstration.</para>
+        </abstract>
+    </info>
+
+
+    <sect1>
+        <title>Introduction</title>
+        <para>The author decided to take up a retirement <quote>hobby</quote> as a change from wrestling with programmatic complexities. Having chosen
+            to build a garden railway, having been trained as an engineer and having read some of the sage advice from those already <quote>in the
+                scene</quote>, it was clear that the layout would need some careful design. Issues such as maximum gradients, minimum turn radii and
+                <emphasis>loading gauge</emphasis> clearances required a clear and calculated design. Naturally there are CAD tools specifically
+            targetted at model railways, but equally well, I found none of them to be <emphasis>just right</emphasis>.</para>
+        <para>So, having spent many years developing software, and in recent times being deeply immersed in XML technologies, particularly
+                XSLT3.0<citation>XSLT</citation> and SVG<citation>SVG</citation>, I decided to build a specific design tool with these technologies.
+            Given Saxon-JS<citation>Saxon-JS</citation> as the XSLT execution engine, the tool was run through a browser connecting to a
+                <emphasis>localhost</emphasis> web server.</para>
+        <para>The main design used an XML definition of garden <quote>background</quote> and the possible layouts, and at first calculated all the
+            resulting geometry, producing both a tabular summary and a set of SVG graphic elements that could be displayed on a grid. This permitted
+            for example interferences between tracks and garden elements (e.g. bushes) to be examined. Simple XHTML controls were added to allow
+            various aspects of the display to be altered dynamically, using Saxon-JS's interactive modes (e.g. <code>ixsl:on-change</code>) to alter
+            style or class properties of parts of the XHTML/SVG DOM tree. Textual styling (fonts, colours. etc.) were defined in a set of CSS
+            stylesheets.</para>
+        <para>Once a simple system was operational, the <quote>picture</quote> was enhanced, both by supporting an isometric view of the
+            garden/layout, but also more <quote>realistic</quote> graphics for the track and other aspects.</para>
+        <para>A little experimentation showed that the animation facilities present in SVG should allow objects to move around the paths of the track.
+            A simple facility was added to enable <quote>block</quote> objects to be run, moving from section to section under controllable and
+            alterable speeds. Simple click interaction allowed the points to be changed, so the path of these blocks could be altered whilst they were
+            still running.</para>
+        <para>The model for these <quote>locomotives</quote> was improved to support a three-dimensional definition consisting of a number of
+            orthogonal rectangular blocks and cylinders, from which an isometric SVG view of a simple locomotive could be displayed. This would then
+            be animated to follow the path of the current track section, with tangential rotation to <quote>point forward</quote> and with suitable
+            rotation animations on the wheels. Simple sound effects (running sound, whistles etc.) were added to the design.</para>
+        <para>Finally, this system was demonstrated at MarkupUK 2018 in the DemoJam session, with some success.</para>
+        <para>In this paper I describe the deign and implementation details of the system that was demonstrated, and outline some additional possible
+            developments. In conclusion I discuss how suitable the combination of XSLT3, SVG and Saxon-JS has been to tackling this design
+            task.</para>
+    </sect1>
+    <sect1>
+        <title>Overall Design</title>
+        <para>The system designed is of course influenced by the external factors of the garden itself and the track components from which the railway
+            will be built. The garden area chosen is approximately 10m x 4m on two levels: </para>
+        <figure>
+            <title>The Garden for the Railway</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/survey.JPG" width="100%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>Both levels are substantially flat<footnote>
+                <para>Only when laying out the track bed did it become apparent that several elevation changes O(50mm) existed on the upper
+                    level.</para>
+            </footnote> with a step of about 250mm between, so it should be possible to climb a connecting embankment. (Generally gradients should be
+            less than 1 in 40 and certainly no more than 1 in 25). The area was surveyed (marked by the red survey points shown above) and a
+            simplified plan of the garden drawn up:</para>
+        <figure>
+            <title>The garden plan</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/Plan.PNG" width="100%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>I decided that the railway would be built at SM32 gauge/scale, also known as 16mm. The track has a gauge of 32mm, and is taken to
+            represent a 2ft narrow-gauge line<footnote>
+                <para>Many of the UK's <quote>little trains</quote>, such as the Ffestiniog and the Talyllyn, run on 1' 11½" gauge track</para>
+            </footnote> so the scale is 16mm to the foot or 1:19. As such, models of narrow-gauge locomotives are large enough to be totally
+            steam-powered. The tracks themselves would not carry electrical power — all engines would be self-powered, and remotely controlled. The
+            commercially available track had a small set of points of different tightness and flexible track sections of some 900mm length. This meant
+            that apart from the fixed-design points, the rest of the track could be <quote>freeform</quote>, subject of course to a recommended
+            minimum turn radius, which whilst being dependent upon locomotive wheelbase, would be about 900-1000 mm.</para>
+        <para>The original design consists of five major sections:</para>
+        <itemizedlist>
+            <listitem>
+                <para>A declarative description, as an XML structure, of the design environment, consisting of background components (e.g. pictures of
+                    the garden and schematics of fixed sections such as walls, paving and plants) and a series of layouts. A layout is described as a
+                    sequence of (mainline) track sections of straights, curves and points, each represented by an XML element describing length,
+                    radius and/or turn angle. Branch lines are children sequences of a <code>point</code> element. Where necessary track connections
+                    between leaves of the tree are joined to make a complete graph thrrough named link declarations.</para>
+            </listitem>
+            <listitem>
+                <para>A geometry computational engine, written in XSLT3, which calculates the position and orientation of each track section, and
+                    produces a map of the layout, keyed by section 'name', each entry describing both the track segments of the section and the
+                    two-way connectivity between section ends. </para>
+            </listitem>
+            <listitem>
+                <para>A graphical display of the design as an SVG tree. Background elements are generated as SVG groups from the enviroment
+                    description. Track components are generated from unit descriptions and positioned with <emphasis>use</emphasis> instructions.
+                    Within this, some components which can differ in display dependent upon state, such as points, are represented by several views,
+                    each classed separately. The overall display can be subject to transform, most noteably an isometric one. Textural styling and
+                    initial visibility is defined in a series of CSS stylesheets.</para>
+            </listitem>
+            <listitem>
+                <para>An XSLT3 stylesheet, using Saxon-JS extensions, and invoked from an outer XHTML document, which populates the XHTML with a
+                    series of interactive controls, and generates the detailed layout internal structures and SVG graphics to be embedded in the web
+                    page. Templates respond to interaction, such as button state changes, or clicking on points levers, altering the local CSS state
+                    of other components and controls.
+                    <!--(This interaction may be extended to supporting drag-and-drop railway construction)--></para>
+            </listitem>
+            <listitem>
+                <para>Adding <quote>railway engines</quote> as SVG objects, which are presented in both plan and isometric views from a simple
+                        <quote>block-and-cylinder</quote> model. An event-based system animates these to run along tangential paths of the track
+                    sections, using SVG animation facilities. Speed and direction of travel can be controlled interactively for multiple engines.
+                    Events are generated at the conclusion of animations, and are caught by templates that consult the layout map to determine the
+                    next sector to enter, then calculate the necessary animation duration, given length and speed, and start up the path-following
+                    animation. Speed change involves stopping a current animation, recalculating duration for the remaining section path and
+                    restarting an new animation partway through. Issues on collision detection (<quote>train crashes</quote>) will be
+                    discussed.</para>
+            </listitem>
+        </itemizedlist>
+        <para>As far as the software mix is concerned, the top-level XHTML document contains some constant background components and <code>div</code>
+            containers which will be populated, a <code>script</code> element containing a very small set of global JavaScript functions, for primary
+            control of animations and mapping from screen to SVG co-ordinates, and an invocation of Saxon-JS with a precompiled program from an XSLT
+            source of some 20 files and perhaps some 3000 source lines. This program takes as input a file containingg definitions of the garden,
+            possible layouts and locomotives. Textural styling is supported by a set of associated (static) CSS files.</para>
+        <para>There are a number of (Javascript) libraries for supporting SVG effects and animation, and pretty much all the written guides to
+                <quote>advanced</quote> SVG use a combination of some of these, but I wanted to explore how much could be done almost entirely in
+            XSLT3.0. All the programming is limited to XDM data types, XHTML, SVG, CSS and XSLT3.0 with Saxon-JS interaction extensions, with a
+            minimum of (perhaps a dozen) globally defined small JavaScript functions, mostly to invoke,query and stop SVG animations.</para>
+    </sect1>
+    <sect1>
+        <title>Layout Topology and Geometry</title>
+        <para>The original motivation was as a tool to design my planned garden railway, in terms of a connected set of track components that
+            satisfied the requirements of i) being constructed from obtainable parts and ii) lay within the limits of bend curvature and track
+            gradient that were recommended for such railways. For the present, given the flat nature of the garden, apart from the step between
+            sections, vertical gradients have been ignored — how they could be added is discussed later.</para>
+        <para>I considered attempting a <quote>drag and drop</quote> style of interaction, but decided against this, especially as all straights and
+            curves could be <quote>freeform</quote> so a small set of track parts wasn't really appropriate. The starting point was a choosing an XML
+            representation that focussed on continuous sequences of track components, describing the <quote>main line</quote>, implemented as a
+            sequence of elements, such as:</para>
+        <example>
+            <title>A simple layout</title>
+            <programlisting language="xml">&lt;layout name="simple">
+   &lt;start x="400" y="400" orient="30"/>
+   &lt;straight name="section1" length="1000"/>
+   &lt;curve r="1500" angle="-45"/>
+   &lt;curve r="1500" angle="45"/>
+   &lt;straight length="500"/>
+   &lt;curve r="500" length="1400"/>
+&lt;/layout></programlisting>
+        </example>
+
+        <para>which defines a layout <emphasis>simple</emphasis> that contains one section <emphasis>section1</emphasis>. This starts at the point
+            (400,400) with an orientation of +30° from the positive X axis. The first section is a 1000 long<footnote>
+                <para>Any consistent distance units could be used of course, but for this case it's simplest to use millimetres.</para>
+            </footnote> straight, preserving orientation, followed by a circular arc curve, of radius 1500, turning left though a positive angle of
+            45°, followed by a similar right turn, a short straight and a tighter left-hand bend defined by radius and curve length, rather than
+            angle. When plotted out this section looks like:</para>
+        <figure>
+            <title>Simple layout - pictorially</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/simpleLayout.PNG" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>Circular arcs were chosen as the only curve representation as i) they support a design method of <quote>turn this tightly for x
+                degrees</quote>, ii) they are supported directly in SVG and iii) their geometry is simple to calculate. Polynomial splines could have
+            been used, but they are difficult to define in terms of curve length. In real railway engineering, curves are defined by <emphasis>Cornu
+                spirals</emphasis> - where the curvature (1/<emphasis>radius</emphasis>) is a piecewise linear function of arc length — lateral
+            (centripetal) acceleration increases at a uniform rate as a train moves along such a curve at constant speed. SVG alas does not support
+            such curves. </para>
+        <para>Layouts that have such a simple topology (a single contiguous section) tend to be somewhat boring. Alterative routes involve switching
+            between different sections joined by <emphasis>points</emphasis><footnote>
+                <para>In American terminology <emphasis>turnouts</emphasis>.</para>
+            </footnote>. In our layout definition a point is represented as an element, <emphasis>whose child is the <quote>branch
+                line</quote></emphasis>:</para>
+        <example>
+            <title>A simple branch line</title>
+            <programlisting language="xml">&lt;layout name="simplePoint" start="section1">
+   &lt;start x="400" y="400" orient="30"/>
+   &lt;straight name="section1" length="1000"/>
+   &lt;point id="P1" radius="small" turn="left">
+      &lt;spur>
+         &lt;straight name="branch1" length="580"/>
+         &lt;curve r="2000" angle="-40"/>
+      &lt;/spur>
+   &lt;/point>
+   &lt;curve name="section2" r="1500" angle="-45"/>
+   &lt;curve r="1500" angle="45"/>
+   &lt;straight length="500"/>
+   &lt;curve r="500" length="1400"/>
+&lt;/layout></programlisting>
+        </example>
+        <para>The branch line itself is defined by a <code>spur</code> element, whose children define a set of sections. The point defines its type,
+            in this case a small radius point and its handedness — here the branch turns off to the left. This layout looks like:</para>
+        <figure>
+            <title>Simple branch line - pictorially</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/simpleLayoutPoint.PNG" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>The point obviously has two possible paths, one straight on, the <emphasis>not-set</emphasis> track, shown in green, and the turning
+            branch, the <emphasis>set</emphasis> track. The layout now consists of three sections, <emphasis>section1</emphasis> leading up to the
+            point <emphasis>P1</emphasis>, followed by <emphasis>section2</emphasis> as the mainline and <emphasis>branch1</emphasis> on the
+            branch.</para>
+        <para>This <quote>tree</quote> representation can obviously be extended, such as adding a point on the branch line, with a sub-branch line
+            such as:</para>
+        <example>
+            <title>A layout with two points</title>
+            <programlisting language="xml">&lt;layout name="twoPoints" start="section1">
+   &lt;start x="400" y="400" orient="30"/>
+   &lt;straight name="section1" length="1000"/>
+   &lt;point id="P1" radius="small" turn="left">
+      &lt;spur>
+         &lt;straight name="branch1" length="580"/>
+         &lt;curve r="2000" angle="-40"/>
+         &lt;point id="P2" radius="small" dir="trailing" turn="left">
+            &lt;spur>
+               &lt;curve r="400" angle="155"/>
+            &lt;/spur>
+         &lt;/point>
+         &lt;straight length="500"/>
+      &lt;/spur>
+   &lt;/point>
+   &lt;curve name="section2" r="1500" angle="-45"/>
+   &lt;curve r="1500" angle="45"/>
+   &lt;straight length="500"/>
+   &lt;curve r="500" length="1400"/>
+&lt;/layout></programlisting>
+        </example>
+        <para>which looks like:</para>
+        <figure>
+            <title>Two points pictorially</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/twoPoints.PNG" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>Observant readers will note that the new point has been added in technically a <emphasis>trailing</emphasis> condition, i.e. proceeding
+            from the start it is only possible to enter the siding in reverse<footnote>
+                <para>Early railway practice only used trailing points on higher-speed main lines, to reduce risk of derailment from partially opened
+                    points.</para>
+            </footnote>. This leads us on to considerations of representing the layout <emphasis>topology</emphasis>.</para>
+
+
+        <sect2>
+            <title>Representing the topology</title>
+            <para>If we want to use a layout for any purpose other than design (such as interactive animation), we don't just need the geometry of the
+                layout: we also need to represent the topology — which sections are joined when points are in a given state? If a train leaves one
+                section, which is the one it will enter, if any? To do this we represent contiguous sections of track and points as components with
+                two or three <emphasis>ports</emphasis>:</para>
+            <variablelist>
+                <varlistentry>
+                    <term>face</term>
+                    <listitem>
+                        <para>The port which faces against an oncoming vehicle in normal travel, i.e. trains usually start from the face port. For
+                                <emphasis>points</emphasis> this is the entry from which the exit track (<emphasis>trail</emphasis> or
+                                <emphasis>spur</emphasis>) depends upon the state of the point.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>trail</term>
+                    <listitem>
+                        <para>The port from which a vehicle emerges in normal travel, i.e. trains usually end a section leaving the trail port. For
+                            points entered in the normal switched direction this is the exit when the point is <emphasis>not set.</emphasis></para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>spur</term>
+                    <listitem>
+                        <para>Only defined for points, the exit port when the point has been <emphasis>set</emphasis>
+                            <footnote><para>In theory an engine entering a set of points from the <emphasis>trail</emphasis> or
+                                        <emphasis>spur</emphasis> direction, when the points are set <emphasis>against</emphasis> that direction, i.e.
+                                    when <emphasis>set</emphasis> from <emphasis>trail</emphasis> or <emphasis>not set</emphasis> from
+                                        <emphasis>spur</emphasis>, may be able to <quote>force</quote> an automatic points switch, but this is not
+                                    recommended practice.</para></footnote>.</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <para>Using these definitions we can describe the topological relations between component sections in a simple map:</para>
+            <figure>
+                <title>Topology of a two-point layout</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/twoPointsTopology.PNG" width="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>This map has an entry for each component describing its type and its port connections in terms of a component/port pair to which
+                that port attaches. Note however that <emphasis>branch2</emphasis> (the <quote>backward</quote> spur from point
+                    <emphasis>P2</emphasis>) is labelled <code>down=false</code>. This means that the <quote>main</quote> direction (i.e. proceeding
+                from <emphasis>P2</emphasis> along <emphasis>branch2</emphasis>) of that section of track is in a reversed sense to the rest of the
+                layout — the importance of this will become apparent later.</para>
+            <para>Thus far we have a layout that has no loops or paths of multiple connection, and whilst totally representable by a tree is not
+                completely useful, especially if one wants to leave a train running around the layout indefinitely. Suppose we have a simple oval
+                loop:</para>
+            <figure>
+                <title>An oval becomes a loop</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/oval.PNG" width="80%"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>which starts at 2000,1000, and loops back through two straights and two curves to an end point co-incident in position <emphasis>and
+                    orientation</emphasis> with the start. To <quote>close the loop</quote>, we have to convert our tree to a graph, in this case with
+                    <quote>self-pointers</quote> by adding a specific link directive</para>
+            <example>
+                <title>Describing a graph linkage</title>
+                <programlisting language="xml">&lt;layout name="oval" start="A">
+    &lt;start x="2000" y="1000" orient="20"/>
+    &lt;straight name="A" length="2000"/>
+    &lt;curve r="1000" angle="180"/>
+    &lt;straight length="2000"/>
+    &lt;curve r="1000" angle="180"/>
+    &lt;link>A.trail A.face&lt;/link>
+&lt;/layout></programlisting>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/ovalGraph.PNG" width="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </example>
+            <para>Now a vehicle finishing at <emphasis>A.trail</emphasis> can proceed happily into <emphasis>A</emphasis> again through
+                    <emphasis>A.face</emphasis> and similarly in a reverse direction. Of course in this case we could infer from the geometrical
+                co-incidence that such a link may be required, but sometimes the geometry isn't quite accurate enough. Here is a passing loop:</para>
+            <example>
+                <title>A passing loop</title>
+                <programlisting language="xml">&lt;layout name="passingLoop" start="main-line1">
+    &lt;start x="400" y="400" orient="30"/>
+    &lt;straight name="main-line1" length="500"/>
+    &lt;point id="passing1" radius="small" turn="left">
+        &lt;spur>                
+           &lt;curve  name="passing-loop" r="1000" angle="-22.5"/>                
+           &lt;straight length="1200"/>
+           &lt;curve r="1000" angle="-22.5"/>
+        &lt;/spur>
+    &lt;/point>
+    &lt;straight name="main-line2" length="1960"/>
+    &lt;point id="passing2" radius="small" dir="trailing" turn="right"/>
+    &lt;straight name="main-line3" length="500"/>
+    &lt;link>passing-loop.trail passing2.spur&lt;/link>
+&lt;/layout></programlisting>
+            </example>
+            <para> Where now we have specifically linked the passing loop component onto the trailing point spur:</para>
+            <figure>
+                <title>Passing loop graphically and topologically</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/PassingLoop.PNG" width="80%"/>
+                    </imageobject>
+                </mediaobject>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/PassingLoopInfo.PNG" width="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>But linking isn't quite as straightforward. Suppose in our earlier example we consider the <quote>small gap</quote> between
+                    <emphasis>section2</emphasis> and <emphasis>branch3</emphasis> is joinable, and we specifically add a link declaration:</para>
+            <example>
+                <title>Linking arbitrary branches</title>
+                <programlisting language="xml">&lt;layout name="twoPointsLinked" start="section1">
+    &lt;start x="400" y="400" orient="30"/>
+    ...
+    &lt;point id="P1" radius="small" turn="left">
+        &lt;spur>
+            ...
+            &lt;point id="P2" radius="small" dir="trailing" turn="left">
+                &lt;spur>
+                    &lt;curve name="branch2" r="400" angle="155"/>
+                &lt;/spur>
+            &lt;/point>
+            &lt;straight name="branch3" length="500"/>
+        &lt;/spur>
+    &lt;/point>
+    &lt;curve name="section2" r="1500" angle="-45"/>
+    ...
+    &lt;curve r="500" length="1400"/>
+    &lt;link>section2.trail branch3.trail&lt;/link>
+&lt;/layout></programlisting>
+            </example>
+            <para>This link introduces a requirement for a <quote>polarity shift</quote> — a locomotive proceeding <emphasis>forwards</emphasis> from
+                    <emphasis>section2</emphasis> would find itself running in the <emphasis>reverse</emphasis> direction in
+                    <emphasis>branch2</emphasis>. To permit smooth continuous operations, our <quote>cyber-locomotives</quote> have a <quote>running
+                    in the wrong-direction</quote> property (which is <emphasis>xored</emphasis> with <emphasis>reverse</emphasis>), and when similar
+                ports are connected with similar <quote>down-line</quote> properties, a dummy <emphasis>swap</emphasis> component is inserted in the
+                link, which will invert this property as a vehicle transits<footnote>
+                    <para>Such an issue is faced by two-rail electric power systems on railways with such <quote>re-entrancy</quote></para>
+                </footnote>:</para>
+            <figure>
+                <title>Swapping direction across links.</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/swappingPolarity.PNG" width="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>(<emphasis>swap1</emphasis> and <emphasis>swap2</emphasis> could in theory be the same, but the implementation is easier to use one
+                for each direction, and the additional cost minimal.)</para>
+        </sect2>
+        <sect2>
+            <title>Computing the geometry</title>
+            <para>The original intention of the design tool was to automate the calculation of track geometry. This proved to be relatively easy,
+                using a simple vector arithmetic package with a triple vector datatype of <code>x,y,orientation</code><footnote>
+                    <para>Adding a <code>z</code> (height) component would be simple, being altered by <code>length * gradient</code>. It is safe to
+                        assume that gradients will never be steep enough to make significant effects on planar (<code>x,y</code>) positions. </para>
+                </footnote>, and the <code>xsl:iterate</code> instruction processing the track component sequences through template application as the
+                track is <quote>constructed</quote>. For example here is the code to process a <code>straight</code> element:</para>
+            <programlisting language="xml">&lt;xsl:template match="straight" as="map(*)" mode="makeTrack">
+   &lt;xsl:param name="start" as="map(*)"/>
+   &lt;xsl:param name="options" as="map(*)" select="map{}" tunnel="true"/>
+   &lt;xsl:variable name="length" select="@length" as="xs:double"/>
+   &lt;xsl:variable name="straight" 
+       select="v:new($length, 0) => v:rotateDeg($start?orient)"/>
+   &lt;xsl:variable name="end" select="v:add($start, $straight)"/>
+   &lt;xsl:variable name="path" select="p:line($start, $end)"/>
+   &lt;xsl:variable name="pieces" as="element()*">
+     &lt;g class="straight">
+       &lt;g class="schematic">
+         &lt;path d="{$path}"/>
+         &lt;xsl:sequence select="r:join($end)"/>
+       &lt;/g>
+       &lt;g class="way" 
+          transform="translate({$start?x},{$start?y}) 
+                     rotate({$start?orient})">
+          &lt;xsl:if test="$options?layTrack">
+            &lt;xsl:sequence select="r:straight($length)"/>
+          &lt;/xsl:if>
+       &lt;/g>
+     &lt;/g>
+   &lt;/xsl:variable>
+   &lt;xsl:sequence select="map{
+        'type':string(name()),
+        'orient.start' : $start?orient,
+        'orient.end' : $start?orient,
+        'pieces': $pieces,
+        'length': $length,
+        'path': $path, 
+        'start' : $start,
+        'end': $end, 
+        'name': string((@name,
+                        'S-'||string(accumulator-before('trackNo')))[1])
+        }"
+   />
+&lt;/xsl:template></programlisting>
+            <para><code>$start</code> is an input parameter which is a map whose principal members are <code>x</code>, <code>y</code> and
+                    <code>orient</code><footnote>
+                    <para>Orientation is held in degrees and converted to radians as required. SVG describes its rotations in degrees and I know
+                        fairly closely what 30°, 45° and 225° look like, but not 1.5 radians.</para>
+                </footnote>. The new end point, including its orientation, is calculated effectively by</para>
+            <programlisting>v:add($start, v:new($length,0) => v:rotateDeg($start?orient))</programlisting>
+            <para>where <code>v:rotateDeg($in,$rot)</code> rotates a vector (and its end orientation) by <code>$rot</code> degrees. During this
+                operation the (SVG) graphic pieces for the schematic and the track pictures are constructed (see below) and added to the resulting map
+                as well as other needed information, such as track section length. Each piece is named, using an <code>xsl:accumulator</code> to
+                generate something suitable in the absence of a specific <code>@name</code> value.</para>
+            <para>This template is executed from an <code>xsl:iterate</code> instruction processing the children of a <code>layout</code> or a
+                    <code>spur</code>:</para>
+            <programlisting language="xml">&lt;xsl:template match="rail|spur|layout" as="map(*)*" mode="makeTrack">
+   &lt;xsl:param name="start" as="map(*)">
+      &lt;xsl:apply-templates select="start" mode="#current"/>
+   &lt;/xsl:param>
+   &lt;xsl:iterate select="* except (start | link)">
+      &lt;xsl:param name="start" select="$start" as="map(*)"/>
+      &lt;xsl:choose>
+         &lt;xsl:when test="not(self::break)">
+            &lt;xsl:variable name="part" as="map(*)">
+               &lt;xsl:apply-templates select="." mode="#current">
+                  &lt;xsl:with-param name="start" select="$start"/>
+               &lt;/xsl:apply-templates>
+            &lt;/xsl:variable>
+            &lt;xsl:sequence select="$part"/>
+            &lt;xsl:next-iteration>
+               &lt;xsl:with-param name="start" select="$part?end"/>
+            &lt;/xsl:next-iteration>
+        &lt;/xsl:when>
+        &lt;xsl:otherwise>
+           &lt;xsl:break/>
+        &lt;/xsl:otherwise>
+     &lt;/xsl:choose>
+   &lt;/xsl:iterate>
+&lt;/xsl:template></programlisting>
+            <para>For each subsequent iteration the <code>$start</code> parameter becomes the <code>end</code> property of the <code>$part</code> just
+                generated. Needless to say processing a <code>curve</code> is similar to that for <code>straight</code>, though the calculation of the
+                chord, end point and the appropriate SVG ellipitical arc are more complex. For the <code>point</code> we need to construct
+                    <emphasis>two</emphasis> sections: the <emphasis>not set</emphasis> (straight on) track section and its end point, and the
+                    <emphasis>set</emphasis> section with its attached branch line, which is constructed by a recursive call on the iteration above,
+                with the branch <code>spur</code> element as context and the spur position and orientation as the <code>$start</code>
+                parameter.</para>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Drawing pictures</title>
+        <para>Thus far we have drawn schematic representations of the track as SVG line-based components. With a little work SVG is entirely capable
+            of generating much more detailed views, with a lot of possibility of caching intermediate and reused sections. For example: </para>
+        <figure>
+            <title>More detailed track</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/detailed.PNG" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>In this case the track is generated from a sequence of <quote>rail-and-sleeper</quote> subsection definitions, displayed via SVG's
+                <code>use</code> directive: </para>
+        <programlisting language="xml">&lt;g xmlns="http://www.w3.org/2000/svg" class="way" 
+    transform="translate(3769.549241302635,2599) rotate(30)">
+    &lt;use href="#track10" x="0" y="0"/>
+    &lt;rect class="ballast" x="360" y="-36" width="140" height="72"/>
+    &lt;use href="#sleeper" x="378" y="0"/>
+    &lt;use href="#sleeper" x="414" y="0"/>
+    &lt;use href="#sleeper" x="450" y="0"/>
+    &lt;line class="rail  SM32" x1="360" y1="-16" x2="500" y2="-16"/>
+    &lt;line class="rail  SM32" x1="360" y1="16" x2="500" y2="16"/>
+&lt;/g></programlisting>
+        <para>In this case we have a <quote>pre-built</quote> 10-sleeper section of straight track (<code>#track10</code>), followed by
+                <quote>ballast</quote>, three sleepers and two rails to display the remainder of the required length. All these are sized to the
+            actual dimensions of the track being used. This is translated and rotated into the required start position.</para>
+        <sect2>
+            <title>Isometric Views</title>
+            <para>Planar views are useful, but they don't give a picture of what one might see, where the third dimension has some importance. Luckily
+                an <emphasis>isometric</emphasis> transformation can give a view <quote>from above and aside</quote>. This involves applying a
+                transform of <code>translate(3000,0) rotate(30) skewX(-30) scale(1,0.8660254037844387)</code> to the graphics and altering some pieces
+                to support a pseudo-3D view. For example, let us add a simple building:</para>
+            <figure>
+                <title>A simple building</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/isoBuilding.PNG" width="60%"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>I could perhaps have looked at using a full 3D modelling package which was capable of generating SVG outputs, but my needs were
+                modest and could perhaps be handled by a simple declarative model, processed completely with XSLT to generate suitable SVG. The
+                building is defined by a simple XML structure of boxes and a cylinder:</para>
+            <programlisting language="xml">&lt;buildings>
+  &lt;resources> …. &lt;/resources>
+  &lt;group x="1000" y="1000" 
+     fill="url(#brickWall)" stroke-width="10" stroke="black">
+     &lt;box width="1000" height="500" rotateZ="0" depth="500" z="0">
+        &lt;top fill="slategrey"/>
+     &lt;/box>
+     &lt;box height="1" width="150" depth="400"
+        z="0" x="100" y="0" fill="url(#wood)"/>
+     &lt;box height="1" width="250" depth="200" fill="black"
+        z="200" x="350" y="0" />
+     &lt;box height="1" width="250" depth="200" fill="black" 
+        z="200" x="650" y="0"/>
+     &lt;box width="1" height="300" depth="200" fill="black"
+        z="200" x="1000" y="100">
+        &lt;east >
+           &lt;svg:image xlink:href="images/officer-in-uniform.png"
+             x="100" y="0" height="200"/>
+         &lt;/east>
+     &lt;/box>
+     &lt;cylinder radius="50" length="150" axis="z" fill="black" 
+        z="500" x="800" y="250" stroke="darkgrey"/>
+  &lt;/group>
+&lt;/buildings></programlisting>
+            <para>which is then used to generate an SVG group that look like:</para>
+            <figure>
+                <title>An iso-orthogonal building</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/orthoBuilding.PNG" width="60%"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>such that when the entire SVG group, within which lie all picture pieces (grid, plan, track etc..), is subject to isometric
+                projection, the building appears to have depth and height. (We also produce a true orthogonal view, so we can look at the scene from
+                    <quote>directly above</quote>.) Currently the repertoire is orthogonally-oriented rectangular blocks and cylinders, with named
+                    <quote>faces</quote> to which styling and content can be attached (<emphasis>top</emphasis>, <emphasis>south</emphasis> and
+                    <emphasis>east</emphasis> for blocks, with <emphasis>bottom</emphasis>, <emphasis>north</emphasis> and <emphasis>west</emphasis>
+                normally hidden, and <emphasis>surface</emphasis>, <emphasis>top</emphasis> and <emphasis>bottom</emphasis> for cylinders.).
+                Components are currently positioned absolutely and can be grouped. Using this we can build models of the complexity of:</para>
+            <figure>
+                <title>The Lady Anne</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="figures/LadyAnne.PNG" width="80%"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>which is defined by some 50 components, some of which are repeats of common substructures, implemented by bindings and
+                interpolations of XSLT variables. This ability to style and add content to the named <emphasis>faces</emphasis> of the component parts
+                is important . For example, adding the <quote>smokebox handle</quote> to the boiler front of <emphasis>Lady Anne</emphasis> merely
+                requires:</para>
+            <programlisting language="xml">&lt;cylinder class="boilerFront" x="151" z="80" axis="x" 
+  radius="27" length="45">
+    &lt;end class="boilerEnd">
+       &lt;svg:g class="silver" stroke="silver" stroke-width="5">
+          &lt;line x1="0" y1="0" x2="10" y2="-10"/>
+          &lt;line x1="0" y1="0" x2="-5" y2="-14"/>
+       &lt;/svg:g>
+    &lt;/end>
+&lt;/cylinder></programlisting>
+            <para>and the graphic components will be placed and transformed correctly to sit <emphasis>in the boiler front</emphasis>. As we will see
+                later, it is critical that the SVG views of these model engines must be such that they produce the expected picture when subjected to
+                an isometric transformation, as shown for the building, as the trajectory paths trains must follow (which are effectively <emphasis>on
+                    the flat</emphasis>) are themselves subjected to the same projection.</para>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Interaction</title>
+        <para>The tool has two main types of interaction: animations, discussed in the next section, and view selection. Most of the view selection is
+            based on switching the <code>display</code> style of graphical or user inteface element on and off, through controls that are generated
+            from declarative descriptions. For example:</para>
+        <figure>
+            <title>Controls for display options</title>
+            <informaltable frame="void">
+                <!--<caption/>-->
+                <col width="50%"/>
+                <col width="50%"/>
+                <tbody>
+                    <tr>
+                        <td>
+                            <programlisting language="xml">&lt;div name="show">
+    &lt;title>Show&lt;/title>
+    &lt;option default="">photos&lt;/option>
+    &lt;option>survey&lt;/option>
+    &lt;option>grid&lt;/option>
+    &lt;option>plan&lt;/option>
+    &lt;option>buildings&lt;/option>
+ ...
+ &lt;/div></programlisting>
+                        </td>
+                        <td align="center" valign="middle">
+                            <mediaobject>
+                                <imageobject>
+                                    <imagedata width="50%" fileref="figures/showControl.PNG"
+                                        valign="top"/>
+                                </imageobject>
+                            </mediaobject>
+                        </td>
+                    </tr>
+                </tbody>
+            </informaltable>
+
+        </figure>
+        <para>declares a group of controls, from which a group of labels and checkboxes are generated, some of which are preset and whose rendering is
+            shown above. Control of display is performed by a generic XSLT template, which fields change events on the generated <code>input</code>
+            checkboxes, all of which are class-labelled as <emphasis>show</emphasis>: </para>
+        <programlisting language="xml">&lt;xsl:template match="input[@class eq 'show']" mode="ixsl:onchange">
+   &lt;ixsl:set-style name="display"  object="id(@value)"
+      select="if(ixsl:get(.,'checked')) then 'inline' else 'none'"/>
+&lt;/xsl:template></programlisting>
+        <para>The <code>@value</code> of the <code>input</code> is taken to the be <emphasis>id</emphasis> of an element (either XHTML or SVG) that
+            contains all items of the given type and <emphasis>display</emphasis> style modified accordingly. Generic hide/reveal controls for object
+            with a given <emphasis>class</emphasis> token are supported by a similar template.</para>
+        <para>Switching between orthogonal and isometric views of the garden/plan/layout involves modifying a top-level transform attribute on the SVG
+            and setting a class token to indicate the given view. As all (3D) components have both orthogonal and isometric views, each
+            class-labelled, simple CSS compound rules such as <code>.viewISO .partORTHO,.viewORTHO .partISO {display: none;}</code> and <code>.viewISO
+                .partISO,.viewORTHO .partORTHO {display: inline;}</code> ensure that only the correct class components are displayed for the currrent
+            view.</para>
+
+        <para>Points obviously have state and this needs to be changed to direct trains to suitable parts of the layout. We construct an XHTML
+                <quote>signal box</quote> where all the point controls are checkboxes and through which specific points can be set into
+                <emphasis>switched</emphasis> or <emphasis>unSwitched</emphasis> classes. CSS styling ensures that the appropriate components for the
+            given state are displayed. Sometimes determining which control effects which point can be problematic. A solution to this is to support
+            clicking on the (SVG) points themselves, or an adjacent lever. This is achieved by the templates:</para>
+        <programlisting language="xml">&lt;xsl:template match="*[contains-token(@class, 'pointLever')]" 
+    mode="ixsl:onclick">
+   &lt;xsl:variable name="point" 
+       select="ancestor::*:g[contains-token(@class, 'point')][1]"/>
+   &lt;xsl:variable name="point.state"
+       select="id($point/@id||'-state')"/>
+   &lt;xsl:sequence select="ixsl:call($point.state,'click',[])"/>
+&lt;/xsl:template>
+
+&lt;xsl:template match="input[contains-token(@class, 'pointState')]" 
+    mode="ixsl:onchange">
+   &lt;xsl:variable name="checked" select="ixsl:get(., 'checked')"/>
+   &lt;xsl:sequence select="js:playAudio(id('pointChange'))"/>  
+   &lt;xsl:for-each select="id('point-' || @value, .)/*:g[1]">
+      &lt;ixsl:set-attribute name="class" 
+         select="if($checked) then 'switched' else 'unSwitched'"/>
+   &lt;/xsl:for-each>
+&lt;/xsl:template></programlisting>
+        <para>where clicking on the (SVG) point lever dispatches another <emphasis>click</emphasis> event to the appropriate state control in the
+            signal box. Controls in the signal box respond to changes by playing the <emphasis>pointChange</emphasis> sound effect and changing the
+            (un)switched class of the actual signal, which changes which of the graphic groups is displayed:</para>
+        <figure>
+            <title>Changing points with a signal box</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/points.png" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </sect1>
+
+    <sect1>
+        <title>Animations</title>
+        <para>SVG supports animations based on SMIL event-driven models. Of particular interest in this case is the use of
+                <emphasis>path-based</emphasis> animation where a given SVG group can be successively translated along a given path. As trains move
+            along tracks, and in our design tracks are defined by sections from which SVG <code>path</code> definitions can be constructed easily, we
+            should be able to simulate the movement of trains around our tracks. And so it proved.</para>
+        <para>The basic animation we used is effectively <quote>move this group <emphasis>g</emphasis> along this path <emphasis>p</emphasis> in a
+                duration of <emphasis>dur</emphasis> seconds.</quote> For each section of the layout (i.e. a contiguous run of straight and curves, or
+            the <emphasis>set</emphasis> and <emphasis>not set</emphasis> short sections of points), we calculate both a path description (the
+                <emphasis>d</emphasis> property of <code>svg:path</code>) and the total length. For example the dashed blue line is the defined
+            (single) path for the <emphasis>section2</emphasis> track section, for which a total length of 4,256 has been calculated : </para>
+        <figure>
+            <title>A track section path</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/section2Path.PNG" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>Assuming we wish our <quote>train</quote> to run at 100mm/s (a scale speed of ~ 7km/hr, i.e. a brisk walking pace), then the animation
+            should take 42.5 seconds. This is achieved by forming up an <code>svg:animateMotion</code> definition element:</para>
+        <programlisting language="xml">&lt;animateMotion xmlns="http://www.w3.org/2000/svg"
+   id="train.animation" xlink:href="#train" <co xml:id="animation.target"/>
+   begin="indefinite"  fill="freeze" repeatCount="1" <co xml:id="animation.start"/>
+   calcMode="linear" keyTimes="0;1" keyPoints="0;1"<co xml:id="animation.times"/>
+   rotate="auto"<co xml:id="animation.rotate"/> 
+   dur="42.5" onend="eventEnded('train;section2.trail')<co xml:id="animation.end"/>>
+   &lt;mpath xlink:href="#section2.path"<co xml:id="animation.path"/>/>
+&lt;/animateMotion></programlisting>
+        <calloutlist>
+            <callout arearefs="animation.target">
+                <para>The graphics group that will be subject to the animation</para>
+            </callout>
+            <callout arearefs="animation.start">
+                <para>Conditions for the start of the animation — in this case the animation waits until it is triggered explicitly. When the
+                    animation has finished freeze the graphics state, i.e leave the graphics translated to the end of the path and do not
+                    repeat.</para>
+            </callout>
+            <callout arearefs="animation.times">
+                <para>
+                    <code>keyTimes</code> and <code>keyPoints</code> define a piecewise-linear mapping between proportions of the duration and
+                    proportions of the total length — this is used to support moving in reverse and altering <quote>speed</quote>.</para>
+            </callout>
+            <callout arearefs="animation.rotate">
+                <para><code>auto</code> adds a rotation transform to the animated graphics corresponding to the current path tangent direction, so the
+                    graphics object <quote>turns</quote> along the path.</para>
+            </callout>
+            <callout arearefs="animation.end">
+                <para>When the animation completes the global function <code>eventEnded()</code> will be executed with an argument containing
+                    information about which train has completed a move and where — in this case arriving at the <emphasis>trail</emphasis> port of
+                        <emphasis>section2</emphasis>.</para>
+            </callout>
+            <callout arearefs="animation.path">
+                <para>A reference to the path to be followed.</para>
+            </callout>
+        </calloutlist>
+        <para>The animation is started by invoking the <code>beginElement()</code> function method of the animation element through a minimal global
+            JavaScript function. Thus our <quote>train</quote>(in this case a cyan arrow) progresses along <emphasis>section2</emphasis> as
+            below:</para>
+        <figure>
+            <title>Movement along a track section.</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/arrow.png" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>When the animation finishes, the <code>onend</code> statement is invoked, which is fielded by the global JavaScript function
+                <code>eventEnded()</code>. </para>
+        <programlisting language="javascript">var ignoreEvent = false;
+function eventEnded(e) { 
+   if(!ignoreEvent) { <co xml:id="event.ignore"/>
+      var event = new Event("change",{"bubbles":true});
+      var store = this.document.getElementById("event");<co xml:id="event.store"/>
+      store.value = e; 
+      store.dispatchEvent(event);<co xml:id="event.dispatch"/>
+  }
+  ignoreEvent = false;
+}</programlisting>
+        <calloutlist>
+            <callout arearefs="event.ignore">
+                <para>There are cases (described below) when we need to ignore an end event temporarily.</para>
+            </callout>
+            <callout arearefs="event.store">
+                <para>A (hidden) checkbox element in the DOM tree that is used to hold the event information as its <code>value</code>
+                    property.</para>
+            </callout>
+            <callout arearefs="event.dispatch">
+                <para>Propagating an event that the value of the event information store has changed.</para>
+            </callout>
+        </calloutlist>
+        <para>After this function has executed, the checkbox <code>id('event')</code> receives a <emphasis>change</emphasis> event which is caught by
+            an XSLT template:</para>
+        <programlisting language="xml">&lt;xsl:template match="*:input[@id eq 'event']" mode="ixsl:onchange"> 
+   &lt;xsl:variable name="layout" as="map(*)"
+      select="$layouts(f:radioValue('layouts', .))"/> <co xml:id="event.layout"/>
+   &lt;xsl:variable name="parts" select="tokenize(@value, ';')"/> <co xml:id="event.orders"/>
+   &lt;xsl:choose>
+      &lt;xsl:when test="exists($parts[3])"> <co xml:id="event.continue"/>
+         &lt;!-- There is a new section to enter -->
+         &lt;xsl:call-template name="runTrain">
+            &lt;xsl:with-param name="engine" select="$parts[1]"/>
+            &lt;xsl:with-param name="trackComponentID" select="$parts[3]"/>
+            &lt;xsl:with-param name="tracks" select="$layout?tracks"/>
+         &lt;/xsl:call-template>
+      &lt;/xsl:when>
+      &lt;xsl:otherwise> <co xml:id="event.stop"/>
+          &lt;!-- There is a no new section to enter - end of the line -->
+          &lt;xsl:for-each select="id($parts[1])">
+              &lt;ixsl:set-attribute name="position" select="$parts[2]"/>
+          &lt;/xsl:for-each>
+          &lt;xsl:variable name="engine" select="$parts[1]"/>
+          &lt;xsl:call-template name="stopEngine">
+             &lt;xsl:with-param name="engine" select="$engine"/>
+          &lt;/xsl:call-template>
+          &lt;xsl:call-template name="reverseEngine">
+              &lt;xsl:with-param name="engine" select="$engine"/>
+          &lt;/xsl:call-template>
+      &lt;/xsl:otherwise>
+   &lt;/xsl:choose>      
+&lt;/xsl:template></programlisting>
+        <calloutlist>
+            <callout arearefs="event.layout">
+                <para>There are a number of possible layouts, held as a named map global variable. Which is the active one is determined by the value
+                    of the <emphasis>layouts</emphasis> radio button set.</para>
+            </callout>
+            <callout arearefs="event.orders">
+                <para>This template expects the value of the <code>event</code> checkbox to be a string of the form
+                        <emphasis><code>train</code></emphasis><code>;</code><emphasis><code>current
+                            port</code></emphasis><code>[;</code><emphasis><code>next port</code></emphasis><code>]</code>.</para>
+            </callout>
+            <callout arearefs="event.continue">
+                <para> If there is a next port, then the train is run on that new section from that port, on the current layout.</para>
+            </callout>
+            <callout arearefs="event.stop">
+                <para>If not then the train is assumed to have reached the end of the line. It is stopped and the direction reversed, so that, as a
+                    convenience to the driver, <quote>opening the throttle again</quote> again will cause the train to move back along the
+                    section.</para>
+            </callout>
+        </calloutlist>
+        <para>The trains are controlled by a simple interactive XHTML control group (obviously of class <emphasis>cab</emphasis>):</para>
+        <figure>
+            <title>The Engine Cab</title>
+            <informaltable frame="void">
+                <col width="35%" align="left"/>
+                <col width="65%" align="left"/>
+                <tbody>
+                    <tr>
+                        <td>
+                            <inlinemediaobject>
+                                <imageobject>
+                                    <imagedata fileref="figures/arrowCab.PNG" width="100%"/>
+                                </imageobject>
+                            </inlinemediaobject>
+                        </td>
+                        <td>
+                            <programlisting language="xml">&lt;div id="Arrow.cab" class="cab arrow">
+  &lt;div class="toggler">
+    &lt;input class="run" type="checkbox"
+       value="Arrow" />
+    &lt;label class="text">Arrow&lt;/label>
+  &lt;/div>
+  &lt;label class="title">Speed 
+        &lt;span class="value">0&lt;/span>&lt;/label>
+  &lt;div name="direction" class="direction">
+     &lt;div class="toggler">
+        &lt;input class="direction" type="checkbox"
+           value="reverse"/>
+        &lt;label class="text">reverse&lt;/label>
+      &lt;/div>
+  &lt;/div>
+  &lt;input type="range" min="0" max="1200"
+       value="0" list="tickmarks" />
+  &lt;div class="radio speed">
+     ...
+     &lt;div class="toggler">
+        &lt;input class="speed" type="radio"
+          value="200" />
+        &lt;label class="text">slow&lt;/label>
+     &lt;/div>
+     ...
+  &lt;/div>
+&lt;/div></programlisting>
+                        </td>
+                    </tr>
+                </tbody>
+            </informaltable>
+        </figure>
+        <para>Apart from selecting a locomotive to run, the only current action is to <emphasis>change its speed or direction of travel.</emphasis> A
+            number of XSLT templates detect changes in the cab input controls such as:</para>
+        <programlisting language="xml">&lt;xsl:template match="input[contains-token(@class, 'speed')]" 
+   mode="ixsl:onchange">
+   &lt;xsl:variable name="cab" 
+      select="ancestor::div[contains-token(@class, 'cab')]"/>
+   &lt;xsl:variable name="run" select="$cab//input[@class eq 'run']"/>
+   &lt;xsl:variable name="value" select="@value"/>
+   &lt;ixsl:set-property object="$cab//input[@type eq 'range']"
+       name="value" select="number($value)"/>
+   &lt;xsl:for-each select="$cab//span[contains-token(@class, 'value')]">
+      &lt;xsl:result-document href="?." method="ixsl:replace-content">
+         &lt;xsl:sequence select="string($value)"/>
+      &lt;/xsl:result-document>
+   &lt;/xsl:for-each>
+   &lt;xsl:if test="ixsl:get($run,'checked')">
+      &lt;xsl:variable name="engine" select="$run/@value"/>
+      &lt;xsl:for-each select="id($engine)">
+         &lt;ixsl:set-attribute name="speed" select="$value"/>
+      &lt;/xsl:for-each>
+      &lt;xsl:call-template name="changeVelocity">
+         &lt;xsl:with-param name="engine" select="$engine"/>
+      &lt;/xsl:call-template>
+   &lt;/xsl:if>
+&lt;/xsl:template></programlisting>
+        <para>which detects a change in the <emphasis>stop, slow, cruise, fast</emphasis> radio button set. The selected speed is the
+                <code>@value</code> of the set, which is written into a <code>span</code> element within the cab <code>div</code> and used to set the
+            slider to a suitable point. If the engine is running (the top left checkbox checked), then the demanded speed is written as an attribute
+            onto the selected engine object and then the <emphasis>changeVelocity</emphasis> template is invoked. </para>
+        <para>The key idea here is to determine <emphasis>how far the current animation has progressed</emphasis>, from which the remaining distance
+            to travel can be determined. This is computed by a global JavaScript function with the animation object <emphasis>a</emphasis> as
+            argument:</para>
+        <programlisting language="javascript">function animProgress(a) {
+  if(a.getAttribute("dur")==0 ||
+     a.getAttribute("dur")=="indefinite") {
+    return 0;
+  }
+  var startTime;
+  try{
+    startTime = a.getStartTime();
+  } catch(e) {
+    return 0;
+  }
+  var t_ratio=(a.getCurrentTime() - startTime)/a.getSimpleDuration();
+  return t_ratio;
+}  </programlisting>
+        <para>which calculates the ratio of elapsed to total animation duration. In cases where the animation is not active (for which I can't find a
+            simple test), the exception on finding start time is caught. Given the remaining distance and desired speed, a new duration can be
+            determined and the animation restarted using the <code>keyPoints</code> property to start somewhere down the animation path, e.g.
+                <code>keyPoints="0.5;1"</code> would be used for a speed change halfway along the track section<footnote>
+                <para>The current animation may itself already involve a <quote>partial</quote> path, as a consequence of a previous change in speed —
+                    this is determined from the existing <code>@keyPoints</code> value on the <code>animateMotion</code> element to determine the
+                        <quote>distance to go</quote>. </para>
+            </footnote>. </para>
+        <para>The animation is restarted by invoking the <code>beginElement()</code> method — the <code>ignoreEvent</code> flag is used to prevent the
+            implicit <code>endElement()</code> event, triggered before the restart, that would normally be used to signal completion of traversal of a
+            section, propagating to the XSLT templates. In the case that the locomotive is running in reverse, the key points are reversed, e.g.
+                <code>keyPoints="0.66;0"</code> would be used for a speed change one-third of the way backwards through a section.</para>
+        <para>In the absence of such speed changes a running locomotive involves animation movement along the current section until the end event is
+            executed, fielded by the XSLT template shown earlier, which then starts animation along the next specified section. In the case of
+            entering points, the state of the point is examined (from the status of the point control in the signal box!) and the correct path and
+            next section determined for the animation<footnote>
+                <para>Changing a point while a locomotive is moving through it will not effect the locomotive's path.</para>
+            </footnote>. When a locomotive enters a <emphasis>swap</emphasis> section, described above, its internal <emphasis>running in the wrong
+                direction</emphasis> flag is inverted and it passes on to the following section.</para>
+        <para>A small number off other animation effects have been added. Firstly locomotives have wheels, which can be animated to rotate at a rate
+            and direction suitable for their diameter and the locomotive's speed, using the animation element: </para>
+        <programlisting language="xml">&lt;animateTransform type="rotate" begin="indefinite" 
+   attributeName="transform" from="0" to="360" 
+   dur="…." attributeType="XML" repeatCount="indefinite"/></programlisting>
+        <para>Secondly, locomotives can be given running sound effects by invoking <code>play()</code> method on an <code>audio</code> element when
+            they start movement, and can<quote>whistle</quote> when they enter a (zero length) <emphasis>whistle</emphasis> pseudo-track section. The
+            end point of this development was a case where multiple engines could be run on a layout, stopping, starting , reversing and changing
+            their speed independently and altering points to move them to different sections of the layout:</para>
+        <figure>
+            <title>Three engines running simultaneously</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/threeEngines.JPG" width="100%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>But there is a problem with the isometric view <quote>trick</quote> and automatic path tangent rotation:</para>
+        <figure>
+            <title>On the ceiling</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/upsideDown.JPG" width="80%"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>The animation rotation transformation is applied before the isometric projection and our 3D trick no longer works with significant
+            rotations. How this may be overcome is discussed in the next section. </para>
+    </sect1>
+    <sect1>
+        <title>Developments</title>
+        <para>There are a small number of developments I have been working on, but at the time of writing they are incomplete. This section describes
+            these ideas.</para>
+        <sect2>
+            <title>True 3D models and view rotation</title>
+            <para>The 3D model used so far is a collection of orthogonally arranged rectangular blocks and cylinders, declared in an order that
+                reflects isometric view shadowing. For example an <emphasis>engine frame</emphasis> block is defined before the
+                    <emphasis>boiler</emphasis> cylinder, to appear underneath it. From this model suitable SVG components can be generated to
+                simulate a 3D view when subjected to a uniform isometric transformation. But to support a non-orthogonal rotation of such a model
+                about the z-axis, to overcome the <quote>on the ceiling</quote> effect, the situation becomes somewhat more complex. There are three
+                points to consider: </para>
+            <itemizedlist>
+                <listitem>
+                    <para>What is a suitable graphic for a block or cylinder when rotated by θ degrees about the z-axis? A key requirement is that the
+                            <quote>faces</quote> model of additional styling and content must still be supported.</para>
+                </listitem>
+                <listitem>
+                    <para>As a group of 3D parts is rotated, their obscuration relationships alter and any views must accommodate this. How should a
+                        set of component parts be <quote>depth-ordered</quote> in the direction of the isometric view, when the ensemble is rotated
+                        significantly?</para>
+                </listitem>
+                <listitem>
+                    <para>How is the appropriate rotated view displayed as a locomotive turns?</para>
+                </listitem>
+            </itemizedlist>
+            <para>Constructing the isometric-prepared components of a rotated block is a little tricky. The top surface is always visible and can just
+                be rotated as required. Ignoring any visibility of the base, only two of the four vertical sides will be visible dependent upon
+                rotation change ranges of 45° and 135°. Each visible face is subjected to additional scaling and skew dependent on the rotation angle,
+                so that it is correctly sized, positioned and any additional content <quote>stays in place</quote>. The situation for horizontally
+                aligned cylinders is very much more complex, and at the time of writing is work in progress.</para>
+            <para>To <quote>view-order</quote> an ensemble of rotated components it would be helpful if a (possibly multiple) value can be computed
+                that can be used as sort keys to arrange the parts into appropriate order using <code>xsl:perform-sort/xsl:sort+</code>. This can be
+                so for some very simple cases, but in general parts must be pairwise-compared, which requires some sorting function that uses a
+                    <emphasis>compare</emphasis> function, rather than a key-generator. Sadly, XPath sort functions all use a <quote>key</quote>
+                model, so a generic XSLT higher-order pairwise sorting function may have to be constructed.</para>
+            <para>Calculating the rotation views <emphasis>on the fly</emphasis> would be catastrophically expensive, so the solution chosen is to
+                generate a series of groups, each corresponding to a defined angle of rotation and labelled suitably (e.g.
+                    <code>class="rotate-45"</code> for a view rotated by -45°). It would also be possible to generate the set of views offline and
+                include in the runtime. However they can be sizeable — an interval of 5°, which certainly doesn't appear <quote>smooth</quote> would
+                require 72 separate versions.</para>
+            <para>Assuming there is such a series of views of an engine, we need to arrange for the display property of the (approximately) correct
+                rotation view to be switched from <emphasis>none</emphasis> to <emphasis>inline</emphasis>. But we do know for a given locomotive
+                which section it is in and can map from the proportion of the animation completed to the tangential orientation at that point. (As we
+                use only straights and circular arcs, the tangent angle is a piecewise linear function of the <quote>section proportion</quote>,
+                running from 0 to 1. This profile is added to the map entry for the section.) Given that the speed of the engine is known, we can thus
+                predict how long it will be until the current rotation view should be superseded by the next one. This is enabled through a template
+                    <code>rotateTrain</code> which both makes visible the suitable view and schedules a further <code>rotateTrain</code> call after a
+                suitable wait. </para>
+        </sect2>
+        <sect2>
+            <title>Collision detection, <emphasis>a.k.a.</emphasis> train crashes</title>
+            <para>As designed, my locomotives are ætheral beings, able to glide seamlessly and smoothly through each other. To prevent this, we need
+                to detect collision or interference. SVG does have some primitive collision detection based on bounding box overlap, but given the
+                isometric 3D nature of our engines, this is unlikley to be accurate, and certainly over-enthusiastic. Moreover, normal movement of our
+                engines is both highly restrained, i.e. to track sections, and predictable, as they travel at known rates.</para>
+            <para>A simple approach, ignoring engine <quote>size</quote> and treating them as point entities, is to consider only cases where two (or
+                more) engines are in the same section<footnote>
+                    <para>Much of nineteenth-century railway signalling development was of course to stop such a situation happening in the first
+                        place.</para>
+                </footnote>, travelling in either the same or opposite directions. Such a case can be checked when either a locomotive enters a new
+                section, or the speed of an engine is changed. In such circumstances, we know both where, in distance, each locomotive is, and how
+                fast they are approaching each other. Hence in the case of a predicted collision we can schedule an action (using
+                    <code>ixsl:scheduleAction</code>) to trigger a <quote>crash notification</quote> after the required interval. However there is
+                also the difficulty of a subsequent speed change altering this — this requires the ability to delete some of the currently active
+                scheduled actions, which has proved highly problematic.</para>
+        </sect2>
+        <sect2>
+            <title>Difficulties</title>
+            <para>Apart from the headache-inducing issue of calculating the geometry of the edege of the visible curved surface of a rotated
+                cyclinder, most of the difficulty has been managing the animations and events. In particular it appears that an active animation
+                cannot be stopped and deleted or restarted without invoking any associated <code>onend</code> event. The temporary solution, of
+                dubious robustness, uses a global flag to suppress subsequent event propagation.</para>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Conclusion</title>
+        <para>I originally built a small tool, using XSLT, that <quote>did the geometry calculations</quote> for a layout I was designing. A graphical
+            view is always helpful, and generating SVG to do so was straighforward. Developing the isometric view led towards a more pictorial aspect
+            to the output. Adding very simple animation opened the possibility of building something more akin to a <quote>train set</quote>, and
+            showed some of the ways controls and active state could be mixed in an XSLT/Saxon-JS/SVG/browser environment. And this led to the idea of
+            a demonstration at MarkupUK 2018...</para>
+        <para>The implementation needed a very small number of global JavaScript functions, that were invoked in XSLT/XPath expressions through the
+            Saxon-JS function mapping namespace <code><link xlink:href="http://saxonica.com/ns/globalJS"/></code>. All the rest of the code is
+            XSLT3.0, with Saxon-JS extensions, generating all necessary XHTML and SVG structures, with templates fielding and processing events both
+            from interaction and animation. Once up and running, the system is of course stateful — the speed, direction and current track section of
+            engines, the switched <emphasis>set</emphasis> state of points etc. This state information is stored as attributes on the DOM tree.</para>
+        <para>Did it help with the original purpose — designing a garden railway? Well this was the layout design demonstrated at Markup2018:</para>
+        <figure>
+            <title>The layout as proposed</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="figures/layoutFull.JPG" width="100%" align="center"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>and this is what currently exists:</para>
+        <figure>
+            <title>Lady Anne on the Garden Line</title>
+            <informaltable frame="void">
+                <col width="45%"/>
+                <col width="55%"/>
+                <tbody>
+                    <tr>
+                        <td>
+                            <mediaobject>
+                                <imageobject>
+                                    <imagedata fileref="figures/GardenLayout.JPG" align="center" width="100%"/>
+                                </imageobject>
+                            </mediaobject>
+                        </td>
+                        <td>
+                            <mediaobject>
+                                <imageobject>
+                                    <imagedata fileref="figures/DSC04018small.JPG" align="center" width="100%"/>
+                                </imageobject>
+                            </mediaobject>
+                        </td>
+                    </tr>
+                </tbody>
+            </informaltable>
+        </figure>
+
+    </sect1>
+
+    <acknowledgements>
+        <title>Acknowlegements</title>
+        <para>Without Saxon-JS this project wouldn't have even been attempted and thanks are due to my colleagues Mike Kay and Debbie Lockett for the
+            excellence of that product. The author is of course extremely grateful for the many votes cast in his direction at last year's MarkupUK
+            DemoJam — without them he <emphasis role="strong">wouldn't have had to write this paper</emphasis>.</para>
+    </acknowledgements>
+
+
+
+
+
+
+
+    <bibliography>
+        <title>References</title>
+        <biblioentry xml:id="Saxon-JS">
+            <abbrev>1</abbrev>
+            <authorgroup>
+                <author>
+                    <personname>
+                        <firstname>Debbie</firstname>
+                        <surname>Lockett</surname>
+                    </personname>
+                </author>
+                <author>
+                    <personname>
+                        <firstname>Michael</firstname>
+                        <surname>Kay</surname>
+                    </personname>
+                </author>
+            </authorgroup>
+            <title>Saxon-JS: XSLT 3.0 in the Browser</title>
+            <publishername>Balisage: The Markup Conference </publishername>
+            <date>2016</date>
+            <biblioid class="uri"> https://doi.org/10.4242/BalisageVol17.Lockett01</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="SVG">
+            <abbrev>2</abbrev>
+            <title>Scalable Vector Graphics (SVG) 1.1 (Second Edition)</title>
+            <date>2011</date>
+            <publishername>World Wide Web Consortium (W3C)</publishername>
+            <biblioid class="uri">https://www.w3.org/TR/SVG11/</biblioid>
+        </biblioentry>
+        <biblioentry xml:id="XSLT">
+            <abbrev>3</abbrev>
+            <title>XSL Transformations (XSLT) Version 3.0</title>
+            <date>2017</date>
+            <publishername>World Wide Web Consortium (W3C)</publishername>
+            <biblioid class="uri">https://www.w3.org/TR/xslt-30/</biblioid>
+        </biblioentry>
+    </bibliography>
+</article>

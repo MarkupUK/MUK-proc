@@ -1,0 +1,641 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0">
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <info>
+    <title>Documenting XML Structures</title>
+    <subtitle>Markup UK 2019</subtitle>
+    <pubdate>May 2019</pubdate>
+    <author>
+      <personname>Erik&#160;Siegel</personname>
+      <email>erik@xatapult.nl</email>
+    </author>
+    <orgname>Xatapult</orgname>
+  </info>
+
+  <!-- ================================================================== -->
+
+  <sect1>
+    <title>Introduction</title>
+
+    <para>We, as XML geeks, all have to do with understanding XML structures we didn't design ourselves. It might be a programming language written as
+      XML, a library configuration file we need to change or data that needs filling. Whatever it is, we need to comprehend the format: the elements,
+      the parent-child relations and the attributes. Most important of course is the <emphasis>meaning</emphasis> of it: how can we use this XML
+      structure to bridge the gap between our intend and the workings of the software it's going to be processed by.</para>
+    <para>Most of us will probably  have been on the other side of this problem: We designed a nifty XML structure and needed to explain this in such
+      a way that others can and will use it (and, as an important side-effect, are mighty impressed by our elegant, intelligent and beautiful design).
+      How to explain an XML structure so users can make the most of it? More often than not this also has marketing value: A well constructed and
+      intelligible explanation might convince people to use your product/library/programming language.</para>
+    <para>Neither side is easy. We probably all have experienced the frustration of wrestling with a half understood and sloppily documented XML
+      format as input for some piece of software that stubbornly refused to do what we wanted it to do. Or, on the other side, the sinking feeling of
+      having to document this nice but complex XML structure, not really knowing how to do this, but realizing it will take a lot of time.</para>
+    <para>This paper will look at the problem of documenting XML structures from various angles: consumer, producer, the structures themselves,
+      supporting software, etc. It will then focus on the production side. Spoiler alert: There are no quick and easy solutions and at the end there
+      is, unfortunately, no GitHub repository containing an auto-XML-structure-document-writer-application… sorry. However, with a little thinking
+      upfront and a bit of automation, the task of documenting XML structures can become more manageable and maybe, for some, even enjoyable.</para>
+
+    <sect2>
+      <title>About the author and his documenting experience</title>
+
+      <para>I'm an XML specialist, doing things like consulting, designing and programming, strictly XML technology only. However, strangely enough, I
+        also like documenting, writing and explaining things to people. Some examples: </para>
+      <itemizedlist>
+        <listitem>
+          <para>I have given various XML, XSLT and other related courses to very different audiences. </para>
+        </listitem>
+        <listitem>
+          <para>Together with Adam &#160;Retter I wrote a book about eXist-db, which was published by O'Reilly in 2014.</para>
+        </listitem>
+        <listitem>
+          <para>Some time ago I re-factored the eXist documentation pages (and partly the accompanying application).</para>
+        </listitem>
+        <listitem>
+          <para>I'm currently working on a book about XProc&#160;3.0, to be published when we've finished the standard.</para>
+        </listitem>
+        <listitem>
+          <para>Of course, like probably for everyone, documenting stuff is something I sometimes do as part of the project I'm working on.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>In all this, documenting XML structures is unavoidable. So I've tried out different ways and formats and tried to understand why some
+        things work and others don't. This culminated into this (admittedly not very academic but hopefully enlightening) paper.</para>
+    </sect2>
+
+  </sect1>
+
+  <!-- ================================================================== -->
+
+  <sect1>
+    <title>Consumption: Understanding XML structures</title>
+
+    <para>If we in our line of work encounter an XML structure we don't know yet, finding some description is usually just a web-search away. Google,
+      Stackoverflow and the likes will often come up with some example, solution or description to help us. This is what I call "cookbook" level
+      understanding: You don't really know what you're doing but you found a recipe and, hey, it works (or not).</para>
+    <para>But what if you really need to understand the format and its implications? For instance because it's a programming language you need to
+      master. Or the application it serves is important to you. You start digging and hopefully find some kind of in-depth explanation of the
+      structure. Do this more than once and you'll find there is no uniform way of documenting such a thing. Let's have a look at a few:</para>
+
+    <variablelist>
+
+      <varlistentry>
+        <term>XSLT</term>
+        <listitem>
+          <para>A lot of people in the XML community know Michael Kay's XSLT book (Michael Kay; XSLT 2.0 and XPath 2.0 Programmer's Reference, 4th
+            edition; Wiley Publishing). Since an XSLT program is an XML structure, the book needs to explain this. Here's an excerpt from the
+            explanation of the <code>&lt;xsl:copy-of&gt;</code>:</para>
+          <figure>
+            <title>An excerpt from the documentation of XSLT</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/xslt-book-excerpt.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>All XML structure descriptions look this way, with as most important parts: short introduction, a standardized formatted impression of
+            what it looks like, a table explaining the attributes and a description of its contents. </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Maven POM</term>
+        <listitem>
+          <para>The documentation of Maven POM (Project Object Model) files can be found on the Apache Maven POM site (<link
+              xlink:href="https://maven.apache.org/pom.html"/>). Here's an example:</para>
+          <figure>
+            <title>An excerpt from the documentation of Maven POM files</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/maven-pom-excerpt.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>This follows a different approach: Short introduction, example XML fragment, explanatory text with a lot of bullets.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Ant</term>
+        <listitem>
+          <para>Another example we're probably all familiar with is Ant. Ant's documentation can be found on the Apache Ant site (<link
+              xlink:href="https://ant.apache.org/manual/"/>). Building blocks of Ant are tasks. Here's an example of a task description:</para>
+          <figure>
+            <title>An excerpt from the documentation of Ant</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/ant-excerpt.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>The documentation follows a consistent pattern: Description, parameters (which are attributes), description of nested elements (for
+            brevity reasons not shown) and examples.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>HL7 CDA</term>
+        <listitem>
+          <para>Here's an example of something only a few will be familiar with: HL7 CDA (health Level 7, Clinical Document Architecture), a standard
+            for the exchange of healthcare information. In a book that tries to explain this and more (Principles of Health Interoperability, SNOMED
+            CT, HL7 and FHIR; Tim Benson, Grahame Grieve; Springer-Verlag), I found the following way of explaining the CDA XML structure: </para>
+          <figure>
+            <title>An excerpt from the documentation of HL7 CDA</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/HL7-CDA-excerpt.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>They use a tree diagram to outline the structure followed by a short explanation followed by (badly formatted…) examples of XML
+            structures and more text to explain these.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>eXist-db <filename>conf.xml</filename></term>
+        <listitem>
+          <para>A last example comes from the documentation of eXist-db's <filename>conf.xml</filename> file. This is the main configuration file for
+            the database. </para>
+          <figure>
+            <title>An excerpt from the documentation of eXist-db's <filename>conf.xml</filename></title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/exist-conf-excerpt.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>This file has no separate documentation page or document. Instead everything is documented using XML comments inside the file
+            itself.</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+    <para>These are just a few examples and they illustrate there are very different of documentation formats out there. Now everybody probably has
+      his/her preferences and not every format needs the same kind or level of documentation, so can we say something in general about it? Let's
+      try:</para>
+    <itemizedlist>
+      <listitem>
+        <para>A major factor in the comprehensibility of the descriptions is <emphasis>consistency</emphasis>. All parts of the structures must be
+          explained in the same way, using the same (sub)sections and lay-out. This becomes more and more important when you use the XML structure on
+          a regular basis. Your eyes and brain get used to the format and can quickly and easily find the things you want to know.</para>
+      </listitem>
+      <listitem>
+        <para>The structure description must be correct and complete. No unmentioned surprise attributes for special occasions, no missing discrete
+          value lists, etc.</para>
+      </listitem>
+      <listitem>
+        <para>On the other hand: Constructions or values that will rarely be used should be recognizable as such. You don't want to spend time
+          understanding this weird attribute that seems important, finding out it will only rarely be used, much later…</para>
+      </listitem>
+      <listitem>
+        <para>The format should be easy to interpret. Meaning should almost pop-up from the page by just looking at it. This means judicious use of
+          all the lay-out tools we have: sections, tables, colors, fonts, whatever. An <emphasis>attractive</emphasis> look is almost a necessity (you
+          don't get a second chance for a first impression).</para>
+      </listitem>
+    </itemizedlist>
+
+    <!-- TBD Compare? -->
+  </sect1>
+
+  <!-- ================================================================== -->
+
+  <sect1>
+    <title>Production: Creating XML Structure documentation</title>
+
+    <para>Let's step to the other side and imagine we have to document some non-trivial XML structure. If there are no previously set rules and
+      guidelines, we're faced with some tough choices: how deep or shallow should the documentation be, what format are we're going to use, how are we
+      going to produce and maintain it?</para>
+    <para>These questions need in answer, but maybe we should start with acknowledging something important: for most people <emphasis>it's not a
+        pleasant prospect at all!</emphasis>. You're deep-down in some code that will be used by others, you created some clever XML format, and
+      suddenly you realize that, for people to be able to use your skilfully designed contraption, this format, that grew a little out of hand, needs
+      documentation. Argh. A depressive sinking feeling overwhelms you… But why is that?</para>
+    <itemizedlist>
+      <listitem>
+        <para>Creating documentation means stepping out of your "knowledge bubble", which is a very, very hard thing to do. You have to step back and
+          try to imagine you're new to all this. What does a fresh user of your software/format needs to know? What is important background, overview
+          and detail information? </para>
+      </listitem>
+      <listitem>
+        <para>Creating documentation is a lot of work. </para>
+      </listitem>
+      <listitem>
+        <para>You're (probably) a developer, not a technical writer, and documenting is not your favourite cup of tea.</para>
+      </listitem>
+      <listitem>
+        <para>Even when you just start writing, you'll soon realize you need a <emphasis>format</emphasis>, a consistent way of describing things. Not
+          only for the reader, but also for yourself. Documenting structures by following some format is really much easier than just typing along and
+          making things up on the fly. But which one? Sigh…</para>
+      </listitem>
+      <!--<listitem>
+        <para/>
+      </listitem>-->
+      <listitem>
+        <para>Once you have it, you're obliged to <emphasis>maintain</emphasis> it. This means that changes in the software now also require you to
+          revisit the documentation. This can lead to all the phenomena we know from maintaining software: from just a few keystrokes to extensive
+          refactor and overhaul operations.</para>
+      </listitem>
+      <listitem>
+        <para>Sometimes, while programming, you get carried away and in the end your XML structure turns out to be so complicated, documenting it is
+          hardly doable. </para>
+      </listitem>
+    </itemizedlist>
+
+    <para>So how to approach this? Before we go in to this, let's make a little side step and look at something that might be going through your mind
+      already: Of course the XML structure in question has a schema of some sort. Can't we use that for (generating) documentation?</para>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>Schemas and documentation</title>
+
+      <para>Creating a schema of some sort (e.g. XML Schema or RELAX NG, maybe with additional Schematron rules) for your XML structure is
+          <emphasis>always</emphasis> a good idea. It helps users to ascertain they created at least syntactically correct XML. It can be used in IDEs
+        like oXygen to get help in creating the thing. But is it also useable for end-user documentation?</para>
+      <para>There are generators out there that can turn a schema into documentation. Here is an example of some something generated by oXygen:</para>
+      <figure>
+        <title>An example of (a part of) generated schema documentation by oXygen</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="figures/schema-doc.png" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+      <para>Like software has classes, methods and type definitions, schemas have constructs like groups, types, extensions, etc. This is all there
+        for the schema developer and maintainer: keep things consistent, don't define constructs more than once, add internal documentation by using
+        meaningful names and make things easier to change. So a simple element might be constructed from an extended type, adding attribute groups,
+        re-defining constructs made earlier, etc.</para>
+      <para>All this is very important and necessary, but <emphasis>not for the end-user</emphasis>. When you look for instance at the diagram oXygen
+        generates, I think you can see the problem: <emphasis>way too much detail</emphasis>. As an end-user of the XML format you're not interested
+        in how the structure is defined in the schema. You simply want to know the attributes and child elements, what they mean and how and when to
+        use them.</para>
+
+      <para>To be fair, the oXygen documentation generator can be tuned in excruciating detail and maybe there is a setting I haven't found yet that
+        will generate what we need. But there are two other problems lurking in the wings:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Are the annotations you write in the schema for the end-user or for the schema maintainer? You probably need both. Maybe using nifty
+            tricks you can keep them apart, but can the documentation generator handle this? You'll also have to be very consistent and careful in
+            creating them.</para>
+        </listitem>
+        <listitem>
+          <para>XML structure documentation more often than not needs additional narrative texts in-between things. For instance when introducing an
+            element, provide an example or add a warning about something. This does not follow from the formal XML structure, it follows from the flow
+            of the explanation. At this moment there is no way a schema documentation generator can cater for this.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>This all is a fundamental problem: Schema documentation generators document the <emphasis>schema</emphasis>, not necessarily the resulting
+        format. Lots of unnecessary schema innards show up and obfuscate what an end-user needs to know. You can't add additional texts. Its a bit
+        like trying to generate Java program end-user documentation using the Javadoc pages…</para>
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>Writing documentation</title>
+
+      <para>So, OK, The idea that you have to write some documentation has landed and you set yourself to this inevitable task. Where to begin? Let's
+        see if we can prepare some guidelines.</para>
+      <itemizedlist>
+        <listitem>
+          <para>If you're smart, you realize upfront that maybe, one day, you'll have to write documentation of some sort for the structure you're
+            working on. And that means trying try to keep its complexity in check. Especially child constructions with lots of complicated nested
+            choices, sequences, etc. are very hard to explain in a satisfactory way. KISS rules.</para>
+        </listitem>
+        <listitem>
+          <para>Please realize you're in a knowledge bubble. You know everything there is to know about the XML structure. Maybe you consider it
+            trivial. But your reader does not. So, first and foremost, try to put yourself in the user's mind. What does he or she need to know to use
+            things effectively? What is important and what are details? What does the reader <emphasis>not</emphasis> know?</para>
+          <para>To reach such a state of mind, the easiest you can do is step away from your project for a day or longer. Take it over the weekend,
+            distract yourself a little. And then plunge in.</para>
+        </listitem>
+        <listitem>
+          <para>Once you've, at least partially, left your knowledge bubble, try to get into the one of the reader. Who is he or she? What background
+            knowledge can we expect? What is your audience?</para>
+          <para>Since we're talking here about documenting XML structures, I think its safe to assume you're writing for a technical, knowledgeable
+            audience. So don't overdo it and ramble about the syntax and semantics of XML in general, or what a schema is, a web-server or other
+            generic concepts. Best to assume this is common knowledge. Writing about it will only annoy your audience and make them feel
+            belittled.</para>
+        </listitem>
+        <listitem>
+          <para>An often made mistake is to start explaining something without establishing what is <emphasis>for</emphasis>. So you happily set out
+            describing your structure's root element and all its attributes, but forget to tell the reader why he/she should bother anyway. Why is
+            this XML structure there? What does it do in general? Where in the processing is it used?</para>
+          <para>So it's important to start with some <emphasis>narrative</emphasis>. A few paragraphs that explain background, goal, usage and the
+            likes in broad terms. Maybe even some diagram or flowchart?</para>
+        </listitem>
+        <listitem>
+          <para>Another thing I always like to see before plunging into the details is some <emphasis>example</emphasis> (or more than one) of the
+            structure we're talking about. What does it look like? How much of it do I already roughly understand? What's the style? It's like a
+            starter when dining out or the trailer of a film.</para>
+          <para>But watch out: deciding on a good example is not easy at all. It must be more than trivial but not overly complicated. It should not
+            bury the reader in frightening details. It should be geared towards some common use-case, one that many readers will recognize and
+            understand and that is not too hard to explain. It must be illustrative.</para>
+        </listitem>
+        <listitem>
+          <para>Before you start explaining the nitty-gritty details of the XML structure, decide on a <emphasis>format</emphasis>. It's not only
+            irritating for the reader to find this element explained this way and another one very different, it will also make your writer's task
+            miserable. This is analogues to programming without conventions. Just try to imagine how tiring it would be to have to come up with some
+            original naming format every time you create a variable, function or class. Much easier to decide on something and stick to it.</para>
+          <para>Of course this leads to the question: what is a good, or at least sufficient, format? More about this later.</para>
+        </listitem>
+        <listitem>
+          <para>Since we're all XML-heads here, I don't think I have to explain the difference between markup and its presentation. So when you're
+            documenting some non-trivial structure, invest time in setting up a tool-chain in which you can describe structures in a formal way that
+            is subsequently converted into the nice diagrams and tables you want to show your readers. Don't create them by hand.</para>
+          <para>This is very important for maintenance reasons. Assume for instance you've decide to make extensive and beautiful tree diagrams of
+            your XML structures using some manual drawing tool. The result is awesome and the likes start streaming in. But XML structures, like all
+            software, tend to change over time. So you have to redo some of the drawings, which is a lot of work even for small changes. Nah, not now…
+            The documentation starts lagging behind and probably dies in beauty one day.</para>
+        </listitem>
+        <listitem>
+          <para>As strange as it may sound, when things get complicated, don't let slavishly following the format get in the way of being
+            understandable. There are situations where your diagrams or formal descriptions will become hard to read and slight deviations from the
+            format you've decided on will improve understandability. Two examples:</para>
+          <itemizedlist>
+            <listitem>
+              <para>The XProc programming language has a <code>&lt;p:choose&gt;</code> instruction. The (new 3.0) standard depicts it like
+                this:</para>
+              <figure>
+                <title>The <code>&lt;p:choose&gt;</code> in the standard</title>
+                <mediaobject>
+                  <imageobject>
+                    <imagedata fileref="figures/p-choose-1.png" width="75%"/>
+                  </imageobject>
+                </mediaobject>
+              </figure>
+              <para>Look at the construction for the child elements <code>&lt;p:when&gt;</code> and <code>&lt;p:otherwise&gt;</code>. It explains,
+                formal and correct, that there must be at least a <code>&lt;p:when&gt;</code> or a <code>&lt;p:otherwise&gt;</code>. Let there be no
+                doubt: standard's documents <emphasis>must</emphasis> be formal and correct, so here it's no problem. But what if you're documenting
+                this? This whole construction with its parenthesis, +, ? and | marks is not really easy to understand for humans. It looks daunting,
+                even while its meaning is quite simple.</para>
+              <para>So when I was writing the section about <code>&lt;p:choose&gt;</code> for the XProc book, I decided to do it a little
+                different:</para>
+              <figure>
+                <title>The <code>&lt;p:choose&gt;</code> in the XProc book</title>
+                <mediaobject>
+                  <imageobject>
+                    <imagedata fileref="figures/p-choose-2.png" width="75%"/>
+                  </imageobject>
+                </mediaobject>
+              </figure>
+              <para>Somewhat further down followed by the remark:</para>
+              <itemizedlist>
+                <listitem>
+                  <para>A <code>&lt;p:choose&gt;</code> must contain <emphasis>at least</emphasis> one <code>&lt;p:when&gt;</code> or a
+                      <code>&lt;p:otherwise&gt;</code>. In other words: a <code>&lt;p:choose&gt;</code> without at least a single branch is not
+                    allowed.</para>
+                </listitem>
+              </itemizedlist>
+              <para>So a simplified diagram, followed by some additional text explaining the border condition. Not formal, not technically exactly
+                correct, but easier and quicker to understand. </para>
+              <para>These kinds of decisions are also driven by the <emphasis>importance</emphasis> of what you're trying to tell. That a
+                  <code>&lt;p:choose&gt;</code> has <code>&lt;p:when&gt;</code> and <code>&lt;p:otherwise&gt;</code> children, yes, that's important.
+                That there's a formal condition on there being at least one… duh. Who will ever want to write a <code>&lt;p:choose&gt;</code> without
+                one? You loose a little exactness but you gain a lot of understandability.</para>
+            </listitem>
+            <listitem>
+              <para>Sometimes possible attribute values are a list of discrete values, like for the <code>visibility</code> attribute in following
+                example.</para>
+              <figure>
+                <title>An attribute with a discrete value list</title>
+                <mediaobject>
+                  <imageobject>
+                    <imagedata fileref="figures/declare-step.png" width="100%"/>
+                  </imageobject>
+                </mediaobject>
+              </figure>
+              <para>That's OK when this list is small, but what if it becomes longer and overflows the line width? Since you've decided on a format
+                where discrete value lists are part of the diagram, you might be tempted to put them all there. However, that would mess up the layout
+                of the diagram <emphasis>and</emphasis> would forfeit its purpose: a quick, single glance, overview of an element's structure.</para>
+              <para>A better solution here would be to list just a few values in the diagram, add an ellipsis (…) to signify this list is incomplete
+                and list them (in a table) later on in the document.</para>
+
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>The target format and how to produce it</title>
+
+      <para>What should be the target format of our documentation. Can we get away with comments in the file? Will it become a website with linked
+        information? A PDF? Is a wiki page sufficient? Or are we writing a book?</para>
+      <itemizedlist>
+        <listitem>
+          <para>For files where there's only one of, like configuration files, its tempting to add documentation using comments in the file itself
+            (like the eXist <code>conf.xml</code> example above). However, I don't think that works very well. Files are edited, and with the editing,
+            sections, including the documenting comments, will disappear or get duplicated. Your nicely formatted file will soon become a mess.
+            Another reason for not using XML comments is that your layout options are limited. Maintenance of nicely indented and formatted lists or
+            tables in comments is hard to keep consistent…</para>
+        </listitem>
+        <listitem>
+          <para>When things are easy and extensive documentation is not really necessary (or there is no time), just use what's at hand. Write it in
+            Word and output it as PDF or HTML, use HTML directly, a Markdown readme file, a wiki page, etc.</para>
+        </listitem>
+        <listitem>
+          <para>When things get a little complicated, more than just a day or so of work and non-trivial, invest in a tool-chain that generates the
+            documentation for you out of some medium-neutral source format. DocBook and DITA are good candidates, especially since IDEs like oXygen
+            have such a splendid support for them. And once you have a medium-neutral source, the final format does not matter much anymore.</para>
+          <para>In designing such a tool-chain, begin with the narrative! So start by being able to create "just" text (like a DocBook or DITA
+            structure) and pull in generated diagrams, tables an the likes from there. Not the other way around.</para>
+        </listitem>
+      </itemizedlist>
+
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>XML element documentation</title>
+
+      <para>What is a good (or at least sufficient) documentation format for our XML structures? We've already talked about the importance of
+        introductory text and examples so let's not talk about that again. Let's look at how to document the basic building blocks of XML: elements.
+        I'll list some requirements first an then talk about what I made of them.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>The structure must be clear in a single glance, with as little ambiguity as possible.</para>
+        </listitem>
+        <listitem>
+          <para>It must contain all the necessary detailed information, quick and easy to find.</para>
+        </listitem>
+        <listitem>
+          <para>It must be attractive to look at. Of course attractiveness is subjective but probably everybody knows examples of pages with a really
+            bad layout. Avoid this.</para>
+        </listitem>
+        <listitem>
+          <para>It must have ample space (and locations) for additional narrative texts.</para>
+        </listitem>
+        <listitem>
+          <para>It should not deviate too much from what the reader is expecting and used to.</para>
+        </listitem>
+        <listitem>
+          <para>It must be consistent: all elements must be done the same way (so the reader gets used to the format).</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>When I started out writing the XProc book I thought long and hard about how to do this. What I came up with is the following:</para>
+      <itemizedlist>
+        <listitem>
+          <para>For the "clear in a single glance" experience you have to start with some kind of formalized depiction of the XML element. A common
+            way is the following (this comes from the XProc 3.0 standard):</para>
+          <figure>
+            <title>Example of an XML element documentation diagram</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/diagram-example-2.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>If you look at other documentation formats, you'll see this in several variations. Admittedly, its hard to beat. It  make the
+            element's structure clear in a single glance and people are used to it. So I decided to stick with it, more or less. One important thing I
+            changed is to put angle brackets around child elements to make it very and unambiguously clear that these are
+              <emphasis>elements</emphasis>.</para>
+          <figure>
+            <title>My XML element documentation diagram</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/diagram-example-3.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>Regardless of the layout details, starting with something like the above is important. People are used to it and get an immediate and
+            clear impression what we're talking about.</para>
+        </listitem>
+        <listitem>
+          <para>After this diagram come the details. What do the attributes and child elements <emphasis>mean</emphasis>? How can we make this as
+            clear and easy to find as possible?</para>
+          <para>In my view, nothing beats tables in presenting this kind of information. These tables should be consistent in that
+              <emphasis>all</emphasis> attributes and child elements must be there. Yes, even when you're documenting this <code>name</code> attribute
+            for the umpteenth time, it <emphasis>must</emphasis> be there. The reader might not have seen the explanations that came before and
+              <emphasis>expect</emphasis> it to be there (but nothing of course that stops you from pulling repeated texts from some common source in
+            your tool-chain…).</para>
+          <para>Here is an excerpt of the table explaining the attributes of the example <code>&lt;p:with-option&gt;</code> element:</para>
+          <figure>
+            <title>Example of a table explaining attributes</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/table-1.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>And here is the table explaining the child elements:</para>
+          <figure>
+            <title>Example of a table explaining child elements</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="figures/table-2.png" width="100%"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+          <para>As you can see, the texts in the tables are relatively short. When longer or additional explanations are necessary, put them elsewhere
+            and link to them (or say something like "see below").</para>
+        </listitem>
+        <listitem>
+          <para>I will not show you, but my tool-chain allows me to add additional narrative texts (almost) everywhere: in-between the diagram and the
+            tables, in-between the tables, etc. So whenever and where-ever necessary, additional explanations can be added, exactly where they're
+            needed to have maximum impact on the understandability.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>So is this it? No, absolutely not. I regularly catch myself changing this or that little detail (especially when the inspiration for
+        writing prose is temporarily missing, the equivalent of doodling around…). There are still some things I'm not totally satisfied with but
+        unsure on how to proceed or decide. For instance the order of attributes/child elements. Should this be alphabetical or in order of
+        importance? And if the latter, how do you decide on importance? It's probably something that is never finished but one thing I do know: it's
+        slowly getting better.</para>
+
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>An example tool-chain</title>
+
+      <para>As an example a short overview of the tool-chain I'm using for creating the XProc book. And guess what: it's written in XProc, although of
+        course still V1.0.</para>
+
+      <figure>
+        <title>My tool-chain for the XProc book</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="figures/figures.jpg" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+
+      <orderedlist>
+        <listitem>
+          <para>The tool-chain starts off with DocBook 5 sources, split into files per chapter.</para>
+        </listitem>
+        <listitem>
+          <para>The descriptions of the various elements are in separate XML files, using a (self invented and, guilty as charged, badly documented)
+            XML dialect.</para>
+        </listitem>
+        <listitem>
+          <para>Inside the source DocBook there are special instructions (XML elements in a different namespace) that trigger the processing of these
+            XML descriptions</para>
+        </listitem>
+        <listitem>
+          <para>A special sub-pipeline converts the XML descriptions into DocBook and takes care of all the formatting, table building, etc.</para>
+        </listitem>
+        <listitem>
+          <para>I don't always want to create things like complex tables directly in DocBook. That's hard to write and maintain. Instead I write some
+            XML that contains the data and a conversion (either XSLT or XProc) that turns it into DocBook. </para>
+        </listitem>
+        <listitem>
+          <para>Like the XML descriptions, this is triggered by special instructions in the DocBook sources.</para>
+        </listitem>
+        <listitem>
+          <para>Finally the tool-chain converts the DocBook into XSL-FO and, through FOP, into PDF.</para>
+        </listitem>
+      </orderedlist>
+
+      <para>All the components of this tool-chain are in an open-source library on GitHub (<link xlink:href="https://github.com/eriksiegel/xtpxlib"/>,
+        in the <code>xdocbook</code> folder). There is a little documentation. If you're interested and need help, drop me a mail and I'll see what I
+        can do.</para>
+
+      <!-- Mention xtpxlib -->
+    </sect2>
+
+  </sect1>
+
+
+  <!-- ================================================================== -->
+
+  <sect1>
+    <title>Conclusions and wrap-up</title>
+    
+    <para>As a wrap-up, let's try to summarize a few things:</para>
+    <itemizedlist>
+      <listitem>
+        <para>All this is relevant when you have invented some XML structure that will be used by others and you want to make sure they'll understand
+          it.</para>
+      </listitem><listitem>
+        <para>When you're serious about documenting, invest in a tool-chain that automates at least the generation of element/attribute documentation.</para>
+      </listitem>
+      <listitem><para>Acknowledge you're in a knowledge bubble. Try to distance yourself from what you know before you begin.</para></listitem>
+      <listitem>
+        <para>Always add a schema of some sort. But that's not enough.</para>
+      </listitem>
+      <listitem>
+        <para>Take the narrative as a starting point and include generated parts <emphasis>into</emphasis> your (hand-crafted) work. Generated
+          documentation is almost never sufficient, satisfactory and/or clear enough.</para>
+      </listitem>
+      <listitem>
+        <para>Start by taking the reader by the hand in some overview introduction. Provide one or more examples.</para>
+      </listitem>
+      <listitem>
+        <para>Spend some time making it look <emphasis>nice</emphasis>.</para>
+      </listitem>
+    </itemizedlist>
+  </sect1>
+
+</article>

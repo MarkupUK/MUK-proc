@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/css" href="resources/css/paper.css"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0"
+	xml:id="xmlpaper">
+	<info>
+		<title>XMLPaper: XML-based Conference Paper Workflow </title>
+		<author>
+			<personname>Cristian Talau</personname>
+			<email>cristian_talau@oxygenxml.com</email>
+			<uri>https://www.oxygenxml.com/</uri>
+			<affiliation>
+				<jobtitle>Software Engineer</jobtitle>
+				<orgname>Syncro Soft SRL</orgname>
+			</affiliation>
+		</author>
+		<keywordset>
+			<keyword>XML</keyword>
+			<keyword>Serverless</keyword>
+			<keyword>Workflow</keyword>
+		</keywordset>
+		<abstract>
+			<para>Popular conference management systems are monolithic solutions that are used
+				across many fields and by very diverse audiences. As a result, these systems have
+				rigid technology choices for paper format: PDF, TeX or Word which have limitations
+				compared to a structured format such as XML. In addition, they do not cover all the
+				steps in the paper submission lifecycle such as: collaboration between authors. </para>
+			<para>We propose a new solution for conference paper submission management that tries to
+				improve the user experience in several areas: authors tooling setup, collaboration
+				between authors, multi-step review processes, multi-format proceedings publishing.
+				This paper will present a typical conference paper submission workflow and identify
+				its steps, the stakeholders and the tools and technologies used. We will then
+				present how our solution improves user experience of each of the stakeholders. </para>
+			<para>In this solution, the documents are authored in the an XML format, that supports
+				publishing both as PDF and web portal. The output format is customizable and clearly
+				communicated to authors so that they can preview how the paper will be published.
+				Authors have a very intuitive user interface to draft the paper and to collaborate
+				in cases where a paper has multiple authors. Reviewers can choose to review either
+				the published PDF or directly on the source. In case of multi-round reviews, they
+				can see the changes made between different revisions, thus being able to focus on
+				the last updates. </para>
+			<para>From a technical point of view, the solution is composed from off-the-shelf Web
+				services with a thin layer of orchestration. It may to be used together with a
+				regular Conference Management System, replacing parts of its functionality. </para>
+			<para>To conclude the paper, we analyze how this solution is similar with other
+				workflows related to content creation in a company, such as creating release notes
+				or datasheets for a product.</para>
+		</abstract>
+	</info>
+	<section>
+		<title>Introduction</title>
+		<para>In this paper I will first present the lifecycle of a conference paper, the key actors
+			and the document formats used. In the next section I will present the architecture of
+			XMLPaper. Then I will explain how this solution improves the user experience for each of
+			the stakeholders. </para>
+		<para>To conclude the paper I will point out similarities between conference paper
+			submissions management and other content management workflows that usually happen in a
+			company. </para>
+	</section>
+	<section>
+		<title>Conference paper submission workflow</title>
+		<section>
+			<title>Content creation</title>
+			<para>A conference paper submission lifecycle starts with the <emphasis role="bold"
+					>authors</emphasis> collaborating to create the content of the paper. At this
+				point the may request preliminary reviews from <emphasis role="bold">colleagues or
+					other members in their organization</emphasis>. </para>
+			<para>The most popular format used to submit a paper is TeX for science conferences
+				while Word is the de-facto standard for humanities conferences.</para>
+			<para>It is not uncommon for authors to create drafts in other formats and only the
+				final submission to be written in the format required by the conference. </para>
+		</section>
+		<section>
+			<title>Peer review</title>
+			<para>After the paper is ready it is submitted to the <emphasis role="bold">conference
+					committee</emphasis> to be reviewed. The review can be a multi-step process in
+				which authors iterate on the paper after a round of reviews.</para>
+			<para>This review is usually performed on the PDF or Word version of the paper and
+				comments are written in the Conference Management System and not directly linked to
+				parts of the document. For multi-round reviews have to identify the changed parts of
+				the paper and to evaluate whether their previous feedback how addressed.</para>
+		</section>
+		<section>
+			<title>Publishing</title>
+			<para>After the paper is accepted, an <emphasis role="bold">editor</emphasis> needs to
+				put it together with the rest of the accepted papers and edit them to have a
+				consistent style and format. At the end the proceedings of the conference are
+				published.</para>
+			<para>Most of the conferences publish only a PDF version of the proceedings which is
+				also used for print in some cases. </para>
+			<para>To make sure all papers have a consistent format the conference employs either a
+				Word styles library and expect authors to adhere to those. In other cases the
+				conference publishes a LaTeX <filename>.class</filename> file to be used by all
+				authors and expect that the submitted PDF files were generated using that
+				configuration file.</para>
+		</section>
+	</section>
+	<section>
+		<title>XMLPaper architecture</title>
+		<section>
+			<title>The source format</title>
+			<para>XMLPaper uses the DocBook format for the paper across all the stages of its
+				lifecycle. </para>
+			<para>DocBook has special markup for articles and is rich enough to support embedded
+				objects like images, videos, mathematical equations, tables, code blocks and so on.
+				However, DocBook is not the only suitable XML vocabulary - JATS (Journal Article Tag
+				Suite) is also a viable alternative.</para>
+			<para>Some advantages of using DocBook include:</para>
+			<para>
+				<itemizedlist>
+					<listitem>
+						<para>The authors can focus on creating the content of the paper and leaving
+							it to conference organizers to define the layout and style of the
+							published version of the paper.</para>
+					</listitem>
+					<listitem>
+						<para>The content can be published to multiple formats, such as PDF, web
+							page and e-book. Having the source available, one can re-publish it
+							later as new formats become popular, e.g. audio paper.</para>
+					</listitem>
+					<listitem>
+						<para>Being an open standard format, it is good for archiving purposes. Some
+							academic papers have a longer lifetime that the company than a
+							particular proprietary format.</para>
+					</listitem>
+					<listitem>
+						<para>Being widely used in enterprise content creation, there is wide range
+							of tooling available for XML-related tasks such as editing,
+							collaboration, and publishing.</para>
+					</listitem>
+				</itemizedlist>
+			</para>
+		</section>
+		<section>
+			<title>Self-service project template</title>
+			<para>The delivery format of XMLPaper is a self-service project template. This project
+				template does not only contain an outline of a paper to be filled in, but also
+				configuration files for all the required tools and services so that authors can
+				start working on the conference paper right away.</para>
+			<para>In order to create an affordable solution we reused off-the-shelf tools and
+				services and made them work together without having the author set every up thing.
+				To make it easy to create a portable configuration that works without any software
+				requirements for authors XMLPaper uses mostly cloud services.</para>
+			<para>XMLPaper allows authors, just by clicking a button, to copy the project template
+				to their Git account and deploy a web-based dashboard for working on the
+				paper.</para>
+			<informalfigure>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="dashboard.png" scale="50" align="center"/>
+					</imageobject>
+					<caption>
+						<para>XMLPaper Dashboard</para>
+					</caption>
+				</mediaobject>
+			</informalfigure>
+			<para>The Dashboard contains buttons to perform the following tasks:<itemizedlist>
+					<listitem>
+						<para>Preview the latest committed version of the paper in PDF format.
+						</para>
+					</listitem>
+					<listitem>
+						<para>A link that can be used to edit the paper in Oxygen XML Web Author. </para>
+						<para>The project includes conference-specific editor configuration:<itemizedlist>
+								<listitem>
+									<para>It validates the paper source "as-you-type" according to
+										the conference-specific constraints expressed as Schematron
+										rules.</para>
+									<informalfigure>
+										<mediaobject>
+											<imageobject>
+												<imagedata fileref="warning%20in%20editor.png"
+												scale="50"/>
+											</imageobject>
+											<caption>
+												<para>Editor issues a warning that the abstract is
+												too short</para>
+											</caption>
+										</mediaobject>
+									</informalfigure>
+								</listitem>
+								<listitem>
+									<para>It includes inline actions and hints to help authors
+										create the correct XML structure</para>
+									<informalfigure>
+										<mediaobject>
+											<imageobject>
+												<imagedata fileref="inline-hints.png" scale="50"/>
+											</imageobject>
+											<caption>
+												<para>Inline hint about how to split the paper in
+												sections. Inline actions to convert a section to
+												subsection and vice versa.</para>
+											</caption>
+										</mediaobject>
+									</informalfigure>
+								</listitem>
+								<listitem>
+									<para>The change tracking and commenting features help
+										co-authors collaborate. They can also be used to send
+										document for review before submission.</para>
+									<informalfigure>
+										<mediaobject>
+											<imageobject>
+												<imagedata fileref="comments.png" scale="50"/>
+											</imageobject>
+											<caption>
+												<para>Comment added by a reviewer suggesting some
+												additional bibliography items </para>
+											</caption>
+										</mediaobject>
+									</informalfigure>
+								</listitem>
+							</itemizedlist></para>
+					</listitem>
+					<listitem>
+						<para>View the XML source code in the Git repository. Most repository
+							hosting services can be used for collaboration between co-authors - they
+							offer version tracking, issue management, and other collaboration
+							features. </para>
+						<para>In this repository, users can find an <filename>.xpr</filename>
+							project file for Oxygen XML Editor which configures the editor to match
+							the conference requirements similar with the web editor. It also
+							includes a Transformation Scenario that generates a PDF preview. Using
+							this editor authors can edit and generate a PDF preview of their paper
+							while offline.</para>
+					</listitem>
+					<listitem>
+						<para>Download the paper in XML format and all supporting resources
+								(<code>xi:include</code>d files, images, etc.)</para>
+					</listitem>
+				</itemizedlist></para>
+			<para>The back-end of the solution is composed of several services as depicted in the
+				diagram below:</para>
+			<informalfigure>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="XMLPaper.png" align="center" scale="50"/>
+					</imageobject>
+					<caption>
+						<para>XMLPaper back-end services diagram</para>
+					</caption>
+				</mediaobject>
+				<para>
+					<itemizedlist>
+						<listitem>
+							<para>The <emphasis role="bold">Dashboard</emphasis> is a static web
+								page with hyperlinks to the web interfaces of the other services. It
+								is generated during the initial setup since the links depend on the
+								location of the Git repository.</para>
+						</listitem>
+						<listitem>
+							<para>The <emphasis role="bold">Git repository</emphasis> stores the
+								source of the paper together with configuration files and build
+								scripts.</para>
+						</listitem>
+						<listitem>
+							<para>The web-based <emphasis role="bold">editor</emphasis> can be
+								opened using a link on the Dashboard. It connects to the Git
+								repository to read the paper source and to commit it every time the
+								users saves.</para>
+						</listitem>
+						<listitem>
+							<para>Every time an user commits a file in the Git repository, a git
+								hook triggers a new job on the <emphasis role="bold">build
+									server</emphasis>. This job connects back to the Git repository
+								to pull the entire repository and then performs the following
+								tasks:</para>
+							<itemizedlist>
+								<listitem>
+									<para>Generates the PDF preview. </para>
+									<para>This task involves downloading several tools such as Saxon
+										6.5, DocBook XSL, XSLT-HL (for syntax highlight in
+										code-blocks), and Apache FOP. It also involves applying some
+										custom XSLT and configuring the above-mentioned tools. <example>
+											<title>PDF Generation configuration</title>
+											<programlisting language="bourne">java -cp "bin/saxon.jar:bin/docbook/xsl/extensions/xslthl.jar" \           
+    com.icl.saxon.StyleSheet processed_paper.xml \
+    bin/docbook/xsl/fo/docbook_custom.xsl \
+  admon.graphics=1 \
+  admon.graphics.extension=.png \
+  admon.graphics.path=bin/docbook/css/img/ \
+  "body.font.family=Times New Roman, Tahoma, Batang, serif" \
+  callout.graphics.path=bin/docbook/xsl/images/callouts/ \
+  draft.mode="no" \
+  fop.extensions=0 \
+  fop1.extensions=0 \
+  highlight.source=1 \
+  highlight.xslthl.config=\
+    file://`pwd`/bin/docbook/xsl/hl/xslthl-config.xml \
+  "monospace.font.family=monospace, Courier New, Consolas, Arial" \
+  paper.type=A4 \
+  "title.font.family=Arial, Tahoma, Batang, sans-serif" \
+> out/paper.fo</programlisting>
+										</example>However, configuring the publishing pipeline is
+										the job of the conference organizers. Authors just save in
+										the editor and then a build starts which in turn uploads the
+										generated PDF to the web server.</para>
+								</listitem>
+								<listitem>
+									<para>Generates the deliverable archive containing the XML
+										source and all its referenced files, for example
+										images.</para>
+								</listitem>
+								<listitem>
+									<para>Generates the Dashboard web page. This page is static and
+										does not change over time. However, its links depend on the
+										URL of the Git repository, so it has to be generated during
+										the first build.</para>
+								</listitem>
+								<listitem>
+									<para>Pushes everything on the <emphasis role="bold">web
+											hosting</emphasis> service. In the current
+										implementation the <emphasis role="bold">web
+											hosting</emphasis> and <emphasis role="bold">build
+											server</emphasis> services are part of the same product.
+									</para>
+								</listitem>
+							</itemizedlist>
+						</listitem>
+					</itemizedlist>
+				</para>
+			</informalfigure>
+		</section>
+		<section>
+			<title>Steady-state workflow</title>
+			<para>The steady state workflow is simple and it resembles the one used for static-site
+				generators: <orderedlist>
+					<listitem>
+						<para>User saves their changes</para>
+					</listitem>
+					<listitem>
+						<para>The editor commits the changes in the Git repository</para>
+					</listitem>
+					<listitem>
+						<para>A git hook is called to trigger a job on the build server</para>
+					</listitem>
+					<listitem>
+						<para>PDF and other reports are generated</para>
+					</listitem>
+					<listitem>
+						<para>Artifacts are uploaded to the Web Server and ready to be used. </para>
+					</listitem>
+				</orderedlist></para>
+		</section>
+		<section>
+			<title>Initial setup</title>
+			<para>The initial setup is more complicated than duplicating the template project since
+				it needs to link together multiple services offered by different vendors. For more
+				details about service choices one can consult the web page of the XMLPaper project:
+					<link xmlns:xlink="http://www.w3.org/1999/xlink"
+					xlink:href="https://github.com/oxygenxml/markupuk-2019-paper"
+					>https://github.com/oxygenxml/markupuk-2019-paper</link>.</para>
+			<para>To make the setup more intuitive XMLPaper uses a setup tool that takes care of
+				connecting various services. This setup tool is part of the same suite as the build
+				service and web hosting service. To make other services cooperate, the steps below
+				are performed:</para>
+			<para>
+				<variablelist>
+					<varlistentry>
+						<term>Authorize the setup tool to create a Git repository</term>
+						<listitem>
+							<para>The setup tool uses <emphasis role="bold">OAuth</emphasis> to ask
+								the authors for permission to create and manage a Git repository in
+								their account starting from the project template.</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>Link the build service to the Git repository</term>
+						<listitem>
+							<para>The setup tool registers a Git hook to trigger the build service
+								whenever a commit is pushed. It also registers an SSH key so that it
+								can fetch the repository contents to perform the build. Each build
+								job will have the URL of the Git repository as an environment
+								variable.</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>Generate the Dashboard web page with links to the other
+							services</term>
+						<listitem>
+							<para>The build service runs a script found in the project that uses the
+								URL of the Git repository to create back links to open the source of
+								the paper either directly or in the web editor.</para>
+						</listitem>
+					</varlistentry>
+					<varlistentry>
+						<term>Authorize the web editor to access the Git repository</term>
+						<listitem>
+							<para>When the web editor is opened for the first time, it uses
+									<emphasis role="bold">OAuth</emphasis> to request the user's
+								permission to read and commit files in the Git repository when the
+								author opens or saves the paper in the editor.</para>
+						</listitem>
+					</varlistentry>
+				</variablelist>
+			</para>
+			<para>
+				<note>
+					<para>Some of the services require the author to <emphasis role="bold">create an
+							user account</emphasis>. In our case, the user has to create an account
+						with a Git repository hosting service and another account for the build
+						service, setup tool, and web hosting service. The user account creation
+						usually happens as an interstitial step and only if the user does not
+						already have an account.</para>
+				</note>
+			</para>
+			<para>In our case, the services are either part of the same bundle like the build
+				service and web hosting service or are connected using <emphasis role="bold"
+					>OAuth</emphasis>. Other services use <emphasis role="bold">personal access
+					tokens</emphasis> to allow applications access their API. In this case, the user
+				should be guided to generate one and give it to the setup tool.</para>
+		</section>
+	</section>
+	<section>
+		<title>User experience analysis</title>
+		<variablelist>
+			<varlistentry>
+				<term>Authors</term>
+				<listitem>
+					<para>Authors get an easy-to-setup environment to work on their paper. <itemizedlist>
+							<listitem>
+								<para>Inline hints help the create the proper structure.</para>
+							</listitem>
+							<listitem>
+								<para>The "as-you-type" validation removes the anxiety of submitting
+									a paper that does not respect the conference constraints.</para>
+								<para>Also by integrating a reporting service, the validation errors
+									can be centralized and tracked in case the authors cannot fix
+									them right away.</para>
+								<informalfigure>
+									<mediaobject>
+										<imageobject>
+											<imagedata fileref="sonar-rule.png" scale="50"/>
+										</imageobject>
+										<caption>
+											<para>Validation issue presented by a reporting
+												service</para>
+										</caption>
+									</mediaobject>
+								</informalfigure>
+							</listitem>
+							<listitem>
+								<para>A preview of the document helps authors tune the paper for the
+									paper publishing format used by the conference. For example,
+									limiting the code-blocks line length to make sure they do not
+									overflow the page for the indent values used when publishing the
+									proceedings.</para>
+							</listitem>
+							<listitem>
+								<para>Collaboration is made easy by the Git version system features
+									and the commenting and change-tracking features of the
+									editor.</para>
+							</listitem>
+						</itemizedlist></para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term>Reviewers</term>
+				<listitem>
+					<para>Reviewers can add comments directly linked to the section that they refer
+						to. Also, in case of multi-round reviews, it is easy to see a difference
+						between the two versions of the paper and to check how their comments were
+						addressed.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term>Conference organizers</term>
+				<listitem>
+					<para>Having the papers in a structured format and respecting the imposed
+						constraints, it is easy to publish them in multiple formats. Also, since
+						authors have the opportunity to preview their paper published with the
+						official formatting, the quality of the output should be better.</para>
+				</listitem>
+			</varlistentry>
+		</variablelist>
+	</section>
+	<section>
+		<title>Similarities with other content creation workflows</title>
+		<para>The demand for more XML content has shifted the work of creating it from technical
+			writers to other departments of a company. Since these people work only occasionally on
+			content creation the investment to have them set up the necessary tools does not pay
+			off.</para>
+		<para>The idea of having a self-service project template that has all the configuration in
+			place can be applied in other scenarios such as creating similar documentation for
+			multiple products. For example, customizable products whose documentation has a standard
+			format but the parameters can differ, datasheets for microchips or release notes for a
+			software product.</para>
+		<para>For cloud-based services, the ease of setup is at odds with other business driving
+			factors such as security, legal compliance, and brand exposure. For example, if a
+			company provides a back-end service as using a freemium pricing model, they want the
+			user to be aware that about that service. So, it is not uncommon that during the setup
+			users will be exposed to a screen presenting that service. </para>
+		<para>However, in an enterprise environment, these factors are not that relevant which can
+			provide an even more intuitive user on-boarding experience. For example, a back-end
+			service can is usually licensed by the company and configured by a system administrator
+			and is totally transparent to the end-user. </para>
+	</section>
+	<section>
+		<title>Conclusion</title>
+		<para>The paper presented how a serverless solution for an XML-based paper submission
+			workflow can be developed with relatively low effort. </para>
+		<para>An important observation is that although the solution is built from a number of
+			off-the-shelf tools and services, most of them are not specifically designed for
+			XML-based solutions, but for web applications. </para>
+		<para>The source code for the project is available online at <link
+				xmlns:xlink="http://www.w3.org/1999/xlink"
+				xlink:href="https://github.com/oxygenxml/markupuk-2019-paper"
+				>https://github.com/oxygenxml/markupuk-2019-paper</link>. We plan to customize it
+			further with conference specific constraints expressed as Schematron rules. We also plan
+			to make it possible to generate the PDF preview on demand without having to commit the
+			paper in the Git repository first. This will imply integrating with a Functions as a
+			Service platform that will run the publishing process.</para>
+	</section>
+	<bibliography xml:id="cristian-references">
+		<bibliomixed xml:id="JATS"><abbrev>JATS</abbrev>
+			<author>
+				<personname><surname>Tamir</surname><firstname>Hassan</firstname></personname>
+			</author>: <title>Trialling a new JATS-XML workflow for scientific publishing</title>.
+				<date>16 February 2019</date>, <orgname>Round-Trip PDF Solutions</orgname>
+			<bibliomisc><link
+					xl:href="http://archive.xmlprague.cz/2019/files/xmlprague-2019-proceedings.pdf"
+				/></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="PLATF"><abbrev>PLATF</abbrev>
+			<author>
+				<personname><surname>Parra</surname><firstname>Lorena</firstname></personname>
+			</author>: <title>Comparison of Online Platforms for the Review Process of Conference
+				Papers</title>. <date>2013</date>, <orgname>Universidad Politécnica de
+				Valencia</orgname>
+			<bibliomisc><link
+					xl:href="https://www.thinkmind.org/download.php?articleid=content_2013_1_30_60033"
+				/></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="REV"><abbrev>REV</abbrev>
+			<author>
+				<personname><surname>Bernstein</surname><firstname>Mark</firstname></personname>
+			</author>: <title>Reviewing Conference Papers</title>. <date>2008</date>,
+				<orgname>Eastgate Systems Inc.</orgname>
+			<bibliomisc><link xl:href="https://www.markbernstein.org/elements/Reviewing.pdf"
+				/></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="OAUTH"><abbrev>OAUTH</abbrev>
+			<title>RFC 6749: The OAuth 2.0 Authorization Framework</title>, <orgname>IETF</orgname>
+			<bibliomisc><link xl:href="https://tools.ietf.org/html/rfc6749"
+			/></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="PROGIT"><abbrev>PROGIT</abbrev>
+			<author>
+				<personname><surname>Cachon</surname>
+					<firstname>Scott</firstname></personname>
+			</author>: <title>Pro Git</title>. <date>2014</date>, <bibliomisc><link
+					xl:href="https://git-scm.com/book/en/v2"
+				>https://git-scm.com/book/en/v2</link></bibliomisc></bibliomixed>
+	</bibliography>
+</article>

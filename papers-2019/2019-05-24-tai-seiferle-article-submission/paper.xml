@@ -1,0 +1,974 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<?xml-stylesheet type="text/css" href="resources/css/paper.css"?>-->
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0">
+	<info>
+
+      <title><emphasis role="italic">sub</emphasis>check</title>
+
+		<author>
+			<personname>Andreas Tai</personname>
+		  <uri>https://www.irt.de/en/</uri>
+			<affiliation>
+				<orgname>Institut für Rundfunktechnik (IRT)</orgname>
+			</affiliation>
+		</author>
+<author>
+  <personname>Michael Seiferle</personname>
+  <email>ms@basex.org</email>
+  <uri>https://www.basex.org</uri>
+  <personblurb>
+    <para>      <?oxy-placeholder content="Details about you"?></para>
+  </personblurb>
+  <affiliation>
+        <orgname>BaseX GmbH</orgname>
+      </affiliation>
+</author>
+		<keywordset>
+			<keyword><?oxy-placeholder content="keyword relevant to your paper"?></keyword>
+			<keyword><?oxy-placeholder content="keyword"?></keyword>
+		</keywordset>
+		<abstract>
+      <para>The exchange of data in XML goes hand in hand with its validation. Mature technologies
+        for this task exist. But often more is needed than just the technical application of XML
+        Schema, Schematron or Relax NG. A user-friendly solution requires an abstraction from the
+        XML foundation. Initiation and result of a validating process needs to be put into the
+        context of the end users domain and be a guidance to solve conformance problems. </para>
+      <para>This paper shows how Schematron, XSLT, XQuery and JavaScript have been glued together to
+        address these requirements. Although the subcheck framework (<link
+          xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://subcheck.io/"
+          >http://subcheck.io</link>) was implemented specifically for the Timed Text Markup
+        Language (TTML) the approach can be used by any other XML vocabulary.</para>
+		</abstract>
+	</info>
+<section xml:id="intro">
+    <title>Intro</title>
+    <para> Do you share this problem? You have a well-documented XML structure and an XML Schema to
+      test conformance, but: </para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para>
+          People do not use the XML Schema because they do not know it
+          exists.
+        </para>
+      </listitem>
+      <listitem>
+        <para> People know the XML Schema exists, but they do not know how to apply it. </para>
+      </listitem>
+      <listitem>
+        <para>
+          People apply the XML Schema, but they do not know how to
+          interpret the error messages.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para> If so: you are in the same situation as we were in 2012. </para>
+  </section>
+  <section xml:id="ttml-and-its-profiles">
+    <title>TTML and its Profiles</title>
+    <para>
+      The W3C Timed Text Markup Language (TTML) <biblioref linkend="TTML2"/> is an XML vocabulary for
+      video subtitles and captions.
+    </para>
+    <para> Like many other XML vocabularies, TTML works as a baseline and covers many known use
+      cases. One use case is the exchange of subtitle files, another use case is the rendering of
+      subtitles in a video player. That's why it comes to no surprise that in operation not the
+      complete TTML vocabulary is used, but only subsets of the Markup Language. </para>
+    <para> Examples of these subsets are EBU-TT-D <biblioref linkend="EBUTTD"/> defined by the
+      European Broadcast Union (EBU) and the widely adopted TTML Profiles for Internet Media
+      Subtitles and Captions (IMSC) <biblioref linkend="IMSC11"/> defined by the Timed Text Working
+      Group (TTWG) <footnote>
+        <para>https://www.w3.org/AudioVideo/TT/</para>
+      </footnote>of the World Wide Web Consortium (W3C), that also published TTML. </para>
+  </section>
+  <section xml:id="validation-of-ttml-profiles">
+    <title>Validation of TTML Profiles</title>
+    <para> Especially in the introduction phase of a new standard, it is important to make sure that
+      the APIs of different software systems use the standards in the same way and conform to the
+      rules of the specifications. </para>
+    <para> Once a workflow is established, the exchanged documents need to conform to the
+      established APIs. </para>
+    <para> Take for example the following real-world use case scenario: a freelancer creates
+      subtitles for a media service company which in turn got a contract from a streaming company to
+      deliver subtitles for a complete season of a video series. </para>
+    <para> The media service company and the streaming company agree on IMSC as the technical
+      baseline for subtitle XML files, but they may also apply their own set of <quote>house style
+        rules</quote>. So at the gateways of the service company and the streaming provider,
+      overlapping but also separate checks are executed. </para>
+    <para> The Institute für Rundfunktechnik (IRT) <footnote>
+        <para>The Institut für Rundfunktechnik GmbH (IRT) (Institute for Broadcasting Technology
+          Ltd.) is the research centre of the German broadcasters, Austria's broadcaster and the
+          Swiss public broadcaster.</para>
+      </footnote>was well aware of this and other scenarios such as the <quote>in-house</quote>
+      exchange of subtitle files and aimed for a better support for them. </para>
+    <para> In 2013, the IRT had already been active in TTML standardization, especially in the
+      definition of the EBU-TT profiles.<footnote>
+        <para>see https://tech.ebu.ch/groups/subtitling</para>
+      </footnote> But although W3C XML Schema (XSD) files existed, non-conformant documents were
+      still produced and distributed. </para>
+    <para> This was due to a lack of knowledge about the existence of the XSD itself, its
+      application or about the meaning of the implied rules and resulted in the new goal to build a
+      more user-friendly validation alternative. The main inspiration came from the W3C HTML
+      validation service. </para>
+    <para> In the process of the installation of their own service, the IRT went through different
+      stages: </para>
+    <itemizedlist spacing="compact">
+      <listitem>
+        <para> A master thesis on the topic was written by Barbara Fichte (supervised by
+          Prof. Dr. Anne Brüggemann-Klein) and a first prototype was implemented. </para>
+      </listitem>
+      <listitem>
+        <para>
+          A cooperation with the company BaseX GmbH was started.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Full working solutions were implemented.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Two different products (<emphasis role="italic">sub</emphasis>check and IMF Analyser) were
+          launched to integrate the solutions.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para> In the following, we describe the implementation of the <emphasis role="italic">sub</emphasis>check service by BaseX GmbH
+      and the IRT. </para>
+  </section>
+  <section xml:id="validation-requirements">
+    <title>Validation Requirements</title>
+    <para> One important requirement was to validate a TTML XML document against different sets of
+      conformance rules without duplicating the implementation effort, another that the end user
+      should only get one error message when the same rule of different specifications was broken.
+      On top of that, the implementation of the software architecture was also guided by a number of
+      non-functional requirements. </para>
+      <para><emphasis role="bold">Team Expertise</emphasis></para>
+      <para> The choice of technologies had to reflect the expertise available in the technical
+        teams. For example, the IRT team worked intensively with XSLT, Schematron and W3C XML Schema
+        but less with XQuery or Relax NG. </para>
+
+    <para><emphasis role="bold">Deployment of Technologies</emphasis></para>
+    <para> The technologies used needed to be widely deployed because it had to be possible to
+        integrate the solution into different system environments. </para>
+      
+    <para><emphasis role="bold">All XML</emphasis></para>
+      <para> We believed and still believe in the power of XML technologies. The cooperation of
+        communities responsible for different XML technologies resulted in well-aligned XML
+        technologies like XPath, XSLT, XQuery, Schematron and XPROC. We therefore wanted to use XML
+        technologies wherever possible. </para>
+
+    <para><emphasis role="bold">Separation of Concerns</emphasis></para>
+      <para> We favoured a design approach with a framework of loosely coupled components that
+        communicate over an agreed API. This way, different stakeholder groups can work on different
+        parts of the framework without interfering with the work of other stakeholders. </para>
+      <para>
+        We identified three different stakeholder groups:
+      </para>
+      <itemizedlist spacing="compact">
+        <listitem>
+          <para>
+            The domain stakeholders who know about conformance rules.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The developers that implement the rules using validation
+            technologies.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The product team that technically designs and implements the end product.
+          </para>
+        </listitem>
+      </itemizedlist>
+
+    <para><emphasis role="bold">End user Requirements</emphasis></para>
+      <para> Existing validation strategies often come with very technical result messages, but
+        users are often not technical. Even if they are, they may not be familiar with an XML schema
+        technology or XML at all. Therefore, the validation should give information in an
+        understandable way. The information should highlight not only what is wrong but also WHY
+        something is wrong and how to correct it. It should enable the user to trace back the error
+        to the documentation of a rule in the specification. </para>
+    
+    <para><emphasis role="bold">Product View</emphasis></para>
+      <para> From the commercial side, some components needed to be integrated separately into
+        different products. Different developer teams needed to work independently from each other. </para>
+  </section>
+  <section xml:id="implementation-approach">
+    <title>Implementation Approach</title>
+    <section xml:id="master-thesis">
+      <title>Master Thesis</title>
+      <para> Barbara Fichte explored the topic in depth in her well written master thesis
+        "Strategies for User-Oriented Conformance Testing of XML Documents".<biblioref linkend="MAFICHTE"/>
+        She worked out the requirements, evaluated different schema languages and described 
+        how she implemented a first prototype. </para>
+      <para> She looked at the schema languages W3C XML Schema, Schematron, Relax NG and NVDL. The
+        conclusion was that Schematron was the best fit for the purpose. One major aspect was the
+        expertise in the team. But most importantly Schematron makes it easy to integrate additional
+        information into the validation. </para>
+      <para> The other Schema technology that was favoured was W3C XML Schema. It is widely
+        implemented and works well with grammar-based constraints. But W3C XML Schema came with a
+        number of limitations. The most important one was that for some types of rules XML Schema
+        1.1 was needed and at the time of writing of the master thesis only limited support by free
+        or open-source XSD 1.1 schema parsers was available. </para>
+      <para> As Schematron was such a good fit, Barbara Fichte proposed and implemented an approach
+        where all constraints could be implemented with Schematron. She used Schematron’s abstract
+        patterns to implement grammar constraints that would usually be implemented with W3C Schema.
+        One example of these constraints is the order in which elements may appear under a parent
+        element. </para>
+      <para> In the later implementation of <emphasis role="italic">sub</emphasis>check, the main schema technology used was indeed
+        Schematron. However, we did not completely remove W3C XML Schema from the validation
+        process. The costs to re-implement already existing grammar constraints in Schematron was
+        too high compared to the benefit. There also existed some XML Schema of TTML profiles
+        published by standard bodies. The use of these schemas enabled <emphasis role="italic">sub</emphasis>check validation to align
+        better with the validation approaches of these organizations. </para>
+    </section>
+    <section xml:id="application-implementation">
+      <title>Application Implementation</title>
+      <para> In the final implementation, we separated three different steps: </para>
+      <itemizedlist spacing="compact">
+        <listitem>
+          <para>
+            The documentation of the rules in a constraints XML
+            document.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The implementation of the rules in Schematron.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The creation of a report that could be used by an end user
+            product.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para> As the approach we took can be applied to any XML vocabulary in many
+        scenarios, we will present a simplified use case to visualize the key points. </para>
+      <para>
+        The scenario is to test cabin bag weight against the allowance
+        of the two assumed airlines Aeto and Örn.
+      </para>
+      <para> In the appendix, different examples show how the approach can be applied to TTML
+        vocabularies. </para>
+      <section xml:id="rules-documentation">
+        <title>Rules Documentation</title>
+        <para> The base of the <emphasis role="italic">sub</emphasis>check framework is the documentation of the rules in a separate
+          XML file (constraints XML). </para>
+        <para> The implementation assumption is that more than one specification needs be tested.
+          These specifications need to be defined first. To keep the XML samples in the paper short
+          we later use only one specification. </para>
+        <programlisting language="xml">&lt;Specifications&gt;
+    &lt;Specification ID=&quot;<emphasis role="bold">ID-Aeto-Conditions</emphasis>&quot;&gt;
+        &lt;Name&gt;Conditions Aeto&lt;/Name&gt;
+        &lt;Acronym&gt;C-Aeto&lt;/Acronym&gt;
+        &lt;Version&gt;1.0&lt;/Version&gt;
+    &lt;/Specification&gt;
+    &lt;Specification ID=&quot;ID-Oern-Conditions&quot;&gt;
+        &lt;Name&gt;Conditions Örn&lt;/Name&gt;
+        &lt;Acronym&gt;C-Örn&lt;/Acronym&gt;
+        &lt;Version&gt;1.0&lt;/Version&gt;
+    &lt;/Specification&gt;
+&lt;/Specifications&gt; 
+</programlisting>
+        <para> After that, the constraints can be documented with the necessary level of detail and
+          linked back to the specification. </para>
+        <programlisting language="xml">&lt;Constraint ID=&quot;c1&quot;&gt;
+    &lt;ShortName&gt;
+      Cabin Bag Max. Weight 8kg
+    &lt;/ShortName&gt;
+    &lt;SpecifiedBy ID=&quot;ID-cabinbag-8kg&quot;&gt;
+        &lt;SpecificationReference&gt;
+          <emphasis role="bold">ID-Aeto-Conditions</emphasis>
+         &lt;/SpecificationReference&gt;
+         &lt;Error_Level&gt;ERROR&lt;/Error_Level&gt;
+    &lt;/SpecifiedBy&gt;
+    &lt;ShortDescription&gt;
+      Value should be equal or less than 8.
+    &lt;/ShortDescription&gt;            
+    &lt;ShortDescriptionUser&gt;
+      Cabin bag should not have more than 8kg weight.
+    &lt;/ShortDescriptionUser&gt;
+&lt;/Constraint&gt;
+</programlisting>
+        <para> The following UML class diagram models the relationship between constraints and
+          specifications. </para>
+        <figure>
+          <title>UML Diagram Constraint - Specification</title>
+          <mediaobject>
+            <imageobject>
+              <imagedata scalefit="1" width="100%" fileref="constraintXmlUml.png" />
+            </imageobject>
+            <textobject><phrase>UML Diagram Constraint -
+            Specification</phrase></textobject>
+          </mediaobject>
+        </figure>
+        <para>
+          All information documented in the constraints XML should be
+          specific to the constraint and not its implementation.
+        </para>
+        <para> One constraint can be part of different specifications and each of these
+          specifications may put the constraint in a different context. While one specification may
+          specify the constraint as a mandatory requirement, another specification may just regard
+          it as recommendation. The first context would result in an error and the second context
+          would result in a warning. </para>
+      </section>
+      <section xml:id="schematron-schema-file">
+        <title>Schematron Schema File</title>
+        <para> The rule is implemented in Schematron as defined by the Schematron standard <biblioref linkend="ISOSCHEMA"/>. In
+          addition, the <literal>@see</literal> attribute is used for linking the Schematron rule
+          back to the documented constraint. </para>
+        <programlisting language="xml">&lt;sch:rule context=&quot;cabin-bag/weight&quot;&gt;
+    &lt;sch:let 
+      name=&quot;bag-weight&quot; 
+      value=&quot;xs:float(.)&quot;/&gt;
+    &lt;sch:let 
+      name=&quot;passenger-name&quot; 
+      value=&quot;../../name&quot;/&gt;
+    &lt;sch:assert 
+      test=&quot;$bag-weight le 8&quot; 
+      see=&quot;http://www.cabin-bag.info/c1&quot;
+      diagnostics=&quot;diag-weight-8&quot;&gt;
+        The weight of cabin luggage is 8kg 
+        or less.
+    &lt;/sch:assert&gt;
+&lt;/sch:rule&gt;
+</programlisting>
+        <para> More context information is given by using Schematron’s diagnostic element. </para>
+        <programlisting language="xml">&lt;sch:diagnostic id=&quot;diag-weight-8&quot;&gt;
+  The cabin luggage of 
+  &lt;sch:value-of select=&quot;$passenger-name&quot;/&gt;
+  exceeded the maximum weight allowance by 
+  &lt;sch:value-of select=&quot;$bag-weight -8&quot;/&gt;kg.
+  Pack lighter!
+&lt;/sch:diagnostic&gt;
+</programlisting>
+      </section>
+      <section xml:id="compiled-schematron">
+        <title>Compiled Schematron</title>
+        <para> The Schematron Schema is compiled into an XSLT using a customized version of the
+          Schematron skeleton implementation <footnote><para>see https://github.com/Schematron/schematron</para></footnote>. The sekeleton implementation needed to be adjusted for two reasons: </para>
+        <orderedlist numeration="arabic" spacing="compact">
+          <listitem>
+            <para> We also wanted to use attributes as rule context.<footnote>
+                <para>see also the discussion on issues
+                  https://github.com/Schematron/schematron/issues/44 and
+                  https://github.com/Schematron/schematron/issues/29 and pull request
+                  https://github.com/Schematron/schematron/pull/41 </para>
+              </footnote>
+            </para>
+          </listitem>
+          <listitem>
+            <para>
+              We wanted to provide a more human readable version of the
+              location where the error occurs.
+            </para>
+          </listitem>
+        </orderedlist>
+        <para> Given the the following XML file…</para>
+        <programlisting language="xml">&lt;passenger&gt;
+    &lt;name&gt;Jane Grant&lt;/name&gt;
+    &lt;cabin-bag&gt;
+        &lt;weight&gt;11&lt;/weight&gt;
+    &lt;/cabin-bag&gt;
+ &lt;/passenger&gt;
+</programlisting>
+        <para>
+          …the target output of the compiled Schematron XSLT is an XML document that follows
+          the structure of the Schematron Validation Report Language. A failed Schematron assert would
+          result in the following SVRL: </para>
+        <programlisting language="xml">&lt;svrl:failed-assert 
+  test=&quot;$bag-weight le 8&quot;
+  id=&quot;assert-c1-1&quot;
+  see=&quot;http://www.cabin-bag.info/c1&quot;
+  location=&quot;/passenger[1]/cabin-bag[1]/weight[1]&quot;
+  subcheck:alternativeLocation=&quot;/passenger/cabin-bag/weight&quot;&gt;
+   &lt;svrl:text&gt;
+     The weight of cabin luggage is 8kg or less.
+    &lt;/svrl:text&gt;
+   &lt;svrl:diagnostic-reference 
+      diagnostic=&quot;diag-weight-8&quot;&gt;
+       The cabin luggage of Jane Grant exceeded 
+       the maximum weight allowance by 3kg. 
+       Pack lighter!
+   &lt;/svrl:diagnostic-reference&gt;
+&lt;/svrl:failed-assert&gt;
+</programlisting>
+        <para>
+          The reference to the documentation of the constraint in the constraint.xml is kept
+          in a <literal>@see</literal> attribute.
+        </para>
+      </section>
+      <section xml:id="generation-of-the-report">
+        <title>Generation of the Report</title>
+        <para> The SVRL is taken as input for the transformation into an XML report. This report is
+          provided to the end user product that integrates the validation. The XML structure of the
+          report is the agreed API between validation engine and post-processing system. </para>
+        <para> The output is grouped by constraint in the report. </para>
+        <programlisting language="xml">&lt;errorCategory&gt;
+    &lt;constraintID&gt;
+      c1
+    &lt;/constraintID&gt;
+    &lt;title&gt;
+      Cabin Bag Max. Weight 8kg
+    &lt;/title&gt;
+    &lt;shortUserDesc&gt;
+      Cabin bag should not have more 
+      than 8kg weight.
+    &lt;/shortUserDesc&gt;
+    &lt;longUserDesc/&gt;
+    &lt;specs&gt;
+        &lt;spec&gt;
+            &lt;name&gt;
+              Conditons Aeto, Version 1.0
+             &lt;/name&gt;
+            &lt;nameAcronym&gt;
+              C-Aeto&lt;
+            /nameAcronym&gt;
+            &lt;errorLevel&gt;ERROR&lt;/errorLevel&gt;
+        &lt;/spec&gt;
+    &lt;/specs&gt;
+    &lt;errors&gt;
+        &lt;error&gt;
+            &lt;messages&gt;
+                &lt;messageMain&gt;
+                  Assertion: The weight of cabin 
+                  luggage is 8kg or less.
+                  Error Information: The cabin 
+                  luggage of Jane Grant exceeded 
+                  the maximum weight allowance 
+                  by 3kg. Pack lighter!
+                &lt;/messageMain&gt;
+                &lt;messageAssertion&gt;
+                  The weight of cabin luggage is 
+                  8kg or less.
+                &lt;/messageAssertion&gt;
+                &lt;messageDiagnosticsAll&gt;
+                  The cabin luggage of Jane Grant 
+                  exceeded the maximum weight 
+                  allowance by 3kg. Pack lighter!
+                &lt;/messageDiagnosticsAll&gt;
+            &lt;/messages&gt;
+            &lt;locations&gt;
+                &lt;location 
+                  locationType=&quot;resolvableXPATH&quot;&gt;
+                  /passenger[1]/cabin-bag[1]/weight[1]
+                &lt;/location&gt;
+                &lt;location 
+                  locationType=&quot;humanXPATH&quot;&gt;
+                  /passenger/cabin-bag/weight
+                &lt;/location&gt;
+            &lt;/locations&gt;
+        &lt;/error&gt;
+    &lt;/errors&gt;
+&lt;/errorCategory&gt;</programlisting>
+      </section>
+      <section xml:id="overview-transformation-chain">
+        <title>Overview: The Transformation Chain</title>
+        <figure>
+          <title>Transformation in the Validation Chain</title>
+          <mediaobject>
+            <imageobject>
+              <imagedata scalefit="1" width="100%" fileref="validationTransform.png" />
+            </imageobject>
+            <textobject><phrase>Transformation in the validation
+            chain</phrase></textobject>
+          </mediaobject>
+        </figure>
+      </section>
+    </section>
+  </section>
+  <section xml:id="interfaces-machine-to-machine-and-the-end-user">
+    <title>Interfaces: Machine-to-Machine and the End-User</title>
+    <para>
+      <emphasis role="italic">sub</emphasis>check’s core interfaces are
+      based on
+      RESTXQ
+      and are implemented in the BaseX XML Server as a pure XQuery application.
+    </para>
+    <para> The service contains a single endpoint <literal>/validate</literal> that orchestrates the
+      validation engine and returns the resulting report. Files that are uploaded by users will not
+      be persisted by the engine, they are parsed and validated in memory only and returned to the
+      caller right away. The report will be returned in its XML form by default, but other formats
+      are possible. </para>
+    <para> The XQuery implementation receives an XML file — it returns an error on non-XML files —
+      and runs the XSL transformation for the compiled rules. The result of this process is then
+      passed on to another stylesheet that transforms it to the reporting format and if necessary
+      conducts conversions to other formats such as JSON or text. </para>
+    <para>
+      In practice, a request looks like the following:
+    </para>
+    <programlisting language="bash">$ cat luggage.xml | http POST http://subecheck/validate
+###################################################
+&gt; Content-Type: application/xml; charset=UTF-8
+</programlisting>
+    <programlisting language="xml">  &lt;report&gt;
+    &lt;errors&gt;
+    &lt;constraintID&gt;c1&lt;/constraintID&gt;
+    &lt;title&gt;
+     Cabin Bag Max. Weight 8kg
+    &lt;/title&gt;
+    &lt;shortUserDesc&gt;
+      Cabin bag should not have more than 8kg weight.
+    &lt;/shortUserDesc&gt;
+    ...
+  &lt;/report></programlisting>
+    <para> Via REST, users can also request a report in JSON format by specifying a different
+        <literal>Accept</literal>-Header: </para>
+    <programlisting language="bash">$ cat luggage.xml | http POST http://subecheck/validate Accept:application/json
+###########################################################################
+&gt; Content-Type: application/json; charset=UTF-8
+</programlisting>
+    <programlisting language="json">{
+  &quot;filename&quot;: &quot;luggage.xml&quot;,
+  &quot;filesize&quot;: &quot;2 KB&quot;,
+  &quot;report&quot;: [{
+    &quot;constraintID&quot; : &quot;c1&quot;,
+    &quot;title&quot;        : &quot;Cabin Bag Max. Weight 8kg&quot;,
+    &quot;shortUserDesc&quot;: &quot;Cabin bag should not have more than 8kg weight.&quot;,
+    &quot;longUserDesc&quot; : &quot;Assertion: The weight of cabin […]&quot;,
+    &quot;specs&quot;        : [{
+      &quot;errorLevel&quot; : &quot;ERROR&quot;,
+      &quot;name&quot;       : &quot;Conditons Aeto, Version 1.0&quot;,
+      &quot;nameAcronym&quot;: &quot;C-Aeto&quot;,
+      &quot;section&quot;    : &quot;[…]&quot;,
+      &quot;text&quot;       : &quot;[…]&quot;,
+      &quot;uri&quot;        : &quot;https://c-aeto/spec&quot;
+    }],
+</programlisting>
+    <para> While <emphasis role="italic">sub</emphasis>check was designed with arbitrary frontends
+      in mind — i.e. it can be easily integrated into existing workflows thanks to its almost
+      universally accessible REST interface — we decided to implement a visual interface as a
+      proof-of-concept that allows users to interactively explore and assess their validation
+      results. </para>
+    <para>
+      This interface heavily builds on the
+      <literal>JSON</literal>-serialization of the reports and is
+      implemented as a Single-Page-Application made up of
+      <literal>Vue.js</literal>-components, that allow the user to
+      potentially browse and filter hundreds of validation messages.
+    </para>
+    <section xml:id="using-the-application">
+      <title>Using the <emphasis role="italic">sub</emphasis>check Application</title>
+      <para> In order to validate an XML file, users may initiate validation by dragging their file
+        onto the browser window. Once the file is dropped, it is sent to the server and the
+        validation pipeline will start. Once the pipeline has finished, usually in under a second,
+        the result list will appear. </para>
+
+        <para> The following screenshots are taken from the examples section at <link
+          xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="https://subcheck.io"
+          >https://subcheck.io</link>and are the results of validating a real subtitle.</para>
+      <section xml:id="the-report-view">
+        <title>The Report View</title>
+        <para> The report view allows the display of general metadata, such as word counts or other
+          metrics, and allows users to gather insight into the validation results and filter them
+          according to their needs. </para>
+        <para> This view is built completely on the report result — so all information displayed is
+          also available to other engines or systems. </para>
+        <figure>
+          <title>The Report View</title>
+          <mediaobject>
+            <imageobject>
+              <imagedata scalefit="1" width="100%" fileref="images/Screenshot-Report-View.png" />
+            </imageobject>
+            <textobject><phrase>The Report View</phrase></textobject>
+          </mediaobject>
+        </figure>
+        <para> Inside the Report View, users may click on the messages to display more in-depth
+          information. </para>
+        <figure>
+          <title>Filtering</title>
+          <mediaobject>
+            <imageobject>
+              <imagedata scalefit="1" width="100%" fileref="images/Screenshot-Report-View-Details.png" />
+            </imageobject>
+            <textobject><phrase>Filtering</phrase></textobject>
+          </mediaobject>
+        </figure>
+        <variablelist>
+        <title>Tabs Overview</title>
+        <varlistentry>
+          <term>Description Tab</term>
+          <listitem>
+            <para> The detail view starts with a general error description to add more technical
+                context for the user. When working with different profiles within the same standard,
+                  <emphasis role="italic">sub</emphasis>check allows adding <literal>Tags</literal>
+                to given rules that will be shown along with the general description, so users can
+                quickly assess whether this rule’s <literal>ErrorLevel</literal> is set differently
+                in other profiles. </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>More Information Tab</term>
+          <listitem>
+            <para>
+                In addition to technical information, this tab will provide
+                more general or editorially useful information and hints on
+                why that message appeared.
+              </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Specifications Tab</term>
+          <listitem>
+            <para> The Specifications tab points to the actual specifications this error violates.
+                Usually entries contain a link that enables users to read the original specification for
+                further information. </para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term>Error Details Tab</term>
+          <listitem>
+            <para> This tab contains an <literal>XPath</literal>-Expression that can be copied to any
+                capable editor or engine to pinpoint the exact error location. An HTML preview of the
+                error is also provided, so the user gets some document context. </para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      </section>
+    
+      <section xml:id="adaptive-filtering">
+        <title>Adaptive Filtering</title>
+        <para> A <emphasis role="italic">sub</emphasis>check application can be used to validate documents against arbitrary schemas
+          and allows users to provide user-defined tags that apply to a given validation message. </para>
+        <para> The screenshot below shows filtering based on a real-world subtitle validation
+          framework: </para>
+        <figure>
+          <title>Filtering</title>
+          <mediaobject>
+            <imageobject>
+              <imagedata scalefit="1" width="100%" fileref="images/Screenshot-Filters.png" />
+            </imageobject>
+            <textobject><phrase>Filtering</phrase></textobject>
+          </mediaobject>
+        </figure>
+        <para> The frontend automatically adapts itself to the validation results, in a way that
+          allows users to explore their data with these facets. The screenshot above shows,
+          highlighted in <emphasis role="strong">bold</emphasis>, what kinds of messages are
+          contained within the result. Users may check or uncheck these categories to display or
+          hide specific items in the report view. </para>
+        <para> For example, some users might only be interested in messages with a
+            <literal>WARNING</literal>-Level, or maybe only warnings that apply to styling-related
+          messages. </para>
+      </section>
+    </section>
+  </section>
+  <section xml:id="conclusion">
+    <title>Conclusion</title>
+    <para>
+      The separation of concerns was successfully implemented.
+    </para>
+    <para> Users can write the rules. They can update the documentation without interfering with
+      validation or product design. </para>
+    <para> Developers can implement the validation rules. They do not have to rely on the domain
+      user (unless there is a new rule that is a breaking change). Although the main implementation
+      is in Schematron, other schema languages can be used as well, as long as a reported error
+      links back to the documented rule. </para>
+    <para> Product designers can rely on the fact that, on the one hand, the same API is triggered
+      to submit the file and filter criteria and, on the other hand, to always get back an XML
+      document in the same format. </para>
+  </section>
+  <section xml:id="other-aspects-and-perspective">
+    <title>Other Aspects and Perspective</title>
+    <para>
+      Some interesting aspects could not be covered in this paper but
+      should be mentioned shortly:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para> <emphasis role="italic">sub</emphasis>check was also used to validate the binary subtitle file format EBU STL. To make
+          this possible the binary STL file was translated first into an XML representation of the
+          binary structure. After that, the resulting XML structure was validated using Schematron
+          rules. </para>
+      </listitem>
+      <listitem>
+        <para> Apart from the <emphasis role="italic">sub</emphasis>check service, the validation
+          engine was also implemented in the workstation-based product IMF analyser. The tool is
+          written in C# and C++. </para>
+      </listitem>
+      <listitem>
+        <para> Especially the integration of the W3C XML Schema validation was a challenge. It needs
+          more work and design changes to become a generic solution. </para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+
+	<bibliography xml:id="tai-references">
+		
+	  <bibliomixed xml:id="EBUTTD">
+	    <abbrev>EBUTTD</abbrev>
+	    <title>TECH3380 EBU-TT-D SUBTITLING DISTRIBUTION FORMAT</title>. <orgname>W3C</orgname>
+	    <bibliomisc><link xl:href="https://tech.ebu.ch/publications/tech3380"/></bibliomisc>
+	  </bibliomixed>
+		
+	  <bibliomixed xml:id="ISOSCHEMA">
+	    <abbrev>ISOSCHEMA</abbrev>
+	    <title>ISO/IEC 19757-3, Information technology — Document Schema Definition Languages (DSDL) - Part 3: Rule-based validation - Schematron</title>.
+	    <date>15 January 2016</date>,
+	    <orgname>ISO/IEC</orgname>
+	    <bibliomisc><link xl:href="http://standards.iso.org/ittf/PubliclyAvailableStandards/c055982_ISO_IEC_19757-3_2016.zip"/></bibliomisc>
+	  </bibliomixed>
+	  
+
+	  <bibliomixed xml:id="MAFICHTE">
+      <abbrev>MAFICHTE</abbrev>
+      <author>
+        <personname><surname>Fichte</surname>
+          <firstname>Barbara</firstname></personname>
+      </author>: <title>Strategien zur benutzerorientierten Konformitätsprüfung von XML-Dokumenten</title>. <date>15
+        June 2014</date>, <orgname>Technische Universität München</orgname>
+      <bibliomisc/>
+	  </bibliomixed>
+	  
+
+	  <bibliomixed xml:id="IMSC11">
+	    <abbrev>IMSC11</abbrev>
+        <author>
+	      <personname>
+	        <surname>Lemieux</surname>
+	        <firstname>Pierre</firstname>
+	      </personname>
+	    </author>: <title>TTML Profiles for Internet Media Subtitles and Captions 1.1</title>. <orgname>W3C</orgname>
+	    <bibliomisc><link xl:href="https://www.w3.org/TR/ttml-imsc1.1/"/></bibliomisc>
+	  </bibliomixed>
+	  
+	  <bibliomixed xml:id="TTML2">
+	    <abbrev>TTML2</abbrev>
+      <author>
+        <personname><surname>Adams</surname>
+          <firstname>Glenn</firstname>
+        </personname>
+      </author><author>
+        <personname>
+          <surname>Concolato</surname>
+          <firstname>Cyril</firstname>
+        </personname>
+      </author>: <title>Timed Text Markup Language 2 (TTML2)</title>. <orgname>W3C</orgname>
+      <bibliomisc><link xl:href="https://www.w3.org/TR/ttml2/"/></bibliomisc></bibliomixed>
+		
+	</bibliography>
+
+  <appendix>
+    <title>Subcheck artifacts with TTML examples</title>
+    <para> Example of TTML specification listing in the constraints.xml:
+      <programlisting language="xml">&lt;Specifications>
+  &lt;Specification ID="spec-imsc1.1">
+         &lt;Name>
+            TTML Profiles for Internet Media 
+            Subtitles and Captions 1.1
+          &lt;/Name>
+         &lt;Acronym>IMSC1.1 Common&lt;/Acronym>
+         &lt;Version>2018-11-08&lt;/Version>
+  &lt;/Specification>
+  &lt;Specification ID="spec-ttml2">
+         &lt;Name>
+            Timed Text Markup Language 2 
+            (TTML2) CR
+         &lt;/Name>
+         &lt;Acronym>TTML2&lt;/Acronym>
+         &lt;Version>2018-11-08&lt;/Version>
+  &lt;/Specification>
+&lt;/Specifications></programlisting>
+    </para>
+    <para>Example of a documented IMSC rule:
+      <programlisting language="xml">&lt;Constraint ID="d1e1321">
+    &lt;ShortName>
+        Extent attribute presence on region 
+        element
+   &lt;/ShortName>
+    &lt;SpecifiedBy>
+        &lt;SpecificationReference>
+            spec-imsc1-text
+        &lt;/SpecificationReference>
+        &lt;SpecText>
+         [The feature] #extent-region [is] 
+         permitted...
+        &lt;/SpecText>
+        &lt;Error_Level>ERROR&lt;/Error_Level>
+        &lt;Chapter>7.4&lt;/Chapter>
+        &lt;URI>
+          https://www.w3.org/TR/ttml-imsc1/#features-and-extensions-1
+        &lt;/URI>
+    &lt;/SpecifiedBy>
+    &lt;SpecifiedBy>
+        &lt;SpecificationReference>
+            spec-imsc1.0.1-text
+        &lt;/SpecificationReference>
+        &lt;SpecText>...&lt;/SpecText>
+        &lt;Error_Level>ERROR&lt;/Error_Level>
+        &lt;Chapter>7.4&lt;/Chapter>
+        &lt;URI>
+            https://www.w3.org/TR/ttml-imsc1.0.1/#features-and-extensions-1
+        &lt;/URI>
+    &lt;/SpecifiedBy>
+    &lt;SpecifiedBy>
+        &lt;SpecificationReference>
+            spec-imsc1.1-text
+        &lt;/SpecificationReference>
+        &lt;SpecText>...&lt;/SpecText>
+        &lt;Error_Level>ERROR&lt;/Error_Level>
+        &lt;Chapter>8.4.2&lt;/Chapter>
+        &lt;URI>
+           https://www.w3.org/TR/ttml-imsc1.1/#extent-region
+        &lt;/URI>
+    &lt;/SpecifiedBy>
+    &lt;ShortDescription>
+        tts:extent on all regions
+    &lt;/ShortDescription>
+    &lt;ShortDescriptionUser>
+        The extent attribute shall be present on all region
+        elements.
+    &lt;/ShortDescriptionUser>
+&lt;/Constraint></programlisting></para>
+    <para>Example of rule implementation in Schematron:
+      <programlisting language="xml">&lt;sch:pattern id="attributeRequirement">
+    &lt;sch:rule 
+     context="/tt:tt/tt:head/tt:layout/tt:region">
+      &lt;sch:assert 
+       diagnostics="elementId"
+       see="http://www.irt.de/subcheck/constraints/d1e1321"
+       id="assert-d1e1321-1">
+        The attribute tts:extent is present.
+      &lt;/sch:assert>
+    &lt;/sch:rule>
+&lt;/sch:pattern></programlisting></para>
+    <para>Example of an IMSC document with an error:
+      <programlisting language="xml">&lt;tt xmlns="http://www.w3.org/ns/ttml" 
+    ttp:profile="http://www.w3.org/ns/ttml/profile/imsc1/text"
+    xmlns:ttp="http://www.w3.org/ns/ttml#parameter"
+    xmlns:tts="http://www.w3.org/ns/ttml#styling" 
+    xml:lang="en">
+    &lt;head>
+        &lt;layout>
+            &lt;region tts:origin="10% 80%"
+             xml:id="bottom"/>
+        &lt;/layout>
+    &lt;/head>
+    &lt;body>
+        &lt;div>
+            &lt;p region="bottom" begin="0s" end="1s">
+                Hello, I am Mork from Ork.
+            &lt;/p>
+        &lt;/div>
+    &lt;/body>
+&lt;/tt></programlisting>
+    </para>
+    <para>Example of the SVRL Output:
+      <programlisting language="xml">&lt;svrl:failed-assert
+   test="attribute::tts:extent" 
+   see="http://www.irt.de/subcheck/constraints/d1e1321"
+   location="/*:tt[namespace-uri()='http://www.w3.org/ns/ttml'][1]/..."
+   subcheck:alternativeLocation="/tt/head/layout/region">
+    &lt;svrl:text>
+        The attribute tts:extent is present.
+    &lt;/svrl:text>
+    &lt;svrl:diagnostic-reference 
+     diagnostic="elementId">
+       The affected 'region' element has the ID 'bottom'.
+    &lt;/svrl:diagnostic-reference>
+&lt;/svrl:failed-assert></programlisting></para>
+    <para>Example of the report view output:
+      <programlisting language="xml">&lt;errorCategory>
+    &lt;constraintID>d1e1321&lt;/constraintID>
+    &lt;title>
+        Extent attribute presence on region element
+    &lt;/title>
+    &lt;shortUserDesc>
+        The extent attribute shall be present on all 
+        region elements.
+    &lt;/shortUserDesc>
+    &lt;specs>
+        &lt;spec>
+            &lt;name>
+                TTML Profiles for Internet Media 
+                Subtitles and Captions 1.0 (IMSC1)- 
+                Text Profile, Version 2016-04-21
+            &lt;/name>
+            &lt;nameAcronym>IMSC1-Text&lt;/nameAcronym>
+            &lt;text>
+                [The feature] #extent-region [is] 
+                permitted ...
+            &lt;/text>
+            &lt;errorLevel>ERROR&lt;/errorLevel>
+            &lt;section>Chapter 7.4&lt;/section>
+            &lt;uri>
+                https://www.w3.org/TR/ttml-imsc1...
+            &lt;/uri>
+        &lt;/spec>
+        &lt;spec>
+            &lt;name>
+                TTML Profiles for Internet Media 
+                Subtitles and Captions 1.0.1 (IMSC1)
+                - Text Profile, Version 2017-07-13
+            &lt;/name>
+            &lt;nameAcronym>IMSC1.0.1-Text&lt;/nameAcronym>
+            &lt;text>
+                [The feature] #extent-region [is] 
+                permitted...
+            &lt;/text>
+            &lt;errorLevel>ERROR&lt;/errorLevel>
+            &lt;section>Chapter 7.4&lt;/section>
+            &lt;uri>
+               https://www.w3.org/TR/ttml-imsc1.0.1/...
+            &lt;/uri>
+        &lt;/spec>
+        &lt;spec>
+            &lt;name>
+                TTML Profiles for Internet Media 
+                Subtitles and Captions 1.1 - 
+                Text Profile,Version 2017-10-17
+            &lt;/name>
+            &lt;nameAcronym>IMSC1.1-Text (Beta)&lt;/nameAcronym>
+            &lt;text>
+                The tts:extent attribute SHALL be present 
+                on all region elements, where it SHALL use 
+                px units, percentage values, or root 
+                container relative units.
+            &lt;/text>
+            &lt;errorLevel>ERROR&lt;/errorLevel>
+            &lt;section>Chapter 8.4.2&lt;/section>
+            &lt;uri>
+                https://www.w3.org/TR/ttml-imsc1.1/...
+            &lt;/uri>
+        &lt;/spec>
+    &lt;/specs>
+    &lt;errors>
+        &lt;error>
+            &lt;messages>
+                &lt;messageMain>
+                   Assertion: The attribute tts:extent is 
+                   present.
+                   Error Information:
+                   The affected 'region' element has the ID 
+                  'bottom'.
+               &lt;/messageMain>
+                &lt;messageAssertion>
+                   The attribute tts:extent is present.
+                &lt;/messageAssertion>
+                &lt;messageDiagnosticsAll>
+                    The affected 'region' element has the ID
+                    'bottom'.
+                &lt;/messageDiagnosticsAll>
+            &lt;/messages>
+            &lt;locations>
+                &lt;location 
+                  locationType="resolvableXPATH">
+                    /*:tt[namespace-uri()='http://www.w3.org/...
+                &lt;/location>
+                &lt;location
+                 locationType="humanXPATH">
+                    /tt/head/layout/region
+                &lt;/location>
+            &lt;/locations>
+        &lt;/error>
+    &lt;/errors>
+&lt;/errorCategory></programlisting></para>
+    
+  </appendix>
+  
+</article>

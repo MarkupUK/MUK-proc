@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="en">
+  <info>
+    <title>What’s in a Schematron?</title>
+    <author>
+      <personname>David Maus</personname>
+      <email>dmaus@dmaus.name</email>
+      <uri>https://dmaus.name</uri>
+      <affiliation>
+        <orgname>State and University Library Hamburg</orgname>
+      </affiliation>
+    </author>
+
+    <keywordset>
+      <keyword>Schematron</keyword>
+    </keywordset>
+    <abstract>
+      <para>This paper presents a preliminary classification of Schematron concepts and discusses
+        the three most important topics covered by ISO Schematron: Rule based validation, schema
+        composition, and reporting. It concludes with rough sketch of a new rule based validation
+        language in the tradition of Schematron that takes the advantages in markup language
+        technology into consideration.</para>
+    </abstract>
+  </info>
+
+  <section>
+    <title>Introduction</title>
+    <para>Schematron is a rule based validation language for structured documents. It was designed
+      by Rick Jelliffe in the late 1990s <citation>JELLIFFE1999</citation> and standardized as part
+      of the ISO Document Schema Language Definitions (DSDL) family in 2006. The last non-ISO
+      version was Schematron 1.6, published in 2002. <citation>JELLIFFE2002</citation> Since the
+      standardization as ISO/IEC 19757-3 two editions have been published. The 2nd edition in 2016,
+      the 3rd edition in 2020. The 3rd edition of ISO Schematron will most likely be the last: The
+      working group was disbanded and, more importantly, ISO removed Schematron from the list of
+      publicly available standards, effectively putting an end to ISO Schematron as an Open
+      Standard.</para>
+    <para>While losing an Open Standard is annoying it gives the opportunity to look at the
+      specification as an object of an analytic inquiry. Rather than comparing Schematron with other
+      schema languages we could look at ISO Schematron’s concepts and ask what function they serve
+      or which topic they cover. This analytic perspective may help structuring a discussion of
+      potential shortcomings or missed opportunities.</para>
+  </section>
+  <section>
+    <title>A preliminary classification of Schematron concepts</title>
+    <para><xref linkend="concepts"/> shows a first classification attempt and identifies six major
+      topics in descending order of importance: Rule based validation, schema composition,
+      reporting, documentation, pattern templating and instance document selection. In the following
+      sections I will provide a brief summary of the topic and the associated concepts, and discuss
+      shortcomings of the current specification.</para>
+    <table xml:id="concepts">
+      <info>
+        <title>Classification of Schematron concepts</title>
+      </info>
+      <tgroup cols="2">
+        <thead>
+          <row>
+            <entry>Topic</entry>
+            <entry>Schematron concepts</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry>Rule based validation</entry>
+            <entry>Assertion, Rule, Pattern, Schema, Query language </entry>
+          </row>
+          <row>
+            <entry>Schema composition</entry>
+            <entry>Abstract rule, Phase, Inclusion</entry>
+          </row>
+          <row>
+            <entry>Reporting</entry>
+            <entry>Natural language statement, Properties, Templating language</entry>
+          </row>
+          <row>
+            <entry>Documentation</entry>
+            <entry>Title, Paragraph, Reference to external documentation</entry>
+          </row>
+          <row>
+            <entry>Pattern templating</entry>
+            <entry>Abstract pattern</entry>
+          </row>
+          <row>
+            <entry>Instance document selection</entry>
+            <entry>Subordinate documents</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+    <section>
+      <title>Rule based validation</title>
+
+      <section>
+        <title>Summary</title>
+        <para>Rule based validation is at the core of Schematron. For Schematron, rule-based
+          validation means that a document is considered to be valid if it passes a specified set of
+          assertion tests.</para>
+        <para>An <glossterm>assertion test</glossterm> is a boolean function over a set of nodes. It
+          is associated with zero or more natural-language statements. Schematron uses two elements
+          to represent assertions: An assertion expressed as a <tag class="element">sch:assert</tag>
+          element succeeds if the assertion test evaluates to boolean true, an assertion expressed
+          as <tag class="element">sch:report</tag> element succeeds if the assertion test evaluates
+          to false. Both use a <tag class="attribute">test</tag> attribute for the assertion
+          test.</para>
+        <para>A <glossterm>rule</glossterm> is an unordered set of assertions. The assertion
+          elements are grouped into a <tag class="element">sch:rule</tag> element with a <tag
+            class="attribute">context</tag> attribute containing a <glossterm>context
+            expression</glossterm>. The context expression is an expression that selects nodes from
+          the instance document. A rule is said to "fire" if its context expression selects a
+          non-empty set of nodes. All assertions of the rule are evaluated for each node of the set.
+          A single assertion is checked by evaluating the assertion expression with the respective
+          node as context. A rule validates a node if all assertions succeed.</para>
+        <para>A <glossterm>pattern</glossterm> is an ordered set of rules. The lexical order of the
+          rule elements in the Schematron document acts as an if-then-else switch for nodes of the
+          instance document. A node is checked with at most one rule per pattern.</para>
+        <para>A <glossterm>schema</glossterm> is an unordered set of patterns. The pattern elements
+          are grouped into a <tag class="element">sch:schema</tag> element. This element has a <tag
+            class="attribute">queryBinding</tag> attribute with an identifier for the language of
+          assertion and context selector expressions.</para>
+
+        <para>Originally Schematron was designed as a schema language solely on top of XSLT. The use
+          of XPath and XSLT match expressions was generalized into the concept of a query language
+          in the course of the ISO standardization process. <citation>JELLIFFE2002</citation>
+          <citation>JELLIFFE2003</citation> A query language is defined by a <glossterm>query
+            language binding</glossterm> that specifies the query language for rule context
+          expressions and for assertion tests. The initial 2006 specification defined the query
+          language binding for XSLT 1.0 <citation>XSLT1</citation> as the default query language.
+          The later editions added normative query language bindings for XPath 2.0
+            <citation>XPATH2</citation>, XSLT 2.0 <citation>XSLT2</citation>, XPath 3.0
+            <citation>XPATH3</citation>, and XSLT 3.0 <citation>XSLT3</citation>. </para>
+        <para>Assertion tests and context expressions are evaluated during validation. They depend
+          on a properly initialized <glossterm>evaluation environment</glossterm>. Schematron
+          provides two native elements to set up the environment for query language expressions. </para>
+        <para>The repeatable <tag class="element">sch:ns</tag> element is a top-level element that
+          defines the available namespace bindings. Namespace bindings have global scope. The
+          repeatable <tag class="element">sch:let</tag> element defines the available variables and
+          their values. Variables are globally available or scoped to the containing pattern or
+          rule. </para>
+        <para>Variables and namespaces can be seen as a common denominator of query languages. The
+          2016 and 2020 updates to the specification, on the other hand, forbid the use of <tag
+            class="element">sch:let</tag> for XPath 2.0 and 3.0. <footnote>
+            <para>It is unclear why the working group felt the need to forbid the use of <tag
+                class="element">sch:let</tag>. All versions of XPath support variable references in
+              XPath expressions.</para>
+          </footnote></para>
+        <para>Defining namespace bindings and variables is not sufficient to evaluate an XSLT
+          expression. To set up an evaluation environment for XSLT, Schematron explicitly allows the
+          two elements <tag class="element">xsl:key</tag> and <tag class="element"
+            >xsl:function</tag> as top-level elements.</para>
+      </section>
+      <section>
+        <title>Shortcomings</title>
+        <para>Setting up the query language environment became more elaborate with new functionality
+          introduced with XSLT 2.0 and later 3.0. The 2016 specification addressed this new
+          functionality by allowing the <tag class="element">xsl:function</tag> declaration as an
+          additional top-level element and by restricting the use of the new
+            <function>fn:error()</function> function. Following the elimination of the result tree
+          fragment data-type in favor of temporary trees it also made the <tag class="attribute"
+            >value</tag> attribute of the <tag class="element">sch:let</tag> expression optional,
+          allowing temporary trees as value. </para>
+        <para>The 2020 specification did not add anything in support of XSLT 3.0. </para>
+      </section>
+
+      <section>
+        <title>Corrections</title>
+        <para>With regard to XSLT as query language three pieces are missing.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Support for data types</term>
+            <listitem>
+              <para>XSLT 2.0 introduced the capability to declare the required types of, among other
+                things, variables. The type can be a built-in or a user-defined type imported from
+                an XML schema. Schematron is currently missing both: The possibility to declare the
+                required type of a variable and to import user-defined data types.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Setting up accumulators</term>
+            <listitem>
+              <para>XSLT 3.0 added accumulators as a new mechanism to capture and process data. An
+                accumulator associates a series of values with nodes of the document tree. The value
+                of an accumulator is obtained by calling the respective accumulator functions
+                  <function>fn:accumulator-before()</function> and
+                  <function>fn:accumulator-after()</function>. Although accumulators are designed
+                for streaming transformations they can also be used with non-streaming
+                transformations.</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Loading user-defined libraries</term>
+            <listitem>
+              <para>The addition of user-defined functions in XSLT 2.0 opened up the possibility of
+                reusable, user-defined function libraries. XSLT 3.0 made the notion of user-defined
+                libraries explicit by adding <glossterm>packages</glossterm>, collections of
+                stylesheet modules with a controlled interface.</para>
+              <para>Schematron lacks a way of including user-defined function libraries other than
+                using schema composition instructions. But neither <tag class="element"
+                  >sch:include</tag> nor <tag class="element">sch:extends</tag> is a good fit. The
+                former inserts the content of an XML document in place of the element, the latter is
+                only allowed to extend a rule. <footnote>
+                  <para>See <xref linkend="composition"/></para>
+                </footnote></para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+        <para>To address these missing pieces the query language specification for XSLT should be
+          expanded as follows:</para>
+        <itemizedlist>
+          <listitem>
+            <para>allow <tag class="element">xsl:include</tag> and <tag class="element"
+                >xsl:import</tag> as top-level elements for the query languages XSLT 1.0, 2.0, and
+              3.0</para>
+          </listitem>
+          <listitem>
+            <para>allow <tag class="element">xsl:schema-import</tag> as top-level elements for the
+              query languages XSLT 2.0 and 3.0</para>
+          </listitem>
+          <listitem>
+            <para>allow an optional <tag class="attribute">as</tag> attribute on a sch:let
+              instruction</para>
+          </listitem>
+          <listitem>
+            <para>allow <tag class="element">xsl:use-package</tag> and <tag class="element"
+                >xsl:accumulator</tag> as top-level elements for the query language XSLT 3.0</para>
+          </listitem>
+        </itemizedlist>
+        <table>
+          <info>
+            <title>Query language environment for XSLT (proposed additions marked with an
+              asterisk)</title>
+          </info>
+          <tgroup cols="4">
+            <thead>
+              <row>
+                <entry/>
+                <entry>XSLT 1.0</entry>
+                <entry>XSLT 2.0</entry>
+                <entry>XSLT 3.0</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>Indexes</entry>
+                <entry><tag class="element">xsl:key</tag></entry>
+                <entry><tag class="element">xsl:key</tag></entry>
+                <entry><tag class="element">xsl:key</tag></entry>
+              </row>
+              <row>
+                <entry>Functions</entry>
+                <entry>-</entry>
+                <entry><tag class="element">xsl:function</tag></entry>
+                <entry><tag class="element">xsl:function</tag></entry>
+              </row>
+              <row>
+                <entry>Namespaces</entry>
+                <entry><tag class="element">sch:ns</tag></entry>
+                <entry><tag class="element">sch:ns</tag></entry>
+                <entry><tag class="element">sch:ns</tag></entry>
+              </row>
+              <row>
+                <entry>Variables</entry>
+                <entry><tag class="element">sch:let</tag></entry>
+                <entry><tag class="element">sch:let</tag></entry>
+                <entry><tag class="element">sch:let</tag></entry>
+              </row>
+              <row>
+                <entry>User-defined libraries*</entry>
+                <entry><tag class="element">xsl:include</tag>, <tag class="element"
+                  >xsl:import</tag></entry>
+                <entry><tag class="element">xsl:include</tag>, <tag class="element"
+                  >xsl:import</tag></entry>
+                <entry><tag class="element">xsl:include</tag>, <tag class="element"
+                  >xsl:import</tag>, <tag class="element">xsl:use-package</tag></entry>
+              </row>
+              <row>
+                <entry>Typed variables*</entry>
+                <entry>-</entry>
+                <entry><tag class="element">sch:let</tag>/<tag class="attribute">as</tag></entry>
+                <entry><tag class="element">sch:let</tag>/<tag class="attribute">as</tag></entry>
+              </row>
+              <row>
+                <entry>User-defined types*</entry>
+                <entry>-</entry>
+                <entry><tag class="element">sch:import-schema</tag></entry>
+                <entry><tag class="element">sch:import-schema</tag></entry>
+              </row>
+              <row>
+                <entry>Accumulators*</entry>
+                <entry>-</entry>
+                <entry>-</entry>
+                <entry><tag class="element">xsl:accumulator</tag></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </section>
+
+    </section>
+    <section xml:id="composition">
+      <title>Schema composition</title>
+      <section>
+        <title>Summary</title>
+        <para>Schema composition is about arranging schemas, patterns, rules, and assertions to
+          support different validation tasks and for the ease of maintenance by allowing reuse of
+          assertions, rules, and patterns.</para>
+        <para>Schematron provides four ways to compose a schema.</para>
+        <para>An <glossterm>abstract rule</glossterm> is a named set of assertions and represented
+          by a <tag class="element">sch:rule</tag> element without a context expression. It is
+          scoped to the containing pattern. All rules of the same pattern can use a set of
+          assertions by referencing the name of the abstract rule in the <tag class="attribute"
+            >rule</tag> attribute of a <tag class="element">sch:extends</tag> element.</para>
+        <para>A <glossterm>phase</glossterm> is a named set of patterns defined by a top-level <tag
+            class="element">sch:phase</tag> element. Phases allow one schema document to cover
+          multiple validation scenarios or needs.</para>
+        <para>Schematron offers two mechanisms to use external definitions. The <tag class="element"
+            >sch:include</tag> element can be used anywhere and has a <tag class="attribute"
+            >href</tag> attribute that points to an external resource. The content of the resource
+          is inserted in place of the <tag class="element">sch:include</tag> element.</para>
+        <para>The second mechanism is build on top of the <tag class="element">sch:extends</tag>
+          element. Instead of a <tag class="attribute">rule</tag> attribute naming an abstract rule,
+          it may use a <tag class="attribute">href</tag> attribute pointing to an external resource.
+          If the external resource is the same element as the <tag class="element"
+          >sch:extends</tag> element’s parent, then the child nodes of the referenced element are
+          inserted in place of the <tag class="element">sch:extends</tag> element. The use of <tag
+            class="element">sch:extends</tag> however is still restricted to the <tag
+            class="element">sch:rule</tag> element.</para>
+      </section>
+      <section>
+        <title>Shortcomings</title>
+        <para>Consider the following case. A schema A, shown in <xref linkend="f.schema-a"/>,
+          includes a pattern from a different schema B, shown in <xref linkend="f.schema-b"
+          />.</para>
+        <figure xml:id="f.schema-a">
+          <title><filename>schema-a.sch</filename></title>
+          <programlisting language="xml"><xi:include href="schema-a.sch" parse="text"/></programlisting>
+        </figure>
+        <figure xml:id="f.schema-b">
+          <title><filename>schema-b.sch</filename></title>
+          <programlisting language="xml"><xi:include href="schema-b.sch" parse="text"/></programlisting>
+        </figure>
+        <para>Simply replacing the <tag class="element">sch:include</tag> element in A with the
+          pattern from B does not produce a working schema.</para>
+        <itemizedlist>
+          <listitem>
+            <para> The included pattern was written with the expectation that the prefix <tag
+                class="prefix">ex</tag> is bound to <uri>http://example.com/ns1</uri>, but schema A
+              uses the prefix <tag class="prefix">example</tag>.</para>
+          </listitem>
+          <listitem>
+            <para>The rule context expression refers to a global variable
+                <varname>allowedTypes</varname> which is not defined in A.</para>
+          </listitem>
+        </itemizedlist>
+        <para>In general, the interaction of schema composition with rule based validation is
+          underspecified.</para>
+      </section>
+      <section>
+        <title>Corrections</title>
+        <para>There is no simple correction. Schematron requires an inclusion mechanism that covers
+          the interaction between variables and namespaces of combined schemas.</para>
+      </section>
+    </section>
+    <section>
+      <title>Reporting</title>
+
+      <section>
+        <title>Summary</title>
+        <para>Schematron encourages the use of natural language descriptions targeted to human
+          readers. This way validation can be more than just a binary distinction (document
+          valid/invalid) but also support authors of in-progress documents with quick feedback on
+          erroneous or unwanted document structure and content. </para>
+        <para>To this effect an assertion test is associated with zero or more natural-language
+          statements written in a lightweight templating language. The specification distinguishes
+          between a primary statement given in the element content of an assertion element, and
+          secondary statements or <glossterm>diagnostic</glossterm> given in the element content of
+          a <tag class="element">sch:diagnostic</tag> element and referenced in a <tag
+            class="attribute">diagnostics</tag> attribute of an assertion element.</para>
+
+        <para>The 2016 revision added a mechanism for structured data targeted at machine rather
+          than human consumption. Designed in the same fashion as diagnostics, an assertion may
+          reference zero or more <tag class="element">sch:property</tag> elements in a <tag
+            class="attribute">properties</tag> attribute. Each property element contains a template
+          for structured data.</para>
+        <para>The templates for natural-language statements and structured data are instantiated
+          when the respective assertion fails. The templating language contains both, elements for
+          text formatting (<tag class="element">sch:emph</tag>, <tag class="element">sch:span</tag>,
+            <tag class="element">sch:dir</tag>) and elements that calculate values from the instance
+          document (<tag>sch:value-of</tag>, <tag class="element">sch:name</tag>; <tag
+            class="element">xsl:copy</tag>-of in <tag class="element">sch:property</tag> for the
+          query languages XSLT 2.0 and 3.0).</para>
+      </section>
+      <section>
+        <title>Shortcomings</title>
+        <figure xml:id="multi-a">
+          <title>Multi-lingual schema suggested by Annex G of ISO/IEC 19757-3:2020</title>
+          <programlisting language="xml"><xi:include href="multilingual-1.sch" parse="text"/></programlisting>
+        </figure>
+        <para>All three reporting elements are modelled as mixed-content elements. As a consequence,
+          an assertion message or diagnostic can only specify one language with an <tag
+            class="attribute">xml:lang</tag> attribute. The suggested mechanism for multi-lingual
+          messages in Annex G of the specification, shown in <xref linkend="multi-a"/>, is
+          cumbersome, at best. It suggests the schema author to define one diagnostic per localized
+          message and reference them in the <tag class="attribute">diagnostics</tag> attribute of
+          the respective assertion. Tobias Fischer <citation>FISCHER2017</citation> summarizes the
+          biggest problem with this approach: Adding a localization requires adding the respective
+          reference to every assertion.</para>
+      </section>
+      <section>
+        <title>Proposed corrections</title>
+        <para>To address this shortcoming Schematron should make the abstraction of a specific
+          message and its natural language content explicit. Rather than treating localized variants
+          as different diagnostics, they should be treated as one diagnostic with different
+          localized variants. A <tag class="element">sch:message</tag> element that wraps the
+          mixed-content templates would do the trick.</para>
+        <figure>
+          <title>Multi-lingual schema, improved</title>
+          <programlisting language="xml"><xi:include href="multilingual-2.sch" parse="text"/></programlisting>
+        </figure>
+      </section>
+    </section>
+  </section>
+  <section>
+    <title>From ISO Schematron to Open Schematron?</title>
+    <para>In the previous sections I discussed some shortcomings of the current ISO Schematron
+      specification. Some could be fixed by simply amending the ISO specification, some like the
+      lacking inclusion mechanism require more substantial work. Ideally, these issues would be
+      addressed by a future 4th edition of the ISO Schematron specification. But alas, this seems
+      unlikely.</para>
+    <para>Maybe ISO Schematron becoming proprietary gives us the opportunity to start anew; or
+      rather start with the core ideas of the Schematron assertion language and specify a rule based
+      validation language that is not identical to, but intersects with ISO Schematron. This new
+      Schematron language has the advantage of roughly 15 years of development in markup technology
+      and roughly 15 years of ISO Schematron practice. </para>
+    <para>It should be based on the XQuery and XPath Data Model 3.1 <citation>WALSH2017</citation>,
+      a data model that includes maps, arrays, and support for strongly typed languages with a type
+      system. It should also distinguish between a core specification and language extensions, and
+      describe an extension mechanism that decouples the core from query language or use-case
+      specific extensions such as streaming validation <citation>DZIURLAJ2021</citation> or
+      interactive corrections <citation>KUTSCHERAUER2018</citation>. Given the rise of JSON
+        <citation>JSON</citation> it should try to align with jsontron <citation>AMER2014</citation>
+      and provide a query language binding for JSON-based path languages.</para>
+    <para>Most importantly, it should again be an Open Standard.</para>
+  </section>
+  <bibliography>
+    <bibliomixed><abbrev>AMER2014</abbrev>Ali, Amer. 2014. <title>Schematron Based Semantic
+        Constraints Specification Framework &amp; Validation Rules Engine for JSON</title>.
+      <bibliomisc><link xlink:href="https://raw.githubusercontent.com/amer-ali/jsontron/master/docs/Jsontron-presentation-v1.pdf">https://raw.githubusercontent.com/amer-ali/jsontron/master/docs/Jsontron-presentation-v1.pdf</link></bibliomisc>. </bibliomixed>
+    <bibliomixed><abbrev>XPATH2</abbrev>Berglund, Anders, Scott Boag, Don Chamberlin, Mary F.
+      Fernández, Michael Kay, Jonathan Robie, and Jérôme Siméon, eds. 2010. <title>XML Path Language
+        (XPath) 2.0 (Second Edition)</title>. World Wide Web Consortium.
+      <bibliomisc><link xlink:href="http://www.w3.org/TR/2010/REC-xpath20-20101214/">http://www.w3.org/TR/2010/REC-xpath20-20101214/</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>XSLT1</abbrev>Clark, James, ed. 1999. <title>XSL Transformations (XSLT)
+        Version 1.0</title>. World Wide Web Consortium.
+      <bibliomisc><link xlink:href="http://www.w3.org/TR/1999/REC-xslt-19991116">http://www.w3.org/TR/1999/REC-xslt-19991116</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>JSON</abbrev>Crockford, Douglas. 2017. <title>The JavaScript Object
+        Notation (JSON) Data Interchange Format</title>. RFC 8259. Internet Engineering Task Force
+      (IETF). <bibliomisc><link xlink:href="https://tools.ietf.org/pdf/rfc8259.pdf">https://tools.ietf.org/pdf/rfc8259.pdf</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>DZIURLAJ2021</abbrev>Dziurlaj, John. 2021. <title>Streaming Extensions for
+      Schematron</title>. <bibliomisc><link xlink:href="https://github.com/HiltonRoscoe/streamable-schematron">https://github.com/HiltonRoscoe/streamable-schematron</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>FISCHER2017</abbrev>Fischer, Tobias. 2017. <title>Localization Concept
+      Needs Improvement</title>. <bibliomisc><link xlink:href="https://github.com/Schematron/schematron/issues/40">https://github.com/Schematron/schematron/issues/40</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>JELLIFFE1999</abbrev>Jelliffe, Rick. 1999. <title>Schematron: An Interview
+        with Rick Jelliffe</title> Interview by Simon St.Laurent.
+      <bibliomisc><link xlink:href="https://web.archive.org/web/20010619150155/http://www.xmlhack.com/read.php?item=121">https://web.archive.org/web/20010619150155/http://www.xmlhack.com/read.php?item=121</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>JELLIFFE2002</abbrev>Jelliffe, Rick. 2002. <title>The Schematron Assertion
+        Language 1.6</title>.
+      <bibliomisc><link xlink:href="https://web.archive.org/web/20061230150144/http://xml.ascc.net:80/resource/schematron/Schematron2000.html">https://web.archive.org/web/20061230150144/http://xml.ascc.net:80/resource/schematron/Schematron2000.html</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>JELLIFFE2003</abbrev>Jelliffe, Rick. 2003. <title>Schematron 1.5 to
+        Schematron 1.6 to ISO Schematron</title>. June 21, 2003.
+      <bibliomisc><link xlink:href="http://www.topologi.com/resources/schematronUpgrades.html">http://www.topologi.com/resources/schematronUpgrades.html</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>KUTSCHERAUER2018</abbrev>Kutscherauer, Nico, and Octavian Nadolu, eds.
+      2018. <title>Schematron Quick Fixes Specification</title>. Quick-fix support for XML Community
+      Group. <bibliomisc><link xlink:href="http://schematron-quickfix.github.io/sqf/spec/SQFSpec.html">http://schematron-quickfix.github.io/sqf/spec/SQFSpec.html</link></bibliomisc>. </bibliomixed>
+    <bibliomixed><abbrev>XSLT3</abbrev>Kay, Michael, ed. 2017. <title>XSL Transformations (XSLT)
+        Version 3.0</title>. World Wide Web Consortium.
+      <bibliomisc><link xlink:href="https://www.w3.org/TR/2017/REC-xslt-30-20170608/">https://www.w3.org/TR/2017/REC-xslt-30-20170608/</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>XSLT2</abbrev>Kay, Michael, ed. 2021. <title>XSL Transformations (XSLT)
+        Version 2.0 (Second Edition)</title>. World Wide Web Consortium.
+      <bibliomisc><link xlink:href="https://www.w3.org/TR/2021/REC-xslt20-20210330/">https://www.w3.org/TR/2021/REC-xslt20-20210330/</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>XPATH3</abbrev>Robie, Jonathan, Don Chamberlin, Micheal Dyck, and John
+      Snelson, eds. 2014. <title>XML Path Language (XPath) 3.0</title>. World Wide Web Consortium.
+      <bibliomisc><link xlink:href="http://www.w3.org/TR/2014/REC-xpath-30-20140408/">http://www.w3.org/TR/2014/REC-xpath-30-20140408/</link></bibliomisc>.</bibliomixed>
+    <bibliomixed><abbrev>SCHEMATRON2020</abbrev>
+      <title>Information technology — Document Schema Definition Languages (DSDL) — Part 3:
+        Rule-based validation, Schematron</title>, second edition, International Standard ISO/IEC
+      19757-3:2020, Geneva, Switzerland : ISO</bibliomixed>
+    <bibliomixed><abbrev>WALSH2017</abbrev>Walsh, Norman, John Snelson, and Andrew Coleman, eds.
+      2017. <title>XQuery and XPath Data Model 3.1</title>. World Wide Web Consortium.
+      <bibliomisc><link xlink:href="https://www.w3.org/TR/2017/REC-xpath-datamodel-31-20170321/">https://www.w3.org/TR/2017/REC-xpath-datamodel-31-20170321/</link></bibliomisc>. </bibliomixed>
+  </bibliography>
+</article>

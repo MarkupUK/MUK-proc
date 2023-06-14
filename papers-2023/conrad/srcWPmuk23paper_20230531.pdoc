@@ -1,0 +1,3031 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE prodoc PUBLIC "-//SG//DTD prodoc//EN" "prodoc.dtd"[
+<!ENTITY    prodoc    "prodoc" >
+<!ENTITY  % sa.divs    "" ><!-- start w/ "|" -->
+<!ENTITY  % sa.heads   "" >
+<!ENTITY  % sa.blocks  "" >
+<!ENTITY  % sa.spans   "| aa" >
+
+<!--          dbwidth         width works, this doesn't mess up the prodoc, defaults to 100%
+              docbook=image   to stop walking and generate image reference
+-->
+<!ENTITY  % sa.atl
+"
+              dbwidth         CDATA             #IMPLIED
+              docbook         CDATA             #IMPLIED
+              shsem           (show| hidden)    #IMPLIED
+              sumoID          CDATA             #IMPLIED
+              sumoLogic       CDATA             #IMPLIED
+              sumoText        CDATA             #IMPLIED
+              userID          CDATA             #IMPLIED
+              userLogic       CDATA             #IMPLIED
+              userText        CDATA             #IMPLIED
+              wnetID          CDATA             #IMPLIED
+              wnetSense       CDATA             #IMPLIED
+" >
+<!ELEMENT aa (#PCDATA) >
+<!ATTLIST ename aname CDATA #IMPLIED >
+]>
+<?xml-stylesheet type="text/css" href="d:/kc/xt/prodoc/prodoc.less.less" title="document prodoc.less.less" alternate="no"?>
+<?xml-stylesheet type="text/css" href="d:/kc/xt/prodoc/prodoc.less.css"  title="document prodoc.less.css" alternate="no"?>
+<?xml-stylesheet type="text/css" href="d:/kc/xt/prodoc/prodoc.css"  title="document prodoc.css" alternate="no"?>
+<?xml-stylesheet type="text/css" href="d:/kc/xt/prodoc/prodoc.css" title="document h1.css" alternate="no"?>
+<?xml-stylesheet type="text/css" href="d:/kc/xt/hsa/hsa.css" title="document hsa.css" alternate="no"?>
+<?xml-stylesheet type="text/css" href="d:/kc/xt/h1/h1.css" title="document h1.css" alternate="no"?>
+<?xml-stylesheet type="text/css" href="sa.css" title="local sa.css" alternate="yes"?>
+<prodoc docgen="code-lines email html-shell rpt-psr toc" id="muk23paper.pdoc"
+  shids="hidden" shcontrol="show" shcontrols="hidden" open="open">
+  <header>
+    <h id="lastCentury">Word processing is so last century</h>
+    <subh>Formalizing internal narratives using internal declarations and making them look pretty</subh>
+    <meta author="© conrad@sagebrushgroup.com" created="2023.05.19"
+      status="submitted" tags="#muk23 #paper"/>
+  </header>
+  <dsi created="2023.05.27 23:34" open="open" id="toReviewers" include="no">
+    <to>Reviewers</to>
+    <span/>
+    <from>kwc</from>
+    <span/>
+    <date date="2023.05.27" dateTime="2023.05.27 23:34" time="23:34">2023.05.31</date>
+    <subject>Thanks for the insightful comments</subject>
+    <div>
+      <p>Here's the prodoc of the submitted version.</p>
+      <p>I'm presenting on Friday, at 16:50 - 17:30 BST (08:50 Pacific).</p>
+      <p>Thanks</p>
+    </div>
+  </dsi>
+  <div created="2023.05.28 13:18" open="closed" include="no">
+    <h id="notes">notes &amp; logs</h>
+    <p created="2023.05.30 11:21" open="closed"
+        ><sp>adam <b>connect sumo</b></sp><sp>Hi Kurt,</sp><sp>Many thanks for mentioning SUMO in your document. You might be able to create a simple markup tool by connecting the words found in a document to SUMO terms, using my SUMO-WordNet mappings, then pop up the SUMO browser with the SUMO definition that links to the word. The user could then accept or reject a tag from SUMO that could mark up a section of the document. <kwc>yup, just need to tune the ui and make the connections, by friday?</kwc></sp><sp>By the way, you could also use SUMO for your agent-artifact-behavior markup, since SUMO already has formal definitions and concepts related to those notions. <kwc>Yeah, but I didn't like the definitions I found.</kwc></sp><sp>all the best, Adam</sp></p>
+    <p created="2023.05.30 12:05" open="closed"
+        ><sp>ari</sp><sp>Looks great. Thank you!</sp></p>
+    <p created="2023.05.28 13:19" open="closed"
+        ><sp>art</sp><sp>I LOVE the title!</sp><sp>tp man, send to team, 6pps</sp><sp>very interesting value proposition, wp structure to communicate narrative.. narrative to formal ontology</sp><sp>more intelligent bots, more intelligent/ accurate bot responses... authored logic instead of noise...</sp><sp>improved communications, better alignment, understanding different perspectives instead of forcing same perspective on everybody</sp><sp>see how bo's world of kflow connects</sp><sp>chatbot world, <b>maxing out performance <kwc>from distilling noise to applying policies</kwc></b>, diminishing returns on investments, generative/llm ai, large language model, machine learning applied to insanely massive amounts of documents, harnessed all of the power from existing, squeezed all the, max accessing capacity, barely scratches surface for processing, ontology is the missing piece, dictionaries and thesausarus.</sp><sp>semantic authoring includes ontologies... keep <b>first exec summary para</b>... keep sowa hexagon... <b>wp how text looks, physical arrangement, looks involves appearance and spacial arrangement, layout</b></sp><sp>deep structures, basic atomic elements, semantic aggregations and rules, scatter gather, lost site of primal, if make decisions based on surface phenom, combitorics kill you, llm didn't mind combitorics, now does, hit limit of complexity... hard and fast structural rules of physics... transnavigational ontologies... wordnet is semi-formalized ontology</sp><sp>trl <b>technology readiness levels</b>... <b>minimum viable product</b></sp></p>
+    <p created="2023.05.30 11:17" open="closed"
+          ><sp>bo</sp><sp><s>Initially the things that caught my eye were things like - Page 6: The test subject attempted …. Who or what is the “test subject” and later the same for “primary researcher”. From what I know they, and “authorâ€ refer to the same person.</s></sp><sp>Then there were the typo class things like; Page 7: <s>knowledge flows can be engineering to be able …. ¿ engineered ?</s> Page 8: <s>Switch are useful â€¦. Should be “Switches”</s>. Page 10 near the bottom: <s>â€¦ is focus all … should be “ to focus”.</s></sp><sp>But as I got into the meet of the paper I found myself more interested in the content to the extent I was overlooking the typos. As can be expected, I personally liked the <u>evolutionary story line</u> and the way you addressed the issue of <u>multi-perspective meaning and KFAM</u>. </sp><sp>As we discussed, I was not able to follow the technical encoding examples, but expect your audience will be better equipped to do so. </sp><sp><u>I also liked what I sensed as the overall message regarding the growing need for what this offers as a society of multiple agent types.</u></sp><sp>As to the finished polished version, I trust subsequent reviews and revisions will pick up and correct the range of things that, as an interested reader, I tended to overlook. </sp><sp>Hope this helps </sp></p>
+    <p created="2023.05.30 11:22" open="closed"
+        ><sp>bruce</sp><sp>Hi,</sp><sp>Overall, this is the beginning of an ebook. Might consider establishing a Wiki page, establish hierarchy of agents with levels of responsibility to edit / approve changes. Can’t be the end all. </sp><sp>Use of jargon will likely irritate some reads but the use <u>makes reading this intense document fun</u>. </sp><sp><b>No foot notes or resource page with links, no where to go from here</b>. </sp><sp>I’ve been talking with you about this exploration for over a decade. I understand stand the vocabulary, concepts presented are many and may leave some <b>wondering if one would need to embrace all of them to utilize prodoc</b>, and the <u>examples are extremely helpful</u> to better grasp the process. </sp><sp>Congratulations. Best regards, Bruce </sp></p>
+    <p created="2023.05.30 11:27" open="closed"
+          ><sp>doug</sp><sp>Kurt,</sp><sp>This is quite a <b>reflection of effort</b> on your part. My knowledge in this area seems too limited to <b>fully appreciate <kwc>Each of you comes to this topic with unique prior knoweldge. As Soo Bong Chae told me at the start of his New College of Florida class, Excursions in Mathematics, <q>As you go down this path, look for one pebble to pick up and carry forward, that's enough.</q></kwc></b> what you are communicating. I get the impression that the audience you will be presenting to is highly familiar with this idea, the specific applications mentioned and how they interact. If I had more knowledge of these specific applications and how they integrated I would get more out of the paper. </sp><sp>I thought you were using WordPerfect in a joking reference to long since dead tech, but I Googled and it is still a real thing. WP was the first app I learned on many, many, many years ago. What I can contribute is that you need to go through it with a fresh set of eyes or Grammarly.</sp><sp>I caught errors on pages 4 and 7 before I just started reading just for understanding rather than grammar. Pg. 4 - <s>they way should be the way</s> Pg. 7 - <s>engineering should be engineered</s> This is a wonderful opportunity and you have clearly put your heart into it. Much success, Doug </sp></p>
+    <p created="2023.05.30 11:37" open="closed"
+        ><sp>duane</sp><sp>Kurt - good to hear from you. We're so overdue for a catch up call. I've been meaning to get in touch but life has had other plans for me. </sp><sp>I am grateful to be mentioned in this and wish you the best of luck in getting this accepted. Fingers crossed! </sp><sp>Duane </sp></p>
+    <p created="2023.05.30 11:33" open="closed"
+            ><sp>jim</sp><sp>My reaction to the paper is that it’s <b>awfully long <kwc>wrote it out so don't have to try to explain it in a few minutes, and can focus on demos, eye candy</kwc></b>, particularly to read in a hurry and absorb enough of to make intelligent comments. I’ve just been through reading all the papers for Balisage, and only one of them came close to being this long, and it was on Frege’s symbolic mathematics of logic. </sp><sp>My quick reaction is that you cover an awful lot of territory, from John Sowa to a quick mention of ixml, but don’t light for very long in any one spot, so there’s not a continuous, detailed development of any facet. I get lots of <b>quick glimpses of case studies but can’t in a short time get them to come together into a whole unified piece</b>. </sp><sp>And I wonder how you’re going to <b>boil this down into a presentation</b> that can be delivered in the available time. Just thinking in terms of what I read for Balisage, I think there are several topics here that could make <b>a paper individually</b>. </sp><sp>The old writing teacher/editor in me can’t help noticing that the <b>style is also jumpy</b>. You’re mostly informal, using contractions and other such things, but there are places where it’s formal and stiff, like the <b>passive voice</b> in a passage like “A generalized process for values-based decision making is introduced”.</sp><sp>I also notice <s>“it’s” used as a possessive</s>. No apostrophe there! (“It’s” means “it is” or “it has”.) </sp><sp>Sorry there’s no more time for going deeper in understanding all you’re trying to cover, since you want to turn this in on Tuesday. </sp><sp>Good luck with Markup UK! James David Mason </sp></p>
+    <p created="2023.05.30 12:06" open="closed"
+          ><sp>liam</sp><sp>typo, "<s>with it's wicked learning" (its)</s>. Although i'm not sure what you mean by <b>wicked learning</b> :slightly_smiling_face:</sp><sp>typo - <s>an authoritative, single sources of generalized markup - delete "an" or change sources to source</s>; <s>Jonathan Sybold has an e after S</s>. <s>"differentiate strings" doesn't make sense</s>. <s>"apply new styles or transform" - end of sentence missing</s>? </sp><sp><s>Hub and spoke baby quote has double quote marks</s>
+      </sp><sp><s>“we're the only animal that choke itself to death” should have “chokes”</s>
+      </sp><sp>(i love some of Doris Lessing’s fiction) </sp><sp><s>The semantic authoring quote (Pound at will) is repeated</s>. </sp><sp>I could give an opinion on heading sizes based on depth, as a typographer, but will refrain :slightly_smiling_face: </sp><sp>Typo <s>loose alignment / lose alignment</s>
+      </sp><sp>css just before Hierarchical tables has weird whitespace problems and appears clipped. </sp><sp>(more later, if i get further)</sp></p>
+    <p created="2023.05.30 11:15" open="closed"
+      ><sp>wendell</sp><sp white="pre">Yo Kurt,
+
+Just scanned it. Kind of blown away - you do not plan to present the entirety do you?
+Looks like a graduate-level course here.
+
+That is not at all meant as a criticism. You are undoubtedly trying to reach several goals at once,
+as are we all.
+
+I saw nothing to complain about except typos, one on p 5 where the graphic label has "Conrad collorary"
+and once later where <s>'it's' (with apostrophe) is used for 'its' (possessive)</s>. Other than that, exceedingly slick!
+
+I would hire you! I hope it's going well --
+Cheers, Wendell
+</sp></p>
+  </div>
+  <div created="2023.05.28 21:35" open="open" include="no">
+    <h id="keywords">Keywords</h>
+    <block id="keywordset">
+      <p>Authoring markup</p>
+      <p>Knowledge management</p>
+      <p>Sense making</p>
+      <p>Semantic formalization</p>
+      <p>Ontologies</p>
+      <p>Bottom-up negotiations</p>
+      <p>Collaborative communications</p>
+    </block>
+  </div>
+  <abstract open="open" include="no">
+    <h id="abstract">Abstract</h>
+    <block id="info.abstract">
+      <p>This presentation describes a journey of replacing WordPerfect with prodoc.dtd, a semantic authoring doctype; and how prodoc evolved to enable computer-assisted sense making, based on markup that formalizes knowledge flow analysis and modeling semantics.</p>
+      <p>The paper also describes some of the challenges associated with multi-perspective decision making and techniques for negotiating and formalizing dynamic, natural-system ontologies. Lessons learned from WordNet and SUMO integrations are summarized.</p>
+      <p>The paper concludes by suggesting that building editors and bots that use author-authored markup to digitize and amplify logic systems could, in many organizational settings, contribute to more-intelligent value optimizations and better long-term performance.</p>
+    </block>
+  </abstract>
+  <div created="2023.05.24 15:49" open="open" include="no">
+    <h id="bio">60-120 word bio</h>
+    <p><small>78 words</small></p>
+    <block id="personblurb">
+      <p>Kurt starts stuff up. Conversations. Improvisational ensembles. Communities of practice. Nuclear reactors and SGML training programs for the US Department of Energy. XML systems and new organizations for many others.</p>
+      <p>He's found that getting everyone on the same page before designing and engineering page-production pipelines speeds progress. His latest work involves using bottom-up, multi-perspective decision making techniques to voice both community values and semantic values in order to develop agreements and bots that better-manage complexity and accelerate change.</p>
+      <p>In this paper, Kurt attempts to describe his personal exploration into using markup to make sense of things by voicing the perspectives of an often-confusing semantic technology researcher and a second persona, the flippant Test subject.</p>
+    </block>
+    <p>Kurt starts up nuclear reactors, markup systems, and organizations. His multi-perspective techniques codify community and semantic values to accelerate change. <small>140 chars</small></p>
+  </div>
+  <xinclude shcontrol="show" shcontrols="hidden" shfilenav="hidden" shxi="show"
+    shxicontrols="hidden">
+    <include href="D:\kc\prog\semAuth\muk23\muk23paper_gen.pdoc"
+      path="D:\kc\prog\semAuth\muk23paper_gen.pdoc\#muk23paper.toc"
+      xmlns="http://www.w3.org/2001/XInclude" xpointer="muk23paper.toc">
+      <fallback>
+        <p xmlns="">xi:include not found</p>
+      </fallback>
+    </include>
+  </xinclude>
+  <div open="open">
+    <h id="summary">Executive Summary</h>
+    <p>Sense making is all about knowing what to do in a given situation, both individually and collectively. Many observe problems with our capacity for collaborative, intelligent behavior. As automated systems (bots) get more involved in decision making, the world must be described more explicitly for intelligent, automated behavior.</p>
+    <p>This is where natural-system and formalized ontologies come into play. </p>
+    <p>This paper focuses on using markup to capture the natural languages that individuals use when they make sense of the world &emdash; the languages of internal narratives &emdash; to start negotiations around formalizing natural system ontologies into automated support systems to help individuals and groups make sense of complexity from multiple perspectives.</p>
+    <p>Formalizing an individual's personal ontology involves digitizing the way that they think about and organize information. This paper reports lessons learned from experiments developing a personalized XML doctype, prodoc. After being modified, as needed, for over a decade, prodoc has evolved to ease the authoring of information from many different perspectives/ logical systems/ ontologies.</p>
+    <qblock created="2023.05.25 15:37">
+      <p>What makes for a better bot? One that's fast, cheap, low-risk, easily trained, and thinks like me.</p>
+      <caption>Test subject</caption>
+    </qblock>
+    <p>The first section, <title csc="i"
+      >What's computer-assisted sense making?</title> looks at the role of automation in helping see patterns and organizing actionable information to enable the intelligent behavior of individuals, groups, and bots. It starts by relating semantic markup, semantic technologies, and formalized ontologies to human and automated sense making processes.</p>
+    <p><title csc="i"
+      >The path to prodoc</title> contrasts word processing's focus on visual formatting behaviors and storage models with generalized markup, where text files contain start and end tags that describe nested containers that make content easy to process and stylesheets provide visual formatting specifications.</p>
+    <p>It introduces semantic markup, which involves giving the containers meaningful names, and semantic authoring, which allows authors to easily create new markup and name the data structures, themselves. Technically simple, allowing authors to declare new markup within documents has significant policy and value-proposition impacts.</p>
+    <p><title csc="i"
+      >prodoc in practice</title> describes computer-assisted sense making tools that a test subject developed using custom markup and element/ attribute-based control surfaces. These control surfaces, sometimes augmented with form controls, allow the author to easily change and adjust CSS visual rendering properties. Sheet music, engineering accessible color pallets, and a modeling language are described.</p>
+    <p><title csc="i"
+      >The politics of markup and meaning</title> deals with politics, which is defined as the way that groups make decisions. Complex global publishing lifecycles bring countless perspectives to the negotiation table. When semantic formalization and authoring are viewed from this perspective, semantics get dynamic. People change their minds about what's meaningful and how to communicate it.</p>
+    <p>A generalized process for values-based decision making is introduced, and its use in stabilizing and formalizing ontologies during markup development is described. Possible roles for semantic authoring in bottom-up data negotiations are considered. The results from mapping personalized markup to authoritative third-parties, WordNet and SUMO, are reported.</p>
+    <p>The paper concludes by introducing H1, a semantic authoring training system that is available for testing.</p>
+  </div>
+  <div created="2023.05.19 10:35" open="open">
+    <h id="senseMaking">What's computer-assisted sense making?</h>
+    <p>Sense making is all about knowing what to do in a given situation, both individually and collectively. Many observe problems with our capacity for collaborative, intelligent behavior. </p>
+    <p>Computers can assist with communications. Likewise, they can assist with sense making, helping people organize information, visualize information, see patterns, and make decisions. As automated systems (bots) get more involved in decision making, the world must be described more explicitly for intelligent, automated behavior.</p>
+    <div created="2023.05.26 19:21" open="open">
+      <h id="ontoWhat">Onto-what?</h>
+      <p>What does it take to explain everything to a computer? This is where the ways that we perceive existence (natural-system ontologies) and formalized computing ontologies come into play. What's an ontology? Here are a couple of descriptions:</p>
+      <div.table created="2023.05.21 23:10" shcontrol="show" shcontrols="hidden"
+        shgrid="hidden">
+        <div.row border="none">
+          <qblock created="2023.05.21 23:10">
+            <p><artifact>Ontology is the subject that asks the question <q>What is there?</q></artifact></p>
+            <p><artifact>The answer can be stated in one word: <q>Everything.</q></artifact></p>
+            <caption>W. V. O. Quine</caption>
+          </qblock>
+          <figure>
+            <subh align="center">Sowa Hexagon</subh>
+            <codeblock bgcolor="kfam" border="none" sgscale="00.786em" p.right="0em" id="sowa" docbook="image" width="60%" alt="The Sowa Hexagon relates language to the world and to ontologies"><b>                <artifact>  World  </artifact>
+                &ar.sw;&ar.ne;     &ar.se;&ar.nw;
+ <agent>  Mental Model  </agent>   &ar.down;&ar.up;    <behavior>  Action  </behavior>
+                &ar.se;&ar.nw;     &ar.sw;&ar.ne;
+        &ar.down;&ar.up;     <ka>  Language  </ka>   &ar.down;&ar.up;
+                &ar.sw;&ar.ne;     &ar.se;&ar.nw;
+<ka>  Symbolic model/  </ka> &ar.down;&ar.up;   <behavior>   Logic &amp;   </behavior>
+<ka>  Knowledge graph  </ka>      <behavior>  Reasoning  </behavior>
+                &ar.se;&ar.nw;     &ar.sw;&ar.ne;
+               <artifact>  Ontology  </artifact></b></codeblock>
+          </figure>
+        </div.row>
+      </div.table>
+      <p>John F. Sowa's Hexagon puts language at the center and emphasizes the importance of mental models and logic in the formalization of an ontology. Formalizing real-world and abstract concepts for our buddies the bots effectively involves not only dealing with <q>what exists?</q> as a list of terms, but also by dealing with all of the models and behaviors that Sowa identifies.</p>
+      <p>Fully-formalized computing ontologies associate terms with formal logic. That's really expensive. Markup, from this perspective, could be considered a semi-formalized ontology.</p>
+      <figure>
+        <subh>Formalized ontologies</subh>
+        <kfam created="2023.05.19 14:39" shcontrol="show" kstyle="light"
+          shcontrols="hidden" shgrid="hidden" sgscale="00.786em" id="formal"
+          docbook="image"
+          alt="Formalized ontologies associate behavioral logic directly with terminology">
+          <kfamRow>
+            <kfamCell/>
+            <kfamCell>
+              <ka>Concept term (syntax)</ka>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <behavior>Behaviors associated with concept are described using formal logic (meaning/ semantics)<ka>Authored rules<mka>Authoring language</mka></ka></behavior>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <agent>Logic processing systems</agent>
+            </kfamCell>
+          </kfamRow>
+        </kfam>
+      </figure>
+      <figure>
+        <subh>Semi-formalized, markup-based ontologies</subh>
+        <kfam created="2023.05.19 14:39" shcontrol="show" kstyle="light"
+          shcontrols="hidden" shgrid="hidden" sgscale="00.786em" id="semiformal"
+          docbook="image" alt="Markup formalizes the terminology but not behavioral logic">
+          <kfamRow>
+            <kfamCell/>
+            <kfamCell>
+              <ka>Concept term (syntax)</ka>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <behavior><ka>Formalized languages</ka> stabilize syntax. <ka>Hierarchies</ka> enable easy modeling and processing.</behavior>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <agent>Text processing systems<behavior>Logical models (meaning/ semantics)<ka>Authored rules in application-specific language<mka>DTD, CSS, Schematron, XPath, XSLT, etc.</mka></ka></behavior></agent>
+            </kfamCell>
+          </kfamRow>
+        </kfam>
+      </figure>
+    </div>
+    <div created="2023.05.26 19:21" open="open">
+      <h id="multiplePerspectives"
+        >Working with multiple languages, perspectives, and ontologies</h>
+      <figure>
+        <subh>Conrad corollary</subh>
+        <codeblock id="conrad" docbook="image" width="30%" alt="Languages reflect different ontology-perspectives of the world"><b bgcolor="kfam"><artifact> Ontology-Perspective </artifact>
+<ka>       Languages      </ka>
+      &ar.sw;&ar.ne;     &ar.se;&ar.nw;
+  <ka> OPLs </ka>  &ar.down;&ar.up;  <ka> OPLs </ka>
+      &ar.se;&ar.nw;     &ar.sw;&ar.ne;
+    &ar.down;&ar.up;  <artifact> World </artifact> &ar.down;&ar.up;
+      &ar.sw;&ar.ne;     &ar.se;&ar.nw;
+  <ka> OPLs </ka>  &ar.down;&ar.up;  <ka> OPLs </ka>
+      &ar.se;&ar.nw;     &ar.sw;&ar.ne;
+        <ka> OPLs </ka></b></codeblock>
+      </figure>
+      <p>The Conrad corollary to Sowa's hexagon sees the world awash in languages that reflect different ontological perspectives, concepts, and logic systems. These are reflected in terminology and usage. Some are naturally-occurring. Some are engineered. Some are dysfunctional. Modern communication systems allow them to compete, globally, for attention and influence.</p>
+      <p>The test subject <sp>attempted to integrate and synthesize multiple ontologies and associated languages:</sp><sp>Word processing and its visual concept of the document, which focuses on how text is arranged and looks on a page, and the ad-hoc, often-redundant behaviors associated with applying layout and style formatting rules with a mouse.</sp><sp>The UNIX tradition of little languages and little bots for text processing.</sp><sp>Semantic markup, SGML, XML, etc., which are based on IBM's hierarchical concept of the document. </sp><sp>Knowledge management and engineering. Concepts for describing the fractal ways that data is transformed into information and synthesized into actionable knowledge to enable intelligent, intentional behavior. Data's about the details. Information's about organizing. Knowledge's about actionable behaviors.</sp><sp>Multiple operational ontologies for concepts of semantics and meaning. What <q>meaning</q> means for humans, automated, and organizational systems. How semantic technologies and formalized ontologies can be used to engineer knowledge about and understanding of meaning in these different behavioral contexts..</sp><sp>Policy making and performance. Techniques for helping folks articulate perceived values to rapidly reach agreements around terms, meanings, priorities, and operational details. The vocabularies of the Government Performance and Results Act, activity-based costing, and value canvasses.</sp></p>
+      <qblock created="2023.05.27 16:43">
+        <p>Remember, style is something that things fall out of, and relational database tables are OK for data, but didn't <b>and don't</b> work for organizing documents.</p>
+        <caption>Test Subject</caption>
+      </qblock>
+    </div>
+    <div created="2023.05.26 19:21" open="open">
+      <h id="computer">How prodoc helped make sense of big words</h>
+      <p><sp>The test subject's experiments in computer-assisted sense making involved using markup to</sp>:<sp>Combine concepts and techniques to model associations</sp><sp>Analyze and refine those models to design and debug knowledge flows and computing systems</sp><sp>Develop ad-hoc and switchable visualizations to identify, highlight, and communicate informative patterns</sp><sp>Iteratively-refine markup and support systems based on new priorities and learnings</sp><sp>Negotiate <q>optimal</q> balances of operational and management considerations, such as priorities and quality criteria, author effort, development effort, markup flexibility and specificity, cool examples, schedule, lifecycle costs, and performance</sp><sp>Build agile, continuous delivery pipelines that enable anything, anytime, modifications to structure, layout, look, and feel; producing highly-contextualized PDFs and invalid, funny-looking source documents.</sp></p>
+    </div>
+    <div created="2023.05.26 19:21" open="open">
+      <h id="lessonsLearned">Lessons learned</h>
+      <p>Co-locating knowledge and behavior tends to improve performance. Multiple perspectives tend to improve quality (and avoid crashes). The big challenge is how to integrate multiple perspectives and synthesize holistic, intelligent behavior.</p>
+      <p>Markup brings important capabilities to the table. It helps with the mechanics of getting knowledge to the agents responsible for behavior. It's both human and machine readable, and makes for an excellent negotiation framework.</p>
+      <p>Knowledge gaps to be identified and resolved through analysis of knowledge flows and language patterns. Plugging knowledge gaps better align behaviors and improve overall performance. Knowledge flows can be engineered to enable specific organizational behaviors and disable others, either through knowledge gaps or cost drivers. That's quite the ticket when associated with behavior prediction markets.</p>
+      <p>Shared meaning is negotiated. Meaning has multiple dimensions. When multiple agents interact with knowledge, they bring multiple perspectives. Just for starters, there's the plumbing side, how to move knowledge between agents.</p>
+      <p>Adding the policy and performance perspectives brings, <q>Why inform them?</q>
+        <q>Who benefits?</q>
+        <q>What are the costs?</q> The list of unique stakeholder perspectives can be countless, especially after folks apply new logic systems after changing their minds.</p>
+      <p>Knowledge architectures relate the bits and pieces of how knowledge enables behavior. Markup can be used in a knowledge architecture not only to enforce top down data quality standards, but enable the bottom-up negotiation of complex systems.</p>
+      <p>One way to use markup to integrate multiple-perspectives is by capturing the natural languages that individuals use when making sense of the world &emdash; the languages of internal narratives &emdash; and using those languages to start negotiations around formalizing natural system ontologies into automated support systems (to improve ergonomics and operational performance) and establishing community standards (for management system performance).</p>
+      <p>Formalizing an individual's personal ontology involves digitizing the way that they think about and organize information. This paper reports lessons learned from experiments developing a personalized XML doctype, prodoc. After being modified, as needed, for over a decade, prodoc has evolved to ease the authoring of information from many different perspectives/ logical systems/ ontologies.</p>
+      <p>The development of specialized data structures is at the essence of the idea of computer-assisted sense making. Organizing information, both structurally and visually, enables patterns to be identified and logic systems applied to enable behavior. When the situation makes sense, you know what to do.</p>
+      <p>Bots can do many things to help things make sense. Many experiments involved fine tuning the visual characteristics of authoring interfaces to make authoring as ergonomically-comfortable and time-efficient as possible.</p>
+      <p>At times, multi-perspective visualizations conflict with each other, potentially damaging signal-to-noise ratios. Switches are useful to help visualize patterns, even shifting layouts and visual style mappings to highlight different aspects, as appropriate. Explicitly-structured markup makes these types of processing and rendering tricks much easier to operationalize.</p>
+    </div>
+  </div>
+  <div created="2023.05.19 10:35" open="open">
+    <h id="prodocPath">The path to prodoc</h>
+    <p><sp>prodoc is the synthesis of:</sp><sp>Some relatively simple things (e.g., word processing)</sp><sp>Some surprisingly simple things (e.g., helping people figure out what the agree on)</sp><sp>Some medium complexity things (e.g., markup systems)</sp><sp>And some somewhat more-complex things (e.g., understanding knowledge flows from multiple perspectives)</sp></p>
+    <qblock created="2023.05.29 11:59">
+      <p><q>No, prodoc's not available. It's an ecosystem of polished production systems and abandoned experiments. More importantly, you'd have to think like me. That process would likely hurt both of us.</q></p>
+      <caption>Test subject</caption>
+    </qblock>
+    <div created="2023.05.21 15:13" open="open">
+      <h id="wp">Bots hate word processing's ornery visually-oriented ontology</h>
+      <p>Let's start with the familiar. Imagine building a spreadsheet with only three columns: <b>bold</b>, <i>italic</i>, and <u>underline</u>? How would you make sense of anything?</p>
+      <p>Word processing (WP) is an approach to documents that is firmly planted in the world of paper. It started by managing whitespace and adding a few visual formatting tricks to replace typewriters. Apple dramatically focused attention on defining the document in terms of its visual characteristics when it introduced the Macintosh, with synchronized bitmapped displays and printers.</p>
+      <p>We're still largely at that stage, where the bulk of the world's documentation is encoded in proprietary formats that concern themselves mostly with visual formatting of information on physical and virtual pages. Even when the files are encoded using marked-up text, the metadata and other metaknowledge artifacts store mostly visual properties.</p>
+      <p>WP's visual orientation is problematic. It really requires humans to be in the loop to look, see, recognize, interpret, synthesize with other understandings to apply missing implicit knowledge, decide, and act.</p>
+      <figure>
+        <subh>Word processing</subh>
+        <kfam created="2023.05.23 13:50" shcontrol="show" kstyle="light"
+          shcontrols="hidden" sgscale="00.786em" shgrid="hidden" docbook="image"
+          id="visualWP"
+          alt="Word processing is optimized to drive screens and printers to feed eyes">
+          <kfamRow>
+            <kfamCell/>
+            <kfamCell>
+              <behavior>Proprietary formatting rules<ka>text</ka></behavior>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <agent>Rendering bot</agent>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <behavior>Screen rendering</behavior>
+              <behavior>Print rendering</behavior>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <agent>Human eyes</agent>
+            </kfamCell>
+          </kfamRow>
+        </kfam>
+      </figure>
+      <p>The visual metaphors also limit the ability of computers to both mediate human-to-human communications and also to participate in the conversation. Even the XML-based word processing encodings are rats nests of difficult-to-process markup. The noise of visual parameters swamps the signal of individual characters. Doable, but expensive.</p>
+      <p>And this is the bottom line of why WP is obsolete technology. It's just too expensive. Labor costs are too high, in large part because you can't build happy little bots to automate anything. You have to buy bots or hire someone to build big grumpy bots.</p>
+      <p>WP provides flexibility to easily tune appearance, but reuse? Global imperatives require fine-grained, context-sensitive documentation to drive intelligent behavior. That means automation. That means containers. Sure, you can move files, but you can't move fine-grained information in and out of narrative documents. WP data is, to quote someone I met at a non-destructive nuclear assay conference, <q>just too stupid to move.</q></p>
+      <p>And this isn't the way that the big dogs roll. The publishing industry started walking away from this technology, decades ago.</p>
+    </div>
+    <div created="2023.05.21 15:13" open="open">
+      <h id="semanticMarkup">Semantic markup to the rescue</h>
+      <p>In the 1990s professional publishers were getting cut up worse than the weak kid at a knife fight. Today, news publishers are really bleeding out.</p>
+      <p>The world of electronic documents was disrupting paper-based publishing. New terms, new technologies, and new processes forced new business logic and strategies. CD-ROMs hit first. Many organizations made significant investments to reengineer their documents to rapidly-release CD-ROMs.</p>
+      <p>Then the web hit, with its wicked learning. Publishers asked themselves, <q>How many times would this happen?</q>
+        <q>How expensive would conversion costs be for each new technology cycle?</q>
+        <q>How many different file formats will we need?</q>
+        <q>How many different variations for different delivery devices?</q></p>
+      <p>Fortunately, the web came with the seeds of the solution. The format used for web documents, the HyperText Markup Language (HTML), was based on an international standard, the Standard Generalized Markup Language (SGML). SGML defines rules for declaring, applying, and validating markup languages &emdash; a language for defining markup languages &emdash; a <q>meta-language</q> so to speak.</p>
+      <p>SGML was designed around the needs of document owners, authors, and publishers. It enables hub and spoke architectures to be implemented with authoritative, single sources of generalized markup that feed various delivery systems (CD-ROMs, web, etc.).</p>
+      <div created="2023.05.30 13:32" open="open">
+        <h id="structure">Separating structure and style</h>
+        <p>Fundamental to generalized markup is the separation of content from style. It leverages lessons learned that go back to John W. Seybold's work at ROCAPPI, where lookup tables were first used to replace complex and error-prone typesetting markup codes with short &emdash; easy to type and differentiate &emdash; strings of text.</p>
+        <figure>
+          <subh>Typesetting lookup table</subh>
+          <table shcontrol="show">
+            <thead>
+              <tr>
+                <th>Easy strings of text</th>
+                <th>Confusing, error-prone typesetting codes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>"<xst>p</xst>"</td>
+                <td>;;; ldasj;fsadlkf dsalkf jdsa;l fjdsl;f dsl;f jdsafldslfkds ld :::</td>
+              </tr>
+              <tr>
+                <td>"<xet>p</xet>"</td>
+                <td>;;; a s;dfkjsadfklds fldskaj fdskf ds;lkf sdlkf dslf sadlfk jdsfkj ds :::</td>
+              </tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>In this world, formatting is associated with generalized data structures, making it easy to apply new styles or transforms, as the need arises. For this document, it took a couple of days to:</p>
+        <ul>
+          <li>
+            <p>Add new data structures to prodoc to make authoring easier to match DocBook requirements.</p>
+          </li>
+          <li>
+            <p>Create a new stylesheet, <file>pdoc2docbook.xsl</file>, to transform prodoc XML to DocBook XML.</p>
+            <p>It stripped all of prodoc's attributes, mapped element names from one markup language to the other, and changed the structure of a few branches.</p>
+          </li>
+          <li>
+            <p>Tune the XML source and XSLT files to create valid DocBook XML.</p>
+            <p>prodoc structures that couldn't be rendered were converted to images.</p>
+          </li>
+        </ul>
+        <p>Once the pipeline was stable, attention went back to authoring and editing. A handful of whitespace issues required manual cleanup.</p>
+      </div>
+      <div created="2023.05.30 13:32" open="open">
+        <h id="lifecyle">Integrating lifecycle perspectives</h>
+        <p>The focus on document lifecycles drove a number of important features that are missing from contemporary word processing platforms and relational database systems.</p>
+        <p>Markup language files are text files. That simple fact improves accessibility and lowers lifecycle costs by orders of magnitude. Nearly any computing device and system can interact with a markup-encoded text file. The Extensible Markup Language (XML) dramatically lowered SGML's cost profile, and there are a wealth of XML-based markup technologies.</p>
+        <p>Documents are naturally hierarchical. Books contain chapters. Chapters contain paragraphs... Markup is organized around addressable trees and nodes and nested containers. These explicit data structures lower level-of-effort for both human and machine processing.</p>
+        <p>Semantics enter the picture when naming the nodes in the tree. When creating custom data structures to solve real-world authoring and publishing issues, the names are often associated with real-world meanings and organizing concepts. These terms, their meanings, and various encoding decisions take us into the world of semantic technologies and formalized ontologies.</p>
+        <p>Semantic markup is the phrase given to this approach to document management, where XML is used to define an application-specific markup language, where the names and data structures reflect complex conceptual frameworks and models.</p>
+        <p>The challenge when using markup for single sources is to focus all authoring on the single, highly-refined source document, so that all derivatives flow from there.</p>
+        <qblock created="2023.05.25 11:50">
+          <p>Hub and spoke, baby, with low cost transforms. Hub and spoke.</p>
+          <caption>Test subject</caption>
+        </qblock>
+      </div>
+    </div>
+    <div created="2023.05.21 15:13" open="open">
+      <h id="semanticAuthoring">From semantic markup to semantic authoring</h>
+      <qblock created="2023.05.26 11:54">
+        <p>prodoc helps me make sense of the world. Markup brings ergonomic efficiencies to the typing process. Semantic markup brings ergonomic efficiencies to the thinking process, especially when concepts and logic systems can be visualized in different ways.</p>
+        <caption>Test subject</caption>
+      </qblock>
+      <p>Most semantic markup systems are organized around the idea of collaborative authoring and publishing. An organization-specific markup language is defined as a doctype with a set of rules that describe the names and relationships of the various containers. Everyone in the group works within those rules, which function as quality standards.</p>
+      <p>Doctypes are designed to standardize documents and protect publishing systems. The structural rules, which are described using an explicit schema language, typically change very slowly to ensure consistency of work processes. Standardized stylesheets are usually part of the equation.</p>
+      <p>Semantic authoring inverts this thinking.</p>
+      <p>Authors are the semantic authorities, they should have all the operational authorizations available to author semantic markup as they deem appropriate, as easily as possible. Every doctype should allow authors to use the internal declaration subset to enable bottom-up formalization and communication of models, in addition to content.</p>
+      <p><b>Semantic authoring is about creating documents that help authors make sense of the world. It lets individuals create semantic markup to formalize their conceptual frameworks. Once formalized, these sense making systems are easier to reuse, communicate, and automate.</b></p>
+      <p>Reducing the incremental costs of new markup means document-level extensions, making every document a <gloss><text>little markup language laboratory</text><treatment> The idea of <q>little languages</q> comes from AT&amp;T's development of the UNIX operating system, where little languages and little bots were developed for managing the streams of text associated with managing telecommunication systems in the 1970s</treatment></gloss>.</p>
+      <p>Semantic authoring doctypes leverage the Internal Declaration Subset, which is a mechanism for authors to create their own markup declarations. This allows new elements and attributes to be declared within any document. They can even be used within the current document, if the rules of the doctype allow.</p>
+      <p>prodoc was built on an HTML core (HTML for semantic authoring: &hsa;.dtd), but comparable semantic authoring extensions could be incorporated into other doctypes. Adding semantic authoring extensions to a DITA subset have been discussed, for example.</p>
+      <p>Why open Pandora's Box? What chaos would ensue?</p>
+      <div created="2023.05.26 12:49" open="open">
+        <h id="individual">Individual impacts</h>
+        <p>Any number of strategic computing projects have failed because organizations couldn't get folks to use XML editors.</p>
+        <p>Why would an individual consider this craziness? Everyone's plate is full. This requires learning and ever since Microsoft took the margins out of WP through bounding, investments in this space have withered, for both individuals and organizations. WP is an ignored necessity, driven by cost-minimization strategies.</p>
+        <p>The standard XML consultant's answer to any question is, <q>That depends.</q> Markup is largely policy neutral. You can apply it to almost any set of value optimizations. Markup languages are adopted, customized, and designed around a purpose. When you use someone else's markup, you are organizing your information around someone else's semantic values and value propositions. That's a cost driver.</p>
+        <p>Everyone's plate is full because the world is increasingly complex. There are a lot of bots that help, but they're all pretty much built by someone else to help them meet their needs.</p>
+        <p>What if folks had bots of their own? Little bots that could be put together in an afternoon? Organized around personally-valuable information. Individuals creating their own little languages and bots inverts markup's dominant value propositions.</p>
+        <figure>
+          <subh>Generalized markup</subh>
+          <kfam created="2023.05.23 13:50" shcontrol="show" kstyle="light"
+            shcontrols="hidden" sgscale="00.786em" shgrid="hidden" id="markup"
+            docbook="image"
+            alt="Markup is processed into trees. Those trees can be rendered for display using CSS. They can be converted to other languages to interact with the world.">
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell>
+                <t><span csc="b" color="artifact"
+                  >&lt;mka></span>markup defines nested containers</t>
+                <t><span csc="b" color="artifact">&nbsp;&nbsp;&lt;ka></span>text</t>
+                <t><span csc="b" color="artifact"
+                  >&nbsp;&nbsp;&nbsp;&nbsp;&lt;mka></span>markup</t>
+                <t><span csc="b" color="artifact"
+                    >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ka></span>text<span csc="b"
+                    color="artifact">&lt;/ka></span></t>
+                <t><span csc="b" color="artifact"
+                  >&nbsp;&nbsp;&nbsp;&nbsp;&lt;/mka></span></t>
+                <t><span csc="b" color="artifact">&nbsp;&nbsp;&lt;/ka></span></t>
+                <t><span csc="b" color="artifact">&lt;/mka></span></t>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <agent>tree-processing bot</agent>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <block>
+                  <ull white="nowrap">
+                    <lli level="1">
+                      <p>/</p>
+                    </lli>
+                    <lli level="2">
+                      <p><span csc="b" color="artifact">&lt;mka/></span></p>
+                    </lli>
+                    <lli level="3">
+                      <p>"markup defines nested containers"</p>
+                    </lli>
+                    <lli level="3">
+                      <p><span csc="b" color="artifact">&lt;ka/></span></p>
+                    </lli>
+                    <lli level="4">
+                      <p>"text"</p>
+                    </lli>
+                    <lli level="5">
+                      <p><span csc="b" color="artifact">&lt;mka/></span></p>
+                    </lli>
+                    <lli level="6">
+                      <p>"markup"</p>
+                    </lli>
+                    <lli level="7">
+                      <p><span csc="b" color="artifact">&lt;ka/></span></p>
+                    </lli>
+                    <lli level="8">
+                      <p>"text"</p>
+                    </lli>
+                  </ull>
+                </block>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <agent>single-step css rendering bot<behavior>walk tree, match node, apply CSS properties</behavior></agent>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <agent>Human eye</agent>
+                <mka>markup defines nested containers<ka>text<mka>markup<ka>text</ka></mka></ka></mka>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell>
+                <block>
+                  <ull white="nowrap">
+                    <lli level="1">
+                      <p>/</p>
+                    </lli>
+                    <lli level="2">
+                      <p><span csc="b" color="artifact">&lt;mka/></span></p>
+                    </lli>
+                    <lli level="3">
+                      <p>"markup defines nested containers"</p>
+                    </lli>
+                    <lli level="3">
+                      <p><span csc="b" color="artifact">&lt;ka/></span></p>
+                    </lli>
+                    <lli level="4">
+                      <p>"text"</p>
+                    </lli>
+                    <lli level="5">
+                      <p><span csc="b" color="artifact">&lt;mka/></span></p>
+                    </lli>
+                    <lli level="6">
+                      <p>"markup"</p>
+                    </lli>
+                    <lli level="7">
+                      <p><span csc="b" color="artifact">&lt;ka/></span></p>
+                    </lli>
+                    <lli level="8">
+                      <p>"text"</p>
+                    </lli>
+                  </ull>
+                </block>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <agent>conversion bot<behavior>walk tree, match node, restructure and translate as desired</behavior></agent>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <ka>Intermediate representation<mka>HTML, CSV, SVG, SQL, FO, etc...</mka></ka>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <agent>specialized processing bot</agent>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <t><img src="img/The_Earth_transparent_background_small.png" height="8em"
+                    align="center"/></t>
+              </kfamCell>
+            </kfamRow>
+          </kfam>
+        </figure>
+        <p><sp>When concluding XML courses I challenge students to build their own <q>bootcamp app</q>:</sp><sp>An XML fragment of information that has personal meaning.</sp><sp>Some CSS to make it pretty and a DTD to validate it.</sp><sp>Extra credit for an XSLT to HTML conversion. With that set of languages you can code the guts of almost any automated solution.</sp><sp>Pro tip: Add a text processing language to get stuff into markup.</sp></p>
+        <qblock created="2023.05.26 12:21">
+          <p><q> AWK is awful good.</q></p>
+          <caption>Test subject</caption>
+        </qblock>
+        <p>Reports ranged from ham radio datasets to a DVD collection with a color scheme that would drive a person to drink. The common denominator? Feelings of accomplishment and excitement about the future. Personal markup is compelling. It's the ultimate computer game.</p>
+        <p>When markup is optimized around individual purpose, it's an enabler, with corresponding changes to brain chemistry. A recent episode of the Public Broadcasting Series, Nova, focused on the neurochemistry of decision making.</p>
+        <qblock created="2023.05.25 12:43">
+          <p>Agency is powerful stuff. Life is unscripted. Perceptions of control are powerful. Actual, impactful, personally-meaningful operational control? Priceless.</p>
+          <caption>Test subject</caption>
+        </qblock>
+        <p>The brain chemistry associated with fear is another important factor. Fearful adults staring at blank screens with their jobs on the line don't learn much. Fearful improvisers tend to get frantic. Open another document template and experiment with markup is like playdough and enables much more creativity.</p>
+        <qblock id="pn0560">
+          <p id="bloodflow" xml:base="file:/D:/kc/clients/bcd/amicuspodcast.pdoc"
+            > ...when people are made afraid, their amygdala starts firing and their prefrontal cortex literally is starved of blood. You can’t have both things [fear and logic] going. And so if you’re asking people to sort of be in their rational brain..., then you need to present this as the possibility of creating something good... </p>
+          <caption id="pn0564"><a id="pn0565"
+              href="https://slate.com/podcasts/amicus/2021/02/incitement-impeachment-inevitable-acquittal.amp"
+              >Anat Shenker-Osorio</a></caption>
+        </qblock>
+        <qblock created="2023.05.26 13:19">
+          <p>Future research hopes to work with neuro-divergent individuals, including those with sensory-integration impairments who have had to create very sophisticated coping mechanisms and supporting ontologies. How much of this knowledge is tacit and inexpressible? How much could be formalized as language and would there be benefits? Stories heal. Would this form of storytelling amplify and add additional dimensions to those benefits?</p>
+          <caption>Primary researcher</caption>
+        </qblock>
+        <p>Giving voice involves two dimensions, the content and the pipeline that communicates that voice. Authoring content that is designed for collaboration and integrates easily with existing computing infrastructures adds social dimensions to individual value propositions.</p>
+        <qblock created="2023.05.26 12:26">
+          <p>Our voices are so valuable that we're the only animal that chokes itself to death. Would average individuals actually use markup to model their realities? Look at what they do with spreadsheets and the various cloud integration toolkits. This is an accessibility/ price/ performance thing.</p>
+          <caption>Test subject</caption>
+        </qblock>
+      </div>
+      <div created="2023.05.26 12:49" open="open">
+        <h id="organization">Organizational impacts</h>
+        <qblock created="2023.05.27 12:43">
+          <p>Humanity’s legacy of stories and storytelling is the most precious we have. All wisdom is in our stories and songs. A story is how we construct our experiences. At the very simplest, it can be: ‘He/she was born, lived, died.’ Probably that is the template of our stories – a beginning, middle, and end. This structure is in our minds.</p>
+          <caption>Doris Lessing, author </caption>
+        </qblock>
+        <p>Markup has strategic organizational impacts. That's why global publishers use it.</p>
+        <p>Markup helps authors make sense of the past, present, and future. It makes it easier to organize information for efficient, increasingly-customized and personalized pipelines. This is human behavior we're trying to influence. We're not just dealing with data.</p>
+        <figure>
+          <subh>Authoring meaning through content, structure and style</subh>
+          <codeblock created="2023.05.24 12:29" sgscale="00.786em"><b>Past meaning      \   Observe    / Future meaning
+Established values \     O      /  Future values
+Past practice       \    ||    /   Future behavior
+Source origins      /    /\    \   Downstream k flows
+Old logic          /   Orient   \  Re-contextualized logic
+Event &amp; prior K   / Decide &amp; Act \ Learnings</b></codeblock>
+        </figure>
+        <p>Markup is good for top-down communications and alignment. If top-down alignment systems were sufficient, our existing single-source-based communication and publishing systems should be ensuring top-notch performance.</p>
+        <p>But operational realities in countless natural economies point to the need for fundamental changes in the rules of the symbolic/ market economy. That appears to be becoming increasingly difficult as the mechanisms that influence market behavior appear to be cutting themselves off from any communications that might challenge the current systems for monetizing human behavior.</p>
+        <p>Through countless decisions, systems evolve and are optimized around specific value propositions. This has happened to markup systems and associated technologies. The ISO:SGML platform, quite simply, establishes a benchmark standard for open systems. XML's refinements have brought countless new voices to the table, but author-authored markup has simply not gotten the same attention as single-sourcing and those value optimizations are reflected in the available technology alternatives through many small details that increase authoring effort in subtle, but impactful ways.</p>
+        <p>Bottom-up sense making and communications are becoming more important. Enabling individuals to customize markup in an organizational setting can be expected to not only increase reuse and collaboration, but also better-enable multi-perspective systems and decisions.</p>
+        <p>Formalizing individual value-optimizations as semantic values shares many traits with fundamentally-enabling technologies, like email. It opens up new channels of communication. How many organizations justified their initial investments in email with its impact reducing paper mail. That happened, but it didn't anticipate the completely-new models of communication that were enabled.</p>
+        <qblock created="2023.05.27 12:56">
+          <p>The big experiment: Can bottom-up knowledge flows be established quickly-enough to build the new understandings and consensus around the logic needed to rapidly realign global supply chains around strategic physical and operational constraints.</p>
+          <caption>Primary researcher</caption>
+        </qblock>
+      </div>
+    </div>
+  </div>
+  <div created="2023.05.22 15:56" open="open">
+    <h id="patternsInform">Document-level controls to capture and communicate meaning</h>
+    <qblock created="2023.05.25 15:12">
+      <p>Semantic authoring is like car restoration on <title>Full Custom Garage.</title> The markup is the frame, and the CSS is the sheet metal. Pound at will. Make the data dance and drive change.</p>
+      <caption>Test subject</caption>
+    </qblock>
+    <p>prodoc provides two primary ways to influence the meaning of information: data structures and visualizations.</p>
+    <p>The basic process for making sense of new data?</p>
+    <ol>
+      <li>
+        <p>Do existing structures work? If so, adapt, otherwise...</p>
+      </li>
+      <li>
+        <p>Add markup to give the data structure</p>
+      </li>
+      <li>
+        <p>Pick meaningful names</p>
+      </li>
+      <li>
+        <p>Add visual differentiation</p>
+      </li>
+      <li>
+        <p>Adjust the look and geometry to look for patterns</p>
+      </li>
+      <li>
+        <p>Rinse and repeat until the data becomes actionable</p>
+      </li>
+      <li>
+        <p>Add a switch or something to change the appearance in real time, if it helps</p>
+      </li>
+    </ol>
+    <p>Sometimes the process starts by making the data look pretty before creating custom data structures. The ability to incrementally add structures and style rules to the base platform reduces the incremental cost of small projects. Successful experiments get moved from the laboratory document to prodoc.dtd.</p>
+    <p>In practice, document-level experimentation has been key to the evolution of prodoc. The full case study document is the actual file that started the development of the <xsol>music</xsol> element.</p>
+    <p>Some of the design alternatives were driven by knowledge loss. The old markup didn't make sense. Create new markup that makes sense for current thinking. A few data structures only stabilized after multiple documents with partial solutions were created, sometimes across years. A couple of systems only went into production after the best features of 3 or 4 solutions from different perspectives were integrated.</p>
+    <div created="2023.05.25 11:55" open="open">
+      <h id="structure">Author-driven structural changes</h>
+      <qblock created="2023.05.25 12:07">
+        <p>Fast, cheap, and out of control</p>
+        <caption>Kevin Kelly</caption>
+      </qblock>
+      <p>Most publishing systems use slow moving schema and stylesheets to ensure consistency of authoring. Semantic authoring is intended to be fast moving. Allowing ideas to be quickly captured and different approaches tested. Creating ecosystems of markup alternatives, driven by personal and small-group imperatives.</p>
+      <qblock created="2023.05.25 12:11">
+        <p>Running off to a DTD file? Too far away, too slow, too impactful. I'm the authority here. Let me extend structures in the document.</p>
+        <caption>Test subject</caption>
+      </qblock>
+      <qblock created="2023.05.25 12:12">
+        <p>Respect my authoritah</p>
+        <caption>Eric Cartman </caption>
+      </qblock>
+      <p>This example of enabling SGML Internal Declaration Subset extensions comes from h1.dtd, a training doctype. An updated <oxml/> framework will be released on June 10th, 2023.</p>
+      <p>Elements are organized into four non-overlapping groups: <xpe>divs</xpe>, <xpe>blocks</xpe>, <xpe>heads</xpe>, and <xpe>spans</xpe>, so that they can be easily extended and combined, at will. This is the example of the definitions for <xpe>divs</xpe></p>
+      <figure>
+        <subh><xpe>divs</xpe> declarations includes the <xpe>sa.divs</xpe> extension mechanism for use in documents</subh>
+        <codeblock created="2023.05.24 21:26" sgscale="00.786em">&lt;!-- __________________________________________________________________________
+. . {
+. . {         %divs; - infinitely-nesting wrapper elements
+. -->
+&lt;!-- ..........................................................................
+. . :                 %h1.divs;         . baseline hierarchical divisions
+. -->
+ &lt;!ENTITY % h1.divs           " div|
+                                h1|
+                                hsa|
+                                hsg|
+                                prodoc" >
+&lt;!-- ..........................................................................
+. . :                 %sa.divs;         . semantic authoring interface
+. -->
+ &lt;!ENTITY % sa.divs           "" >
+&lt;!-- ..........................................................................
+. . :                 %divs;            . (roll-up)
+. -->
+ &lt;!ENTITY % divs              " %h1.divs;
+                                %sa.divs;" >
+ </codeblock>
+      </figure>
+      <figure>
+        <subh>Document header, where new elements are added through the <xpe>sa.divs</xpe> interface</subh>
+        <codeblock created="2023.05.24 21:42" sgscale="00.786em">&lt;!DOCTYPE div PUBLIC "-//SG//DTD h1//EN" "../h1.dtd"[
+&lt;!ENTITY    h1                "h1" >
+&lt;!ENTITY  % sa.divs           "" >&lt;!-- e.g., "| ename" -->
+&lt;!ENTITY  % sa.blocks         "" >
+&lt;!ENTITY  % sa.heads          "" >
+&lt;!ENTITY  % sa.spans          "" >
+&lt;!ENTITY  % sa.atl            "" >
+&lt;!ELEMENT   ename             (#PCDATA) >
+&lt;!ATTLIST   ename
+              aname           CDATA                                 #IMPLIED >
+]></codeblock>
+      </figure>
+      <p>A common reason for adding spans to a document is to customize tables. <xsol>tr</xsol> contains <xpe>spans</xpe>, and the set of <xpe>spans</xpe> includes <xsol>td</xsol> and <xsol>th</xsol>. Adding any element to the set of <xpe>spans</xpe> adds them to table rows.</p>
+    </div>
+    <div created="2023.05.25 11:56" open="open">
+      <h id="visual">Author-driven visual changes</h>
+      <qblock created="2023.05.25 11:59">
+        <p><q>Quickly changing the look and feel of text is WP's core value proposition. Pretty, but dumb. And it takes a lot of mousing around to set the properties on all those unrelated objects. Hurts my arm. Let me keep my keys on the keyboard, please. Let me apply style changes to branches and not leaves.</q></p>
+        <caption>Test subject </caption>
+      </qblock>
+      <p>Since the semantic authoring platform was developed to displace WordPerfect, various markup-based style controls (control surfaces) were implemented.</p>
+      <p>Elements can function as visual control surfaces. <xsol>p</xsol> adds whitespace. <xsol>t</xsol> doesn't. <xsol>frame</xsol> adds a border. <xsol>block</xsol> doesn't. Mapping the <oxml/>
+        <oxcmd>Rename Element</oxcmd> function to Alt-N enables quickly changing how data looks by changing the element name. This frequently happens when tuning inline markup to adjust prominence.</p>
+      <p>Global attributes provide most of the visual control surfaces, overriding the CSS stylesheet defaults. Some of the simplest attributes are direct pass through. <xa>borders</xa>, <xa>padding</xa>, and <xa>style</xa> accept standard CSS syntax. Many css properties were renamed to simplify authoring: <xa>bgcolor</xa>, <xa>p.left</xa>, <xa>p.right</xa>, <xa>face</xa> (typeface).</p>
+      <p>Some attributes add support for fixed values. <xa>scale</xa>, for example, sets font-size using arbitrary values. <xa>sgscale</xa> contains a standardized and generalized set of values based on the square root of the golden ratio. It started as a reference, for quickly bringing up a list of values, before being given an active role.</p>
+      <p><xa>color</xa> and <xa>bgcolor</xa> are defined with a number of named colors that map to a color library. One of the color pallets is for modeling knowledge flows. Another attribute, <xa>kstyle</xa>, applies background, foreground, and border color combinations based on the value of the <xa>k</xa> attribute, which describes the element's role in knowledge flows.</p>
+      <p>A few controls are more aspirational than functional. <xa>lineheight</xa> never seems to work. <xa>max-height</xa> and the pagination settings are waiting for more powerful engines.</p>
+      <p>A variety of <xa>sh*</xa> attributes show and hide control panels, table grids, id values, purple numbers, included content, and <xsol>xi:include</xsol> controls. A couple more activate CPU-crushing focus and hover behaviors.</p>
+    </div>
+  </div>
+  <div created="2023.05.19 10:35" open="open">
+    <h id="practice">prodoc in practice</h>
+    <p>One day, the test subject was amused by the total absurdity of keeping project notes and analysis in WordPerfect (WP) while simultaneously writing XSLT specifications using an XML editor. The test subject rebuilt that specification doctype for a project and started modifying it to replace WP for all professional documentation. The customized authoring and publishing platform was named <q>prodoc.</q></p>
+    <p>Technically, prodoc is an <gloss>XML doctype</gloss>, centered around <file>prodoc.dtd</file>, and a supporting toolkit, with many of the tools based on Oxygen XML Editor and Author software (<oxml/>).</p>
+    <p>And so started a grand experiment. Could someone who had provided training, support, and engineering to thousands of WP users transition? </p>
+    <p>The only <q>active</q> WP document is business cards that are encoded in tables with offset crop marks.</p>
+    <qblock created="2023.05.26 18:29">
+      <p>Go back to WordPerfect? Are you crazy? Here, I can grab an element by pressing Alt-E. Even copying and pasting is easier. When I go to another editor, none of my compositional idioms are there. Yuck!</p>
+      <caption>Test subject</caption>
+    </qblock>
+    <qblock created="2023.05.27 14:25">
+      <p>I don't know how I could move these documents back to a word processor. Even accepting the loss of structure, the algorithmic visual effects would take too many mouse clicks to be worth the effort, and probably require a separate graphics package.</p>
+      <caption>Test subject</caption>
+    </qblock>
+    <!--<xinclude include="yes" shcontrol="show" shcontrols="show" shfilenav="show"
+      shinclude="show" shp="show" shxi="show" shxicontrols="show">
+      <xi:include href="D:\kc\comm\book\portfolio\music.pdoc" parse="xml"
+        xml:base="D:\kc\comm\book\portfolio\music.pdoc"
+        xmlns:xi="http://www.w3.org/2001/XInclude">
+        <xi:fallback>
+          <p color="red">Xinclude failure. File not found</p>
+        </xi:fallback>
+      </xi:include>
+    </xinclude>-->
+    <div created="2023.05.27 17:13" open="open">
+      <h id="class"><xa>class</xa> &emdash; Authored class styles</h>
+      <qblock created="2023.05.30 15:26">
+        <p><q>Look Ma. No stylesheet changes</q></p>
+        <caption>Test Subject</caption>
+      </qblock>
+      <p>An early design principle was, <q>Hands off the <xa>class</xa> attribute. That's for user control.</q> Recently, an approach was implemented that allows authors to define classes and associate specific CSS styles, all within a document.</p>
+      <p>The <xa>style</xa> attribute maps to the <oxml/> -oxy-style CSS property. This allows raw CSS to be passed to the CSS processor for the defined element.</p>
+      <p>Adding a <xa>styleclass</xa> attribute on an element makes the <xa>style</xa> value available for reuse. A little XPath handles the indirection from <xa>class</xa>, through the preceding <xa>styleclass</xa>, to <xa>style:</xa></p>
+      <figure>
+        <subh p.left="3.5em" m.top="1em"><xa>class</xa> markup</subh>
+        <codeblock m.left="2em" m.right="2em" padding="0.25em" kstyle="bgcolor" docbook="image" id="classMarkup"
+          alt="The first &lt;t/> element defines the style for the class. Others reference the defined styles through the @class attribute"
+          >&lt;tl docbook="image" id="classMarkup">
+  &lt;t><b>***</b> &lt;org <agent>styleclass="org"</agent> <behavior>style="font-weight:800;color:green"</behavior>
+    ><b>org/@styleclass="org" and @style set style</b>&lt;/org><b> ***</b>&lt;/t>
+  &lt;t><b>***</b> &lt;org <artifact>class="org"</artifact>><org class="org"><b>org/@class"org" replicates style</b></org>&lt;/org><b> ***</b>&lt;/t>
+  &lt;t><b>***</b> &lt;org <artifact>class="org"</artifact>>again&lt;/org> <b>***</b>&lt;/t>
+&lt;/tl></codeblock>
+      </figure>
+      <figure>
+        <subh p.left="3.5em" m.top="1em"><xa>class</xa> CSS</subh>
+        <codeblock m.left="2em" m.right="2em" kstyle="bgcolor" padding="0.25em" docbook="image" id="classCSS"
+          alt="CSS associates the @style, @styleclass, and @class attributes"
+          >                           <artifact>*[class]</artifact>
+{
+  -oxy-style            : oxy_xpath(" let <artifact>$x:=@class</artifact> \
+                                      return (preceding::*[<agent>@styleclass</agent>=<artifact>$x</artifact>])[1]/<behavior>@style</behavior>",
+                                    evaluate, dynamic-once);
+}</codeblock>
+      </figure>
+      <figure>
+        <subh p.left="3.5em"><xa>class</xa> rendering</subh>
+        <tl m.left="2em" p.left="2em" m.top="0.5em" docbook="image" id="classRendering"
+          dbwidth="50%"
+          alt="This figure demonstrates the CSS rendering through reference">
+          <t>*** <org styleclass="org" style="font-weight:800;color:green"
+              >org/@styleclass="org" and @style set style</org> ***</t>
+          <t>*** <org class="org">org/@class"org" replicates style</org> ***</t>
+          <t>*** <org class="org">again</org> ***</t>
+        </tl>
+      </figure>
+    </div>
+    <div created="2023.05.24 14:14" open="open">
+      <h id="awkbuddy"><xsol>awkbuddy</xsol>
+        &emdash; An interactive development environment block</h>
+      <p>One day, dreaming about the keyboard macro processors, I thought, <q>AWK! of course, AWK!</q> The result is <xsol>awkbuddy</xsol>, which inverts most code/ documentation conventions by putting code fragments into a standard prodoc.</p>
+      <figure>
+        <subh><xsol>awkbuddy</xsol> codeblocks</subh>
+        <ull shlevels="hidden" id="awkbuddyStructure" docbook="image" dbwidth="40%"
+          alt="Shows the awk, source, target, and cmd codeblocks within an awkbuddy element ">
+          <lli level="1">
+            <p><xpath>prodoc</xpath></p>
+          </lli>
+          <lli level="2">
+            <p><xpath>awkbuddy/@id=""</xpath></p>
+          </lli>
+          <lli level="3">
+            <p><xpath>codeblock/@id="awk"</xpath></p>
+          </lli>
+          <lli level="3">
+            <p><xpath>codeblock/@id="source"</xpath></p>
+          </lli>
+          <lli level="3">
+            <p><xpath>xi:include/codeblock/@id="target"</xpath></p>
+          </lli>
+          <lli level="3">
+            <p><xpath>codeblock/@id="cmd"</xpath></p>
+          </lli>
+        </ull>
+      </figure>
+      <p>The code blocks can be arranged, as desired, to co-locate knowledge with decisions. I've tuned mine on eye movements, by wrapping the codeblocks in table structures. The <file>awkbuddy.cmd</file> script rips the prodoc into separate files and runs the pipeline. Factoring out the file-processing overhead made AWK a much more convenient tool. More little bots have been built. Much time saved. Much more complexity managed.</p>
+      <p>Perhaps more importantly, it improves knowledge retention and library accessibility. Simply having the code and a source fragment is usually sufficient to remember the project. On the other hand, if you want to write a novel to explain a few lines of AWK, the tools are at hand.</p>
+      <p>Custom IDs can be used to run multiple awkbuddies from the same prodoc and prevent collisions in the generated files. File-level collisions across separate awkbuddies (<file>*.abud</file>) never proved to be much of an issue. If the default target fragment has been overwritten, just rerun the transform.</p>
+    </div>
+    <div created="2023.05.27 13:26" open="open">
+      <h id="bbody"><xsol>bbody</xsol>, <xsol>branches</xsol>, <xsol>branch</xsol>
+        &emdash; Hierarchical tables</h>
+      <p>The first hierarchical table was developed to do stakeholder analysis. The generalized implementation uses a specialized table body element: <xsol>bbody</xsol>. Changing <xa>display</xa> switches between the full table and a simplified blocks view, which makes it easier to restructure the branches.</p>
+      <figure>
+        <subh><xpath>table/@display="table"</xpath> (columns displayed for data processing)</subh>
+        <table docbook="image" shindent="show" hs="corner" sgscale="00.786em"
+          shgrid="show" shcontrol="show" shcontrols="hidden" id="bbodyTable"
+          alt="Column one shows indentation to match the nested branches. Column two, the XPath. Column three, nothing important."
+          >
+          <thead>
+            <tr>
+              <th>Tree</th>
+              <th>XPath</th>
+              <th>Etc.</th>
+            </tr>
+          </thead>
+          <bbody>
+            <branch>
+              <tr>
+                <th id="th">stakeholders</th>
+                <td><xpath>table/bbody/branch/tr/td</xpath></td>
+                <td>Another</td>
+              </tr>
+              <branches>
+                <branch>
+                  <tr>
+                    <th>internal</th>
+                    <td><xpath>table/bbody/branch/branches/branch[1]/tr/td</xpath></td>
+                    <td>column</td>
+                  </tr>
+                  <branches>
+                    <branch>
+                      <tr>
+                        <th>group</th>
+                        <td><xpath>table/bbody/branch/branches/branch[1]/</xpath><xpath>branches/branch[1]/tr/td</xpath></td>
+                        <td>w/</td>
+                      </tr>
+                      <branches>
+                        <branch>
+                          <tr>
+                            <th>individuals</th>
+                            <td><xpath>table/bbody/branch/branches/branch[1]/<xpath>branches/branch[1]/<xpath>branches/branch[1]/tr/td</xpath></xpath></xpath></td>
+                            <td>dumb</td>
+                          </tr>
+                        </branch>
+                      </branches>
+                    </branch>
+                  </branches>
+                </branch>
+                <branch>
+                  <tr>
+                    <th>external</th>
+                    <td><xpath>table/bbody/branch/branches/branch[2]/tr/td</xpath></td>
+                    <td>data...</td>
+                  </tr>
+                </branch>
+              </branches>
+            </branch>
+          </bbody>
+        </table>
+      </figure>
+      <figure>
+        <subh><xpath>table/@display="block"</xpath> (columns hidden for tree processing)</subh>
+        <table shindent="show" hs="corner" display="block" shcontrol="hidden"
+          shcontrols="hidden" shfocus="show" docbook="image" id="bbodyList" width="20em"
+          dbwidth="50%"
+          alt="The same hierarchical table in block/ list mode">
+          <bbody>
+            <branch>
+              <tr>
+                <th>stakeholders</th>
+                <td><xpath>table/bbody/branch/tr/td</xpath></td>
+              </tr>
+              <branches>
+                <branch>
+                  <tr>
+                    <th>internal</th>
+                    <td><xpath>table/bbody/branch/branches/branch[1]/tr/td</xpath></td>
+                  </tr>
+                  <branches>
+                    <branch>
+                      <tr>
+                        <th>group</th>
+                        <td><xpath>table/bbody/branch/branches/branch[1]/</xpath><xpath>branches/branch[1]/tr/td</xpath></td>
+                      </tr>
+                      <branches>
+                        <branch>
+                          <tr>
+                            <th>individuals</th>
+                            <td><xpath>table/bbody/branch/branches/branch[1]/<xpath>branches/branch[1]/<xpath>branches/branch[1]/tr/td</xpath></xpath></xpath></td>
+                          </tr>
+                        </branch>
+                      </branches>
+                    </branch>
+                  </branches>
+                </branch>
+                <branch>
+                  <tr>
+                    <th>external</th>
+                    <td><xpath>table/bbody/branch/branches/branch[2]/tr/td</xpath></td>
+                  </tr>
+                </branch>
+              </branches>
+            </branch>
+          </bbody>
+        </table>
+      </figure>
+      <figure>
+        <subh><xsol>bbody</xsol> markup</subh>
+        <codeblock created="2023.05.27 21:54" sgscale="00.786em">&lt;table shindent="show" hs="corner" display="block" shfocus="show">
+  &lt;bbody>
+    &lt;branch>
+      &lt;tr>
+        &lt;th id="th">stakeholders&lt;/th>
+        &lt;td>&lt;xpath>table/bbody/branch/tr/td&lt;/xpath>&lt;/td>
+      &lt;/tr>
+      &lt;branches>
+        &lt;branch>
+          &lt;tr>
+            &lt;th>internal&lt;/th>
+            &lt;td>&lt;xpath>table/bbody/branch/branches/branch[1]/tr/td&lt;/xpath>&lt;/td>
+          &lt;/tr>
+          &lt;branches>
+            &lt;branch>
+              &lt;tr>
+                &lt;th>group&lt;/th>
+                &lt;td>&lt;xpath>table/bbody/branch/branches/branch[1]/&lt;/xpath>&lt;xpath>branches/branch[1]/tr/td&lt;/xpath>&lt;/td>
+              &lt;/tr>
+              &lt;branches>
+                &lt;branch>
+                  &lt;tr>
+                    &lt;th>individuals&lt;/th>
+                    &lt;td>&lt;xpath>table/bbody/branch/branches/branch[1]/&lt;xpath>branches/branch[1]/&lt;xpath>branches/branch[1]/tr/td&lt;/xpath>&lt;/xpath>&lt;/xpath>&lt;/td>
+                  &lt;/tr>
+                &lt;/branch>
+              &lt;/branches>
+            &lt;/branch>
+          &lt;/branches>
+        &lt;/branch>
+        &lt;branch>
+          &lt;tr>
+            &lt;th>external&lt;/th>
+            &lt;td>&lt;xpath>table/bbody/branch/branches/branch[2]/tr/td&lt;/xpath>&lt;/td>
+          &lt;/tr>
+        &lt;/branch>
+      &lt;/branches>
+    &lt;/branch>
+  &lt;/bbody>
+&lt;/table></codeblock>
+      </figure>
+    </div>
+    <div created="2023.05.22 15:56" open="open">
+      <h id="colors"><xsol>colortest</xsol>
+        &emdash; Automating accessible color negotiation pipelines</h>
+      <p>Challenge: Use the W3C-published formula for calculating the accessibility of color combinations. Over many years, the system was re-factored. Copying and pasting values into a small XML model was fine for small projects, but I had to seek client approvals on a pallet of 24 colors that were going to be used for strategic branding.</p>
+      <figure>
+        <subh>Color testing and tuning pipeline</subh>
+        <kfam created="2023.05.27 14:34" shcontrol="show" kstyle="light"
+          shcontrols="hidden" shgrid="hidden" docbook="image" id="colorsPipeline"
+          alt="The pipeline enabled efficient tuning of color pallets">
+          <kfamRow bgcolor="bgagent">
+            <kfamCell/>
+            <kfamCell colspan="11"/>
+          </kfamRow>
+          <kfamRow valign="bottom">
+            <kfamCell/>
+            <kfamCell>
+              <behavior>Pick colors</behavior>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell>
+              <behavior>Add multi-token set names</behavior>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell/>
+            <kfamCell/>
+            <kfamCell>
+              <behavior>Organize &amp; prune fg/ bg tests</behavior>
+              <behavior>Compare colors</behavior>
+              <behavior>Adjust color values</behavior>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell>
+              <fleft/>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell>
+              <behavior>Review results</behavior>
+            </kfamCell>
+          </kfamRow>
+          <kfamRow bgcolor="bgagent">
+            <kfamCell/>
+            <kfamCell colspan="11">
+              <agent>Author</agent>
+            </kfamCell>
+          </kfamRow>
+          <kfamRow>
+            <kfamCell/>
+            <kfamCell>
+              <fup/>
+              <fdown/>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell>
+              <fup/>
+              <fdown/>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell/>
+            <kfamCell/>
+            <kfamCell>
+              <fup/>
+              <fdown/>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell/>
+            <kfamCell/>
+            <kfamCell>
+              <fup/>
+            </kfamCell>
+          </kfamRow>
+          <kfamRow>
+            <kfamCell/>
+            <kfamCell>
+              <agent>Just Color Picker</agent>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell colspan="7">
+              <agent><oxml/></agent>
+            </kfamCell>
+            <kfamCell/>
+            <kfamCell>
+              <agent>Web browser</agent>
+            </kfamCell>
+          </kfamRow>
+          <kfamRow>
+            <kfamCell/>
+            <kfamCell>
+              <behavior>Generate html</behavior>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <ka>table.html</ka>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <behavior agent="xsl bot">Generate fg/ bg test sets</behavior>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <ka><xsol k="kx">colortest</xsol></ka>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <behavior agent="xsl bot"
+                >Calculate W3C color accessibility values</behavior>
+            </kfamCell>
+            <kfamCell>
+              <fright/>
+            </kfamCell>
+            <kfamCell>
+              <ka>Accessibility report.html</ka>
+            </kfamCell>
+          </kfamRow>
+        </kfam>
+      </figure>
+      <p>The Just Color Picker tool generated HTML. A new transformation was created to map the HTML output to a new prodoc element, <xsol>colortest</xsol>. The production accessibility calculator was updated to handle the new schema and missing functionality was added.</p>
+      <p>Implementation had a mix of performance objectives: large swatches to make small comparisons, built in black, gray, and white samples, ability to instantly see color changes based on editable hex values, demonstrate single-sourcing concepts to client, save me an armload of effort</p>
+    </div>
+    <div created="2023.05.24 20:51" open="open">
+      <h id="h"><xsol>h</xsol>
+        &emdash; Depth-based headings because big headings are ugly</h>
+      <p>HTML uses numbered headings, prodoc, on the other hand, uses nested divs with a single, context-sensitive <xsol>h</xsol> element</p>
+      <p>The following XPath scales headings based on the maximum depth of the document. <a
+          href="https://www.modularscale.com/?1&amp;em&amp;1.272"
+          >1.272 is the square root of the golden ratio</a>. A recent document needed a gentler scaling factor. The cube root of the golden ratio (<a
+          href="https://www.modularscale.com/?1&amp;em&amp;1.174"
+        >1.174</a>) was used, instead.</p>
+      <figure>
+        <subh>CSS to scale headings based on document depth</subh>
+        <codeblock created="2023.05.26 15:47" sgscale="00.786em">h {
+font-size : oxy_xpath("concat(
+            math:pow(<b>1.272</b>,((max(//h/count(ancestor::*[@display='div'])) - count(ancestor::*[@display='div']) + 1 ))),
+            'em')", evaluate,dynamic-once) ;
+}</codeblock>
+      </figure>
+    </div>
+    <div created="2023.05.21 15:13" open="open">
+      <h id="kfam"><xsol>kfam</xsol>
+        &emdash; An element and generalized design language to make sense of knowledge flows from multiple perspectives</h>
+      <qblock created="2023.05.26 14:45">
+        <p kstyle="light"
+            >The kfam ontology includes a lot of concepts, but you only really need to focus on three to make sense of knowledge flows: <img
+            src="img/agent.png" width="3.5em" alt="agent in an orange box"/>, <img
+            src="img/artifact.png" width="4em" alt="artifact in a blue box"/>, and <img
+            src="img/behavior.png" width="5em" alt="behavior in a green box"/>.</p>
+        <caption>Test subject</caption>
+      </qblock>
+      <p>The knowledge flow analysis and modeling language &emdash; kfam &emdash; represents the most extreme example of the fractal nature of this approach to computer-assisted sense making.</p>
+      <p>The base language, markup, and visualizations associated with kfam have evolved over 30 years of discussions around organizational performance. New concepts and ideas around those concepts interplay with new ways to organize and control the appearance of kfam data. The result is a design language, where kfam concepts are used to name elements, attributes, colors, etc.</p>
+      <p>One view of sense making is answering the question, <q>How to make sense of this data? How to organize it without incessantly banging on the keyboard?</q>. The meaning of kfam from this perspective centers on ergonomics, the behavior of eyes and hands. Operationally, that's tuning the markup, interfaces, and bots to organize data into actionable knowledge.</p>
+      <p>When multiple datasets need the same treatment, shifting from manual to automated processes makes sense. This type of computer-assisted sense making &emdash;making sense of new data sources &emdash; would often be considered secondary deliverables, infrastructure that enables behavior, lowers costs, and improves quality.</p>
+      <p>When kfam is applied to primary activities, the questions shift to, <q>How do I make sense of this situation. What are we trying to accomplish? Who knows what? What doesn't know enough?</q></p>
+      <p> This type of sense making focuses on making sense of a behavioral domain, the performance objectives, and the specific knowledge requirements that enable intelligent behavior.</p>
+      <p>The <sp><xsol>kfam</xsol> element is a customized table that evolved to help the Test subject make sense of:</sp><sp>The ways that knowledge flows through organizations and is acted upon, operationally, planned, and implemented</sp><sp>The various bits and pieces of XML system architectures At its core, kfam is a language for dealing with the fractal nature of language and behavior.</sp><sp>Competing, multidimensional value optimizations. The variety of performance objectives and the specific knowledge requirements that enable intelligent behavior within a span of control.</sp></p>
+      <p>When engineering markup systems, analysis of knowledge flows has impacts on architectural decisions, fine-grained markup decisions, usability, and occasionally how to deal with organizational dynamics.</p>
+      <p>By being closely associated with primary work products and being rather abstract, the meaning of kfam concepts has been highly-dynamic, making formalization an iterative process. Of all of the systems built on the prodoc platform, kfam has had the most iterations and has the most moving parts. It is the most expansive example of semantic authoring being used to create markup based on a person's conceptual models. </p>
+      <qblock created="2023.05.26 14:40">
+        <p>I started working with markup at the same time that Bo introduced me to knowledge management and Joe, values-based decision making. I couldn't untangle those conceptual frameworks with a Lampson crane.</p>
+        <caption>Test subject</caption>
+      </qblock>
+      <div created="2023.05.23 00:53" open="open" kstyle="line">
+        <h id="kfamLang">kfam conceptual language</h>
+        <p>kfam's organized around three core concepts: <agent>agents</agent>, <artifact>artifacts</artifact>, and <behavior>behaviors</behavior>. Those three <artifact>concepts</artifact> are sufficient to describe a <behavior>knowledge flow</behavior>.</p>
+        <p><agent>Agents</agent>
+          <behavior>act</behavior>, <behavior>make decisions</behavior>, and <behavior>exhibit behavior</behavior>. The set of <agent>agents</agent> comprise <ind>individuals</ind>, <org>organizations</org>, <sys>systems</sys>, and <bot>automated agents</bot> (<bot>bots</bot>).</p>
+        <p><artifact>Artifacts</artifact> are <pa>physical</pa> or <ka>conceptual</ka> objects. </p>
+        <p><sp><k>Knowledge</k> can also be characterized through such distinctions as</sp>:<sp>Knowledge artifacts (ka) and meta-knowledge artifacts (mka)</sp><sp><data>Data</data>, <info>information</info>, <k>knowledge</k></sp><sp>Explicit, implicit, and tacit forms</sp></p>
+        <p><behavior>Behavior</behavior> comprises actions and decisions. Knowledge enables behavior. Co-location of knowledge and decisions generally improves performance. Behavior goes by many different names in different contexts.</p>
+        <p>Policy is what you do. Policy is behavior. Written policies are only guidance. The pages don't act. Ideally, they are semantic triggers, triggering the intended behaviors by the acting agents.</p>
+        <p>Meaning is behavior. Words have no meaning without action. Knowledge flows and lifecycles comprise such behaviors as knowledge creation, retention, transfer, use, and destruction.</p>
+        <p>Values are disassociated and abstracted knowledge systems that synthesize pattern recognition and evaluation to quickly apply established logic to operational details with minimal thought. They represent distilled and automated behaviors. Unscripted life requires active management systems; automate the operational details. Novelty focuses active attention, thinking, and &emdash; if there isn't too much fear &emdash; creativity.</p>
+        <p kstyle="line"
+            >While <agent>agent</agent>, <artifact>artifact</artifact>, and <behavior>behavior</behavior> are enough to describe a knowledge flow, additional details help with detailed analysis and engineering. The following diagram relates the kfam <q>data ∫ information ∫ knowledge ∈ behavior</q> model with Sowa's concepts and OODA loops, the process that fighter pilots use to Observe, Orient, Decide, and Act.</p>
+        <figure>
+          <subh>Knowledge flows associated with knowledge enabling behavior</subh>
+          <kfam created="2023.05.26 17:39" shcontrol="show" bgcolor="kfam"
+            shcontrols="hidden" shgrid="hidden" sgscale="00.786em" align="center"
+            docbook="image" id="ooda" csc="b"
+            alt="Observe relates to kfam sensing behaviors. Orient to sense making. Decide and act to knowledge use.">
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell bgcolor="paleGoldenrod">
+                <t><strong>Observe</strong></t>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell bgcolor="bgbehavior" csc="strong">
+                <t>Decide/ Act</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="middle">
+              <kfamCell/>
+              <kfamCell bgcolor="paleGoldenrod">
+                <data>Data</data>
+              </kfamCell>
+              <kfamCell colspan="2" bgcolor="royalblue" color="white">
+                <t><fleft/>---------------------------</t>
+              </kfamCell>
+              <kfamCell colspan="3" bgcolor="royalblue">
+                <artifact p.top=".3em" p.bottom="0.3em"
+                  > World / Physical existence </artifact>
+              </kfamCell>
+              <kfamCell colspan="2" bgcolor="royalblue" color="white">
+                <t><fleft/>------------------------------------</t>
+              </kfamCell>
+              <kfamCell bgcolor="bgbehavior">
+                <v>Change</v>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell bgcolor="paleGoldenrod">
+                <t csc="strong">|</t>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell bgcolor="bgbehavior">
+                <fup/>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell bgcolor="paleGoldenrod">
+                <fdown/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell bgcolor="yellowGreen" colspan="4">
+                <t><strong>Orient</strong></t>
+              </kfamCell>
+              <kfamCell rowspan="2" bgcolor="yellowGreen">
+                <k>Actionable, synthesized knowledge</k>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell bgcolor="bgbehavior">
+                <t csc="strong">|</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell bgcolor="paleGoldenrod">
+                <sense white="nowrap"><big>∫</big>Sensing<big>∫</big></sense>
+              </kfamCell>
+              <kfamCell>
+                <t>→</t>
+              </kfamCell>
+              <kfamCell bgcolor="yellowGreen">
+                <info> Information </info>
+              </kfamCell>
+              <kfamCell bgcolor="yellowGreen">
+                <fright/>
+              </kfamCell>
+              <kfamCell bgcolor="yellowGreen">
+                <mksense white="nowrap"><big>∫</big>Sense making<big>∫</big></mksense>
+              </kfamCell>
+              <kfamCell bgcolor="yellowGreen">
+                <t>→</t>
+              </kfamCell>
+              <kfamCell>
+                <t><strong sgscale="02.618em">∈</strong></t>
+              </kfamCell>
+              <kfamCell bgcolor="bgbehavior">
+                <t white="nowrap">∫Knowledge use∫</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell bgcolor="paleGoldenrod">
+                <behavior> Perceive </behavior>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell bgcolor="yellowGreen">
+                <fup/>
+              </kfamCell>
+              <kfamCell bgcolor="yellowGreen"/>
+              <kfamCell bgcolor="yellowGreen">
+                <t csc="strong"><fdown/></t>
+              </kfamCell>
+              <kfamCell bgcolor="yellowGreen"/>
+              <kfamCell bgcolor="yellowGreen">
+                <fup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell bgcolor="bgbehavior">
+                <t csc="strong">|</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell colspan="7" bgcolor="darkorange">
+                <agent> Agent's mental models &amp; conceptual space</agent>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell bgcolor="bgbehavior">
+                <t csc="strong">|</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell colspan="7" bgcolor="bgartifact">
+                <k>Associated event-specific and prior knowledge</k>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell bgcolor="bgbehavior">
+                <t csc="strong">|</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell colspan="7" bgcolor="bgartifact">
+                <aka> Abstracted knowledge / Values / Judgement / Expertise </aka>
+              </kfamCell>
+              <kfamCell bgcolor="bgbehavior">
+                <t><fleft/>
+                  <v display="inline"> Reapply </v></t>
+              </kfamCell>
+              <kfamCell bgcolor="bgbehavior">
+                <t csc="strong" align="left"><fleft/>-----------┛ </t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell colspan="4" bgcolor="bgartifact">
+                <k> Symbolic models, Knowledge graphs, Languages, Logic</k>
+              </kfamCell>
+              <kfamCell bgcolor="bgartifact">
+                <behavior>Recognize &amp; interpret</behavior>
+              </kfamCell>
+              <kfamCell bgcolor="bgartifact">
+                <behavior> Organize &amp; create</behavior>
+              </kfamCell>
+              <kfamCell bgcolor="bgartifact">
+                <behavior>Apply</behavior>
+              </kfamCell>
+              <kfamCell bgcolor="bgbehavior">
+                <t white="nowrap"><fleft/>
+                  <v display="inline"> Improvise </v></t>
+              </kfamCell>
+              <kfamCell bgcolor="bgbehavior">
+                <t csc="strong" align="left"><fleft/>-----------┛ </t>
+              </kfamCell>
+            </kfamRow>
+          </kfam>
+        </figure>
+        <codeblock created="2023.05.23 01:42" sgscale="00.786em" display="none"> &lt;!--
+              Term              Description
+                Primative
+                  Subclass
+
+                agent           (exhibits behavior)
+                  bot           automated agent
+                  gov           governing agent
+                  ind           individual agent
+                  mgmt          management agent
+                  org           organizational agent
+                  reg           regulating agent
+                  sys           system agent
+
+                artifact        (doesn't exhibit behavior)
+                  aka           abstracted/ distilled/ disassociated ka
+                  data          raw signal
+                  info          organized information
+                  k             synthesis of enabling knowledge
+                  ka            knowledge artifact
+                  mka           meta-ka (k about a ka)
+                  pa            concrete physical artifact
+                  rel           relationship
+
+                behaviors       (is behavior)
+                  issue         problem
+                  ku            knowledge use/ action/ decision
+                  mksense       sense making
+                  sense         perception
+                  v             value
+
+                kx              Exclude from kstyle processing
+-->
+&lt;!-- ..........................................................................
+. . :                 %kcore;     kfam primatives used for @k
+-->
+ &lt;!ENTITY % kcore       " agent| bot| gov| ind| mgmt| org| reg| sys|
+                          artifact| aka| data| info| k| ka| mka| pa| rel|
+                          behavior| issue| ku| mksense| sense| v|
+                          kx" >
+ 
+&lt;!-- ..........................................................................
+. . :                 %ked;               editorial markup
+-->
+&lt;!ENTITY % ked                " b| br| fdown| fdup| feq| fleft| flright|
+                                fright| fudown| fup| i| spacer| square| tube|
+                                u" >
+&lt;!-- ..........................................................................
+. . :                 %kmodels;         . structures
+--> &lt;!ENTITY % kmodels        " kflow|
+                                kfam|
+                                kv" >
+ 
+&lt;!-- ..........................................................................
+. . :                 %kphases;         . lifecycle phases
+--> &lt;!ENTITY % kphases        " kaccess|
+                                kaquisition|
+                                kcapture|
+                                kcreation|
+                                kdestruction|
+                                kretention|
+                                kretrieval|
+                                ktransfer|
+                                ktraversal|
+                                kutilization" >
+ 
+&lt;!-- ..........................................................................
+. . :                 %ksys;            . sys equivalents
+--> &lt;!ENTITY % ksys           " dir|
+                                file" >
+ 
+
+&lt;!-- ..........................................................................
+. . :                 %kfam.lang;       ( roll-up )
+-->
+ &lt;!ENTITY % kfam.lang         "%kcore;|
+                               %ked;|
+                               %kmodels;|
+                               %kphases;|
+                               %ksys;"></codeblock>
+        <codeblock created="2023.05.23 01:55" sgscale="00.786em" display="none"> characterization mappings
+ &lt;!ENTITY % activity.vals     "(primary| secondary| alignment| performance|
+                                value)" >
+&lt;!ENTITY % agency.vals       "(gov| org| sys| ind| bot|
+                                gov.bipolar|...
+&lt;!ENTITY % exist.vals        "(conceptual| real)" >
+&lt;!ENTITY % focus.vals        "(da| md| d2i| ia| mi| i2k| ka| mk| ku| k2v|
+                                mv)" ></codeblock>
+      </div>
+      <div created="2023.05.21 15:13" open="open">
+        <h id="kfamMarkup">kfam markup language</h>
+        <p>In markup systems, elements are first-class objects. Early experiments with extending and customizing semantics using attributes proved unworkable due to accessibility issues.</p>
+        <p>A couple of other design principles: The egg carton principle. How many eggs would you buy if you had to create your own egg cartons, on the spot? Be generous when you build containers. Redundancy, many ways to say the same thing, doesn't hurt.</p>
+        <p>Formalizing kfam starts by creating <xpe>spans</xpe> based on the concepts, e.g., <xsol>agent</xsol>, <xsol>artifact</xsol>, <xsol>behavior</xsol>. Likewise for attributes. <xpe>semantic-atl</xpe> includes <xa>agent</xa>, <xa>artifact</xa>, and <xa>behavior</xa>.</p>
+        <p>Most modeling is done in a specialized table called <xsol>kfam</xsol>, which uses a restricted element set and has a fairly extensive set of controls:</p>
+        <figure>
+          <subh><xsol>kfam</xsol> workspace</subh>
+          <kfam created="2023.05.24 16:42" shcontrol="show" kstyle="light"
+            shcontrols="hidden" width="100%" sgscale="00.786em" docbook="image"
+            id="workspace"
+            alt="Four rows of CSS controls adjust table properties. They sit above a kfam table with light formatting">
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell>
+                <agent>agent</agent>
+              </kfamCell>
+              <kfamCell>
+                <artifact>artifact</artifact>
+              </kfamCell>
+              <kfamCell>
+                <ka>knowledge artifact (ka)</ka>
+              </kfamCell>
+              <kfamCell>
+                <mka>metaknowledge artifact (mka)</mka>
+              </kfamCell>
+              <kfamCell>
+                <behavior>behavior</behavior>
+              </kfamCell>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+          </kfam>
+        </figure>
+      </div>
+      <div created="2023.05.22 23:36" open="open">
+        <h id="kfamVisualizations">kfam visual language</h>
+        <p>The kfam visual language starts with colors. Named colors are defined with HSL values and variables in LESS stylesheets. The names are defined for use as attribute values in prodoc.dtd so that they can be applied to <xa>color</xa> and <xa>bgcolor</xa> using picklists. One of the color pallets is for modeling knowledge flows.</p>
+        <figure>
+          <subh>Named foreground and background colors</subh>
+          <table shcontrol="show" docbook="image" id="bgcolors" shgrid="hidden"
+            shcontrols="hidden" width="50%"
+            alt="foreground and background colors for agent, artifact, and behavior">
+            <tbody>
+              <tr>
+                <td/>
+                <td>agent</td>
+                <td>bgagent</td>
+                <td>artifact</td>
+                <td>bgartifact</td>
+                <td>behavior</td>
+                <td>bgbehavior</td>
+              </tr>
+              <tr>
+                <td/>
+                <td bgcolor="agent"/>
+                <td bgcolor="bgagent"/>
+                <td bgcolor="artifact"/>
+                <td bgcolor="bgartifact"/>
+                <td bgcolor="behavior"/>
+                <td bgcolor="bgbehavior"/>
+              </tr>
+            </tbody>
+          </table>
+        </figure>
+        <p>Another attribute, <xa>kstyle</xa>, applies <xsol>kfam</xsol>visualizations to any element. <xa>kstyle</xa> accepts the values <xpath
+            white="normal"
+            >(bgcolor| color| custom| dark| full| gray| kflow| light| line| none)</xpath>. It applies background, foreground, and border color combinations based on the value of the <xa>k</xa> attribute, which describes the element's role in knowledge flows. prodoc.dtd sets default <xa>k</xa> attribute values for most spans, which can be overwritten to lie to the author, e.g., <xpath>agent/@k="behavior"</xpath>, would create a secret <xsol>agent</xsol> camouflaged to look like a <xsol>behavior</xsol>.</p>
+        <figure>
+          <subh><xa>k</xa> → <xa>kstyle</xa> CSS style mappings</subh>
+          <kfam created="2023.05.24 17:02" shcontrol="show" kstyle="light"
+            shcontrols="hidden" shgrid="hidden" sgscale="00.786em" docbook="image"
+            id="k-kstyle" dbwidth="70%"
+            alt="Setting the @k attribute to &quot;agent&quot; maps any element to the class of agents">
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell>
+                <agent>&lt;agent k="agent"></agent>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <block>
+                  <codeblock k="behavior">                              <b>*[k='agent']</b>
+{ -oxy-tags-background-color  : @kfam-agent-bg;
+  -oxy-tags-color             : black;
+}
+
+*[kstyle='light'][display]    <b>*[k='agent']</b>
+{ background-color            : @kfam-agent-bg;
+  border-color                : @kfam-agent-border;
+  color                       : black;
+}
+
+*[kstyle='light'][display]    *[k]:not(*[k='kx'])
+{ border-style                : solid;
+  border-width                : 2px;
+}</codeblock>
+                </block>
+              </kfamCell>
+            </kfamRow>
+          </kfam>
+        </figure>
+        <figure>
+          <subh><xa>kstyle</xa> variations applied to a table</subh>
+          <table shcontrol="show" shcontrols="hidden" shgrid="hidden" trules="none"
+            docbook="image" id="kstyleVariations" dbwidth="80%"
+            alt="The @kstyle attribute can be changed to get a range of visual effects">
+            <tr kstyle="bgcolor">
+              <xa>kstyle="bgcolor"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+            <tr kstyle="color">
+              <td colspan="11" sgscale="00.236em"/>
+            </tr>
+            <tr kstyle="color">
+              <xa>kstyle="color"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+            <tr kstyle="color">
+              <td colspan="11" sgscale="00.236em"/>
+            </tr>
+            <tr kstyle="dark">
+              <xa>kstyle="dark"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+            <tr kstyle="color">
+              <td colspan="11" sgscale="00.236em"/>
+            </tr>
+            <tr kstyle="full">
+              <xa k="kx">kstyle="full"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+            <tr kstyle="color">
+              <td colspan="11" sgscale="00.236em"/>
+            </tr>
+            <tr kstyle="gray">
+              <xa k="kx">kstyle="gray"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+            <tr kstyle="color">
+              <td colspan="11" sgscale="00.236em"/>
+            </tr>
+            <tr kstyle="kflow">
+              <xa k="kx">kstyle="kflow"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+            <tr kstyle="color">
+              <td colspan="11" sgscale="00.236em"/>
+            </tr>
+            <tr kstyle="light">
+              <xa k="kx">kstyle="light"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+            <tr kstyle="color">
+              <td colspan="11" sgscale="00.236em"/>
+            </tr>
+            <tr kstyle="line">
+              <xa k="kx">kstyle="line"</xa>
+              <td/>
+              <agent>agent</agent>
+              <td/>
+              <artifact>artifact</artifact>
+              <td/>
+              <ka>ka</ka>
+              <td/>
+              <mka>mka</mka>
+              <td/>
+              <behavior>behavior</behavior>
+            </tr>
+          </table>
+        </figure>
+      </div>
+      <div created="2023.05.26 20:24" open="open">
+        <h id="kfamModeling">kfam modeling</h>
+        <p>kfam started as a natural language for discussing project activities and how knowledge enables behavior. Some of that ambiguity has remained as the language has evolved into an analytical system, modeling language, and engineering framework. The most complete, published definition of kfam can be found in <a
+            href="https://sagebrushgroup.com/archive/201009_KFlowAnalysisModel_Paper.pdf"
+              ><title csc="i"
+              >Knowledge Flow Modeling and Analysis with Focus on Enabling Actions and Decisions within the Business Process</title></a>.</p>
+        <p>kfam was first used as a modeling language when markup program managers were being blamed for expected IT schedule slippages. Finding the solution was pretty easy.</p>
+        <ol>
+          <li>
+            <p>Map out the processing steps, defining each of the transforms and intermediate data forms</p>
+          </li>
+          <li>
+            <p>Identify the responsible agents. Who was doing the work? A person? A bot? Some combination?</p>
+          </li>
+          <li>
+            <p>Any knowledge gaps or other barriers to progress?</p>
+          </li>
+          <li>
+            <p>Where does any missing information need to come from?</p>
+          </li>
+        </ol>
+        <figure>
+          <subh>Knowledge gap analysis</subh>
+          <kfam created="2023.05.19 13:56" shcontrol="show" kstyle="light"
+            shcontrols="hidden" shgrid="hidden" sgscale="00.786em" docbook="image"
+            id="gapAnalysis" align="center"
+            alt="Source documents are converted to targets through a series of transformations and intermediate forms. The acting agents have knowledge gaps, and need the assistance of knowledgeable sources">
+            <kfamRow>
+              <kfamCell>
+                <t>1.</t>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <issue>source framemaker docs</issue>
+              </kfamCell>
+              <kfamCell>
+                <behavior>transform</behavior>
+              </kfamCell>
+              <kfamCell>
+                <ka>intermediate form</ka>
+              </kfamCell>
+              <kfamCell>
+                <behavior>transform</behavior>
+              </kfamCell>
+              <kfamCell>
+                <ka>intermediate form</ka>
+              </kfamCell>
+              <kfamCell>
+                <behavior>transform</behavior>
+              </kfamCell>
+              <kfamCell>
+                <artifact>target markup docs</artifact>
+              </kfamCell>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <fup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <fup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <fup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell>
+                <t>2.</t>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <agent>acting agent</agent>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <agent>acting agent</agent>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <agent>acting agent</agent>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell>
+                <t>3.</t>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <issue>kgaps</issue>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <issue>kgaps</issue>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <issue>kgaps</issue>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <fup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <fup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <fup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell>
+                <t>4.</t>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <agent>k source agent</agent>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <agent>k source agent</agent>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell>
+                <agent>k source agent</agent>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+          </kfam>
+        </figure>
+        <p>It turned out that all of the knowledge gaps were pending IT decisions. The problem went away. We also made a couple of refinements to the startup process.</p>
+        <p>Here's a more-complete set of kfam elements: Any element can join a class by setting the <xa>k</xa> attribute to the listed value.</p>
+        <figure>
+          <subh><xa>k</xa> values and associated colors</subh>
+          <kfam shcontrol="show" shcontrols="hidden" kstyle="light" shgrid="hidden"
+            docbook="image" id="kfamColors" sgscale="00.786em" dbwidth="80%"
+            alt="Agent colors are in the red-orange range. Artifacts, blue-purple. Behaviors use greens and yellows">
+            <kfamRow valign="top">
+              <kfamCell colspan="3">
+                <agent> agent </agent>
+              </kfamCell>
+              <kfamCell>
+                <t>Acts or has the power to act (exhibits behavior)</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <bot> bot </bot>
+              </kfamCell>
+              <kfamCell>
+                <t>Automated agent</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <gov> gov </gov>
+              </kfamCell>
+              <kfamCell>
+                <t>Governing agent</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <ind> ind </ind>
+              </kfamCell>
+              <kfamCell>
+                <t>Individual agent</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <issue> issue </issue>
+              </kfamCell>
+              <kfamCell>
+                <t white="nowrap"><q>Every problem's a management failure</q>
+                  &emdash; DOE Management Oversight Risk Tree</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <mgmt> mgmt </mgmt>
+              </kfamCell>
+              <kfamCell>
+                <t>Managing agent</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <org> org </org>
+              </kfamCell>
+              <kfamCell>
+                <t>Organizational agent</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <sys> sys </sys>
+              </kfamCell>
+              <kfamCell>
+                <t>System agent</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2"/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell colspan="3">
+                <artifact>artifact</artifact>
+              </kfamCell>
+              <kfamCell>
+                <t>Physical or conceptual object (doesn't exhibit behavior)</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <pa> pa </pa>
+              </kfamCell>
+              <kfamCell>
+                <t>Physical artifact</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <ka> ka </ka>
+              </kfamCell>
+              <kfamCell>
+                <t>Knowledge artifact</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <aka> aka </aka>
+              </kfamCell>
+              <kfamCell>
+                <t>Abstract/ distilled/ disassociated knowledge artifact</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <data> data </data>
+              </kfamCell>
+              <kfamCell>
+                <t>Item of factual information/ raw signal</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <info> info </info>
+              </kfamCell>
+              <kfamCell>
+                <t>Organized, meaningful data</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <k> k </k>
+              </kfamCell>
+              <kfamCell>
+                <t>Synthesis of enabling knowledge artifacts</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <mka> mka </mka>
+              </kfamCell>
+              <kfamCell>
+                <t>Metaknowledge about a ka</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <rel> rel </rel>
+              </kfamCell>
+              <kfamCell>
+                <t>Relationship/ associative/ associated Metaknowledge</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell colspan="3">
+                <behavior> behavior </behavior>
+              </kfamCell>
+              <kfamCell>
+                <t>Actions and decisions</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <mksense> mksense</mksense>
+              </kfamCell>
+              <kfamCell>
+                <t>Sense making/ meaning association/ informing behaviors</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <ku> ku </ku>
+              </kfamCell>
+              <kfamCell>
+                <t>Knowledge utilization event/ action/ decision</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <sense> sense </sense>
+              </kfamCell>
+              <kfamCell>
+                <t>Sensing, perceiving, data acquisition behaviors</t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell colspan="2">
+                <v> v </v>
+              </kfamCell>
+              <kfamCell>
+                <t>
+                  <t>Value, expectations, default logic, meaning, worth, enabled future behaviors</t>
+                </t>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow valign="top">
+              <kfamCell colspan="3">
+                <t> kx </t>
+              </kfamCell>
+              <kfamCell>
+                <t>Exclude from <xsol k="kx"
+                  >kstyle</xsol> processing. Override any default value</t>
+              </kfamCell>
+            </kfamRow>
+          </kfam>
+        </figure>
+      </div>
+    </div>
+    <div created="2023.05.22 15:51" open="open">
+      <h id="music"><xsol>music</xsol> &emdash; Rationalizing chord/ lyric pairings</h>
+      <p>When chord symbols lose alignment with the lyrics, they lose their meaning. With WP, the pairings regularly fall out of alignment for countless reasons:</p>
+      <figure>
+        <subh>Lyric-chord charts with misaligned text (it gets much worse, especially with proportional fonts)</subh>
+        <codeblock scale="0.86em" docbook="image" id="oldMusic" width="50%" alt="Shows the F#m chord above the word &quot;Me&quot; preventing the next chord &quot;G&quot; from aligning with the word &quot;eat&quot;">   D              <b color="red">F#m G</b>       A
+In remembrance of Me eat this bread
+   G              Em            A
+In remembrance of Me drink this wine
+   Bm             G  C            A
+In remembrance of Me pray for the time
+     D         F#m     G   A
+When God's own will is done</codeblock>
+      </figure>
+      <p>Markup was used to make the chord <xsol>c</xsol> and lyric <xsol>l</xsol> relationships more explicit.</p>
+      <figure>
+        <subh><xsol>lyric</xsol> lines, with lyric fragments <xsol>l</xsol>, and chord <xsol>c</xsol>symbols next to each other so they don't get lost</subh>
+        <codeblock csc="compact">&lt;music>
+  &lt;lyric>
+    &lt;l>In &lt;/l>
+    &lt;c>D&lt;/c>
+    &lt;l>remembrance of &lt;/l>
+    &lt;c>F#m&lt;/c>
+    &lt;l>Me &lt;/l>
+    &lt;c>G&lt;/c>
+    &lt;l>eat this &lt;/l>
+    &lt;c>A&lt;/c>
+    &lt;l>bread&lt;/l>
+  &lt;/lyric>
+&lt;/music></codeblock>
+      </figure>
+      <p>XPath was used to manage horizontal and vertical offsets.</p>
+      <figure>
+        <subh>CSS rendering with fully-automated offsets</subh>
+        <music view="print" docbook="image" id="cssRendering" dbwidth="60%"
+          alt="Shows the G chord correctly aligned with the word &quot;eat&quot;">
+          <lyric><l>In </l><c>D</c><l>remembrance of </l><c>F#m</c><l>Me&nbsp;&nbsp;
+              </l><c>G</c><l>eat this </l><c>A</c><l>bread</l></lyric>
+        </music>
+      </figure>
+      <p>All the CSS gymnastics cause cursor-positioning problems. Adding an edit mode solved the problem:</p>
+      <figure>
+        <subh><xpath>music[@view="edit"]</xpath> markup</subh>
+        <codeblock csc="compact">&lt;music view="edit">
+  &lt;lyric>
+    &lt;l>In &lt;/l>&lt;c>D&lt;/c>&lt;l>remembrance of &lt;/l>&lt;c>F#m&lt;/c>&lt;l>Me&amp;nbsp;&amp;nbsp;&lt;/l>
+    &lt;c>G&lt;/c>&lt;l>eat this &lt;/l>&lt;c>A&lt;/c>&lt;l>bread&lt;/l>
+  &lt;/lyric>
+&lt;/music></codeblock>
+      </figure>
+      <figure>
+        <subh><xpath>music[@view="edit"]</xpath> rendering</subh>
+        <music view="edit" id="cssEdit" docbook="image" dbwidth="70%"
+          alt="Shows the chords and words on one line to simplify editing">
+          <lyric><l>In </l><c>D</c><l>remembrance of </l><c>F#m</c><l>Me&nbsp;&nbsp;</l><c>G</c><l>eat this </l><c>A</c><l>bread</l></lyric>
+        </music>
+      </figure>
+    </div>
+    <div created="2023.05.27 21:10" open="open">
+      <h id="vcanvas"><xsol>vcanvas</xsol>
+        &emdash; Visualizing and comparing sets of value optimizations</h>
+      <p>Value canvases come from the book <title csc="i"
+          >Blue Ocean Strategy</title>, They provide a good way to visualize and compare multiple sets of value propositions. The following SVG rendering was generated from data entered into a <xsol>vcanvas</xsol> table.</p>
+      <figure>
+        <subh>Rendering of <xsol>vcanvas</xsol> datasets</subh>
+        <p>
+          <img src="img/vcanvas.xmlValue.png"
+            alt="Value canvas comparing text, word, and XML value propositions"
+            width="100%"/>
+        </p>
+      </figure>
+    </div>
+    <div created="2023.05.26 20:49" open="open">
+      <h id="wordnetSumo"
+        >WordNet and SUMO integrations &emdash; Associating markup with dictionaries &amp; formal logic</h>
+      <p>There are different ways to organize bottom-up markup. A technical solution is namespaces, but that just keeps the chaos from bugging the bots.</p>
+      <qblock created="2023.05.26 21:12">
+        <p>Namespaces! A linguistic solution without behavioral context (e.g., requirements). So many different implementation models. So much fun.</p>
+        <caption>Anonymous source</caption>
+      </qblock>
+      <p>Another approach is negotiations. As individual markup is shared and encounters similar/ overlapping markup, conversations are used to generalize the concepts and markup. Different concepts get different names. Individual markup feeds departmental standards. Semantic generalization flows up through layered DTDs, matching the organizational hierarchy. This represents an evolutionary approach to bottom-up data modeling and system design.</p>
+      <p>Coming at the question from the opposite direction, individual markup could be anchored to a separate, semantic authority. At the first Ontolog face-to-face meeting &amp; workshop in 2003, Adam Pease introduced SUMO, the Suggested Upper Merged Ontology to the group. The aftermath is described in the forward to In Adam's book <title
+          csc="i">Ontology</title>:</p>
+      <qblock created="2023.05.26 21:29">
+        <p>The result of [Adam's] behavior was quite infectious. Adam, Kurt Conrad, and I ended up in a late night sushi restaurant somewhere near Menlo Park, CA, discussing how to map SUMO concepts to Mandarin, Japanese, and Cantonese, how WordNet can reference SUMO, and why First-Order Logic (FOL) constraints are generally a cool concept to have in advanced computer systems. An upper-level ontology, such as SUMO, is a common, shared conceptualization of a domain.</p>
+        <caption>Duane Nickull</caption>
+      </qblock>
+      <div created="2023.05.27 10:43" open="open">
+        <h id="wsApproach">Approach</h>
+        <p>The draft implementation uses prodoc's document-level extension mechanism to add global attributes a test document:</p>
+        <figure>
+          <subh>Semantic formalization attribute list</subh>
+          <codeblock created="2023.05.26 21:55" sgscale="00.786em">&lt;!-- ren to fsem.atl when generalized -->
+&lt;!ENTITY  % sa.atl
+"
+              shsem           (show| hidden)   #IMPLIED
+              sumoID          CDATA            #IMPLIED
+              sumoLogic       CDATA            #IMPLIED
+              sumoText        CDATA            #IMPLIED
+              userID          CDATA            #IMPLIED
+              userLogic       CDATA            #IMPLIED
+              userText        CDATA            #IMPLIED
+              wnetID          CDATA            #IMPLIED
+              wnetSense       CDATA            #IMPLIED
+" ></codeblock>
+        </figure>
+        <p kstyle="light">The approach was tested with the concepts <xsol k="kx"
+            >agent</xsol>, <xsol k="kx">artifact</xsol>, and <xsol k="kx"
+            >behavior</xsol>. The <xa k="kx"
+          >shsem</xa> attribute controls the expansion and collapsing of the associated form control that provides access to the WordNet and SUMO attributes set.</p>
+        <figure>
+          <subh>Elements mapped to WordNet definitions and SUMO logic</subh>
+          <tl m.left="1.272em" docbook="image" id="elements2sumo" dbwidth="70%"
+            alt="A behavior element has been expand to show interfaces for WordNet and SUMO connections">
+            <t kstyle="light"><agent shsem="hidden" sumoID="Phrase" wnetID="106332364"
+                sumoLogic="(=>
+  (instance ?PHRASE Phrase)
+  (exists (?PART1 ?PART2)
+    (and
+      (part ?PART1 ?PHRASE)
+      (part ?PART2 ?PHRASE)
+      (instance ?PART1 Word)
+      (instance ?PART2 Word)
+      (not
+        (equal ?PART1 ?PART2)))))"
+                sumoText="If an object is an instance of phrase,
+then there exist another object and a third
+object such that the other object is a part of
+the object and the third object is a part of the
+object and the other object is an instance of
+word and the third object is an instance of
+word and the other object is not equal to the
+third object" wnetSense="the semantic role of the animate entity that 
+instigates or causes the happening denoted by the 
+verb in the clause. " userText="agents make decisions and perform actions"
+                userID="agent">agent</agent></t>
+            <t kstyle="light"><artifact shsem="hidden" wnetID="100021939"
+                wnetSense="a man-made object taken as a whole." sumoID="Artifact"
+                userText="a physical or conceptual thing"
+                sumoText="If an entity is an instance of artifact,
+then there exists a process such that the 
+process is an instance of making and the 
+entity is a result of the process" sumoLogic="(=>
+  (instance ?ARTIFACT Artifact)
+  (exists (?MAKING)
+    (and
+      (instance ?MAKING Making)
+      (result ?MAKING ?ARTIFACT))))" userID="artifact"
+              >artifact</artifact></t>
+            <t kstyle="light"><behavior wnetID="114008342"
+                wnetSense="the action or reaction of something (as a
+machine or substance) under specified
+circumstances; &quot;the behavior of small particles
+can be studied in experiments&quot;." sumoID="Process"
+                sumoText="If a case role a process and an object and the
+case role is an instance of case role and the
+process is an instance of process and the
+object is an instance of object,
+
+then the object plays role in event the case
+role for the process" userText="an action or a decision" userID="behavior"
+                sumoLogic="
+(=>
+  (and
+    (?ROLE ?EVENT ?OBJ)
+    (instance ?ROLE CaseRole)
+    (instance ?EVENT Process)
+    (instance ?OBJ Object))
+  (playsRoleInEvent ?OBJ ?ROLE ?EVENT))" shsem="show"
+              >behavior</behavior></t>
+          </tl>
+        </figure>
+      </div>
+      <div created="2023.05.27 10:43" open="open">
+        <h id="wsFindings">Findings &amp; next steps</h>
+        <qblock created="2023.05.27 11:57">
+          <p>Humans are not ideally set up to understand logic; they are ideally set up to understand stories.</p>
+          <caption>Roger C. Schank, cognitive scientist</caption>
+        </qblock>
+        <p>An obvious next step is to connect the form control to a SUMO repository and add a lookup/ query interface. The level of effort appears reasonable.</p>
+        <p>More thought needs to go into a more challenging issue, authoring fully-formalized semantics. Spelling KIF is one thing. Spelling out formal logic in KIF is another.</p>
+        <p>Semantic markup can simplify knowledge transfer by making implicit organizing concepts more explicit. This is especially useful during learning, before a new conceptual framework's language and logic have been fully-internalized.</p>
+        <p><sp>Expressing KIF concepts more explicitly through markup is expected to help it make sense in more behavioral contexts:</sp><sp>For individuals, faster comprehension and productivity, especially when style variations can be applied to help differentiate concepts</sp><sp>For the bots, more tool options. XSLT and XPath, by themselves, dramatically expand the software development options.</sp></p>
+        <p>In his <title csc="i"
+            >Standard Upper Ontology Knowledge Interchange Format</title> document, Adam describes SUO-KIF using BNF syntax:</p>
+        <figure>
+          <subh>SUO-KIF definition</subh>
+          <codeblock created="2023.05.27 10:55" sgscale="00.786em">upper ::= A | B | C | D | E | F | G | H | I | J | K | L | M |
+N | O | P | Q | R | S | T | U | V | W | X | Y | Z
+lower ::= a | b | c | d | e | f | g | h | i | j | k | l | m |
+n | o | p | q | r | s | t | u | v | w | x | y | z
+digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+special ::= ! | $ | % | &amp; | * | + | - | . | / | &lt; | = | > | ? |
+@ | _ | ~ |
+white ::= space | tab | return | linefeed | page
+initialchar ::= upper | lower
+wordchar ::= upper | lower | digit | - | _ | special
+character ::= upper | lower | digit | special | white
+word ::= initialchar wordchar*
+string ::= "character*"
+variable ::= ?word | @word
+number ::= [-] digit+ [. digit+] [exponent]
+exponent ::= e [-] digit+
+term ::= variable | word | string | funterm | number | sentence
+relword ::= initialchar wordchar*
+funword ::= initialchar wordchar*
+funterm ::= (funword term+) | (funword sentence+)
+sentence ::= word | equation | inequality |
+relsent | logsent | quantsent
+equation ::= (= term term)
+relsent ::= (relword term+) | (relword sentence+)
+logsent ::= (not sentence) |
+(and sentence+) |
+(or sentence+) |
+(=> sentence sentence) |
+(&lt;=> sentence sentence)
+quantsent ::= (forall (variable+) sentence) |
+(exists (variable+) sentence)</codeblock>
+        </figure>
+        <p>ixml was used to transform KIF to <xsol>kif</xsol>. The most significant finding was that the definition appears to include a couple of unnamed layers that deserve clarification.</p>
+        <p>Integrations with other automated systems have been explored. OntoInsights focuses on the value propositions associated with storytelling and deep narrative analysis. It generates RDF fragments that can be translated into KIF.</p>
+        <figure>
+          <subh>From semi-formalized markup languages to fully-formalized ontologies</subh>
+          <kfam created="2023.05.27 11:13" shcontrol="show" kstyle="light"
+            shcontrols="hidden" shgrid="hidden" docbook="image" id="formalization"
+            align="center"
+            alt="A developer creates the kif markup language. An author creates markup and definitions to feed a bot that generates kif markup, which feeds editorial and negotiation processes">
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <agent p.right="0.5em" p.left="0.5em" valign="middle">developer</agent>
+              <behavior p.left="0.5em" p.right="0.5em" valign="middle">creates</behavior>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <ka><xsol k="kx">kif</xsol> markup language<behavior display="block">
+                    <ka display="inline"> bnf </ka>
+                    <fright/>
+                    <bot display="inline">ixml </bot>
+                    <fright/>
+                    <ka display="inline">
+                      <xsol k="kx">kif</xsol>
+                    </ka></behavior></ka>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell p.right="0.5em" p.left="0.5em"/>
+              <kfamCell p.left="0.5em" p.right="0.5em"/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <agent rowspan="3" p.right="0.5em" p.left="0.5em" valign="middle"
+                >author</agent>
+              <behavior p.left="0.5em" p.right="0.5em" rowspan="2" valign="middle"
+                >creates</behavior>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <ka>personal markup</ka>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <kfamCell>
+                <ka>narrative definitions</ka>
+              </kfamCell>
+              <kfamCell>
+                <fright/>
+              </kfamCell>
+              <bot rowspan="2" p.left="0.5em" p.right="0.5em">bot<behavior display="block">
+                  <ka> rdf </ka>
+                  <fright/>
+                  <ka> kif </ka>
+                  <fright/>
+                  <ka>
+                    <xsol k="kx">kif</xsol>
+                  </ka></behavior></bot>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <behavior p.left="0.5em" p.right="0.5em">edits formalized logic</behavior>
+              <kfamCell>
+                <flright/>
+              </kfamCell>
+              <kfamCell>
+                <ka><xsol k="kx">kif</xsol> markup</ka>
+              </kfamCell>
+              <kfamCell>
+                <fleft/>
+              </kfamCell>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell align="center">
+                <fdup/>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+            <kfamRow>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell/>
+              <kfamCell>
+                <behavior white="nowrap">formalized ontology negotiations</behavior>
+              </kfamCell>
+              <kfamCell/>
+              <kfamCell/>
+            </kfamRow>
+          </kfam>
+        </figure>
+        <qblock created="2023.05.27 10:48">
+          <p>Every time I look in one of those fully-formalized thingies, it never agrees with the way I think.</p>
+          <caption>Test subject</caption>
+        </qblock>
+      </div>
+    </div>
+  </div>
+  <div created="2023.05.19 16:16" open="open" include="yes">
+    <h id="politics">Bottom-up negotiations to define shared meanings</h>
+    <qblock created="2023.05.19 16:17">
+      <p from="p3">Policy is what you do, not what you say or write.</p>
+      <t> </t>
+      <caption>Paul Strassmann, The Politics of Information Management</caption>
+    </qblock>
+    <p>A few more mantras from Strassmann: <q>Information management is primarily a question of politics and secondarily one of technology.</q>
+      <q>Operational decisions take care of today. Management decisions protect the future.</q>
+      <q>Without privacy, there is no freedom.</q></p>
+    <p>Negotiations around markup are rarely zero-sum. The ability to handle optional structures usually provides sufficient flexibility to accommodate different stakeholder interests. Even so, as the complexity of the project increases, integrating the multiple perspectives becomes more challenging.</p>
+    <p>Just as bottom-up markup starts with defining semantic values, a parallel, bottom-up approach to decision making starts with conversations to define common human values.</p>
+    <p>As the discussion topics progress, the group creates a shared vision for change and looks at the current conflicts from a position of safety. Issues are prioritized, and initiatives defined &emdash; quickly and without conflict.</p>
+    <p>More importantly, the process is energizing. Individuals see their values in the shared vision, and the new initiatives as a way to accomplish personal objectives. </p>
+    <p>From an ontological perspective, the identification, articulation, and prioritization of abstract values, starts a formalization process. The corresponding conversations create shared meanings to support the new language.</p>
+    <div created="2023.05.30 21:23" open="closed" include="no">
+      <h>drafts</h>
+      <p>Information management is primarily a question of politics and secondarily one of technology.</p>
+      <p>Politics is the way that groups make decisions.</p>
+      <p>Operations is decisions made for to take care of today. Management is decisions to protect the future.</p>
+      <p>Without privacy, there is no freedom</p>
+      <p>Implicit policy making by technologists</p>
+      <p>I grabbed Strassmann's book minutes from a flight out of San Jose, with a very-heavy overhead bag of SGML books that Boeing balked at paying for. The copy on my shelf came from Bob Smith, who gave me the phrase <q>semantic eschatology</q> to help tie all of this together, another topic for another paper.</p>
+      <p>Human success has been a function of working collaboratively, but it is not the only alignment mechanism. Force has also proved effective. So has influence.</p>
+      <p>Many different systems have been developed to align human actions, decisions, and behavior. With the rise of behavior prediction markets, understanding and managing these alignment mechanisms become more critical, especially when market systems and associated supply chains are associated with existential threats.</p>
+      <p>Global publishing systems have global stakeholders, all with their own sets of interests. In most cases, some overlap and some conflict. Late understandings of critical requirements can disrupt engineering schedules.</p>
+      <p>Many markup initiatives follow the pattern of wicked problems. The progression from first implementation to full interactive electronic technical manuals isn't usually one or two steps. Organizations have cycled through multiple, multi-million dollar iterations as their concept of the document shifted from automating files, to automating collections, to automating document components. The old system simply didn't have the right geometry for the new complexity.</p>
+      <p>Some wicked learning, learning that destabilizes logic systems, is probably always going to occur. We're back to evolving understandings and sense making, but there are ways to amplify marginal voices so that needless surprises don't occur. More importantly, effectively focusing political forces can convert resistance to lift. And the techniques are surprisingly easy.</p>
+      <p>After starting the DOE SGML project, I was transferred to a new strategic planning group and met Joe Beck, lead planner for the Pacific Northwest National Laboratory.</p>
+      <p> The power dynamic of Joe's stakeholder-focused strategic planning process and SGML's Internal Declaration Subset are the same, bottom-up decision making.</p>
+      <kfam created="2023.05.25 10:33" shcontrol="show" kstyle="light">
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell>
+            <t>O</t>
+            <t>||</t>
+            <t>/\</t>
+          </kfamCell>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+        <kfamRow>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+          <kfamCell/>
+        </kfamRow>
+      </kfam>
+      <p>With power comes responsibility. As the authority responsible for all lifecycle decisions, I end up negotiating with myself. Short-term operational imperatives vs good management practice to protect the future.</p>
+      <p>Dynamic semantics</p>
+      <p>Meanings change. This became clear during my first ontology project. Cisco's SGML initiative had metadata requirements. A large search said there wasn't much that had been assembled with care. For one example, I found 25 variations on the same product name in much less time than it took to assemble the report. The search program took on the initiative in hopes of reducing negative reviews by fixing the upstream data.</p>
+      <p>The approach that we took was to form consensus acceleration teams (CATs) with an engineering, marketing, and techdoc representative. We developed a repeatable process organized around three short meetings and two research exercises. The goal was to come up with a good working definition and the normative term for the concept.</p>
+      <p>One team met and thought that the were done after the first meeting. The person from marketing had all the answers... Until meeting #2, when the report was, <q>Everything that I told you last time is three months out of date.</q></p>
+      <p>most problems are geometry problems</p>
+    </div>
+    <p>The following training aide describes the process in more detail:</p>
+    <figure>
+      <subh>Community engagement process</subh>
+      <img src="img/ceProcess.pdf" width="90%"
+        alt="Four columns provide guidance on assembling a community, conversing and forming consensus, collaborating, and creating change"
+      />
+    </figure>
+  </div>
+  <div created="2023.05.26 16:00" open="open" include="yes">
+    <h id="h1">h1.dtd &emdash; Build your own prodoc</h>
+    <p><file>h1.dtd</file> is based on an HTML subset. It's scheduled for release on June 10th.</p>
+    <figure created="2023.05.30 20:47" open="open">
+      <subh>h1.dtd summary</subh>
+      <codeblock sgscale="00.786em">&lt;!-- ==========================================================================
+                                                              dawkIns ....
+              dawk Summary            
+                                               
+    SPath:    D:\kc\xt\h1\                  
+    SFile:    h1.dtd                
+    Gen:      2023-05-30 22:12         
+    GenBy:    D:\kc\xt\bin\dawk.awk           
+    Target:   D:\kc\xt\bin\scratch\dawk_tgt.txt           
+    fileType: xml
+    chopCol:  79
+
+    Module:   h1.dtd
+              HTML 1 Document Type Declarations
+
+    Public Identifier:
+
+              -//SG//DTD h1//EN
+
+    Date:     2021.05.29
+
+    Version:  Released for testing
+ 
+    Contents:
+
+   175    Declaration constants (parameter entity declarations)
+   178   
+   179      Extensible element constants
+   182   
+   183        %divs; - infinitely-nesting wrapper elements
+   186                %h1.divs;           baseline hierarchical divisions
+   194                %sa.divs;           semantic authoring interface
+   198                %divs;              (roll-up)
+   203   
+   204        %heads; - top of div (metadata) elements
+   207                %h1.heads;          baseline heading containers
+   211                %sa.heads;          semantic authoring interface
+   215                %heads;             (roll-up)
+   220   
+   221        %blocks; - paragraph-level elements
+   224                %h1.blocks;         baseline blocks (email benchmark)
+   239                %sa.blocks;         semantic authoring interface
+   243                %blocks;            (roll-up)
+   248   
+   249        %spans; - inline elements
+   252                %h1.spans;          baseline spans
+   280                %sa.spans;          semantic authoring interface
+   284                %spans;             (roll-up)
+   289   
+   290      Attribute constants
+   293   
+   294        Semantic attribute entities
+   297                @alt                alternate (text for image)
+   301                @agent              acts or has the power to act
+   305                @artifact           physical or conceptual object
+   309                @author             agent responsible for writing text
+   313                @behavior           an agent's actions and decisions
+   317                @class              css classifications
+   321                @content            add @name for custom "attribute"
+   325                @created            when created
+   329                @href               hypetext reference
+   333                @id                 unique identifier
+   337                @idref              reference to a single identifier
+   341                @modified           when modified
+   345                @name               add @content for matching value
+   349                @src                media source
+   353                @status             relative ranking
+   357                @tags               #words that classify or categorize
+   361                @type               nature or genre
+   365                %sem.atl;           (roll-up)
+   385   
+   386        Enumerated attribute value sets for style attributes
+   389                %avs.align;         horizontal text alignment values
+   394                %avs.display        display property values
+   402                %avs.open.closed;   details open/closed switch values
+   406                %avs.valign;        vertical alignment values
+   412                %avs.vwhite         vertical whitespace
+   417                %avs.whitespace     text whitespace
+   422   
+   423        Style attribute entities
+   426                @align              horizontal text alignment
+   430                @bgcolor            background color
+   434                @border             (width style color)
+   438                @color              text color
+   442                @colspan            column span
+   446                @display            default display geometry is inline
+   450                %a.display.def;     defined default (e.g., "block")
+   454                @height             vertical size
+   458                @margin             whitespace ouside border
+   462                @open               open/close display &amp; displayblock
+   466                @padding            whitespace inside border
+   470                @rowspan            row span
+   474                @scale              scales font size
+   478                @style              inline css
+   482                @valign             vertical alignment
+   486                @white              text whitespace
+   490                @width              horizontal size
+   494                @xspace.pre         xml:space="preserve"
+   499                %style.atl;         (roll-up)
+   517   
+   518        %gatl; - extensible global attribute set
+   531                %sa.atl;            semantic authoring interface
+   535                %gatl;               (roll-up)
+   541   
+   542      Element content model constants
+   545                %div.model;         generalized content model for divs
+   549                %fig.model;         content model for figure element
+   553                %kitchen.sink;      merged content models
+   557                %mixed;             parsable character data and %spans;
+   561                %text;              parsable character data content model
+   565                %undefined;         text
+   569   
+   570    Element and attlist declarations
+   573   
+   574      %h1.divs; declarations
+   577                div                 nested, hierarchical division
+   583                h1                  H1 wrapper
+   589                hsa                 HTML for semantic authoring wrapper
+   595                hsg                 HTML for semantic generalization wrap
+   601                prodoc              prodoc wrapper
+   607   
+   608      %h1.heads; declarations
+   611                h                   heading
+   617   
+   618      %h1.blocks; declarations
+   621                block               generic block of text
+   627                codeblock           block of source code
+   634                figure              wrapper bordered content
+   639                hr                  horizontal rule, thematic break
+   644                ol                  ordered list wrapper
+   649                p                   paragraph
+   654                qblock              block formatting for quoted text
+   659                t                   text
+   665                table               tablular, matrix data
+   670                  tr                table row
+   675                tl                  text list
+   680                ul                  unordered list
+   685   
+   686      %h1.spans; declarations
+   689                a                   hyperlink anchor
+   694                agent               one who acts, that which acts
+   699                artifact            physical or conceptual object
+   704                b                   bold text
+   709                behavior            action, decision, patterns
+   714                big                 big text
+   719                br                  line break
+   724                details             @open="closed" hides all but summary
+   729                i                   italic text
+   734                img                 inline image
+   742                meta                meta-data
+   747                name                designates and references concept
+   752                nowrap              non-breaking text
+   757                q                   quotation
+   762                s                   strikeout
+   767                small               small text
+   772                source              origin, reference
+   777                span                generic inline, span of text
+   782                strong              important text
+   787                summary             visible heading for details element
+   792                target              goal, result, focus
+   797                td                  table data cell
+   802                th                  table header cell
+   807                u                   underline
+   812   
+   813    Document constants (general entity declarations)
+   816                &amp;bull;            • bullet
+   820                &amp;circle;          ∘ ring operator
+   824                &amp;emdash;          — emdash symbol
+   828                &amp;h1;                "h1" string
+   832                &amp;H1;                "H1" string
+   836                &amp;hsa;               "hsa" string
+   840                &amp;Hsa;               "Hsa" string
+   844                &amp;nbsp;              non-breaking space
+  1034   
+  1035    END  h1.dtd
+
+# 2023.05.30 22:12 # D:\kc\xt\h1\ # h1.dtd #
+
+                                                              dawkIns .....
+=========================================================================== --></codeblock>
+    </figure>
+  </div>
+  <div created="2023.05.24 15:49" open="closed" include="no">
+    <h id="ark">ark</h>
+    <p> meaning, codified for computer or in human sense... develop app, fill gap, bootstrap reusabilty, build it, leave path for others, house? bots are accessible, vs ai/ml, children's museum (models)</p>
+    <p tags="#policy"
+      >Knowledge management options in organizational settings is limited due to the natural differences in how individuals and bots deal with information. Bots require explicitly-codified knowledge artifacts. Humans work with an asounding array of explicit, implicit, and tacit knowledge. Managing the implicits...</p>
+    <p>Labor on livable wages is too expensive. We need more low-cost automation. What's the least we can say to the bots so they makes sense of all this chaos? No-code/ low-code. Use a lot of electricity distilling patterns from stupid data.</p>
+    <p>Just as XML can be seen as a knoweldge transfer device, where the markup speeds the learning of names, concepts and logic; the CSS interfaces introduce processing concepts without learning/ wrangling precise CSS syntax.</p>
+    <p>This is where the hybrid visual-structural semantic athoring model is the best of both worlds when working with semantic formalization, make stuff explicit when that helps. Rely on visual formatting to leave the semantics implicit to limit costs.</p>
+    <p>Wicked learning tends to occur when new information and conceptual frameworks change established logic systems. Things used to make sense one way. Now they make sense another. Kuhn wrote about this in <title
+        csc="i"
+      >The Structure of Scientific Revolutions</title>. <q>Wicked problems</q> views the pattern from the perspective of solutions. </p>
+    <p>Iterative aproaches attempt to speed change towards performance targets... med risk, </p>
+    <p>This is a paper about integrating multiple perspectives and assessing it's demonstrated and expected performance from multiple perspectives </p>
+    <p>sophisticated solutions to manage complexity. we expect more conditionality and context sensitivity from our bots. Who's going to define those policies</p>
+    <p>app programming standards focus on processing and delivery, what about the feed processes, analysis and design. office documents turn these processes into stovepipes, markup liberates</p>
+    <p>To replace wp the easy ways to change appearance needed to be preserve. Level lists, as well.</p>
+    <p>A set of style attributes were defined. These provided ways to control the stylesheet (add 3 examples)</p>
+    <p>sensemaking wrap-up, next section, semantic authoring and sensemaking patterns</p>
+    <p>most of the time, the innovation isn't new structures and styles, but techniques to use those capabilities to create new data interfaces, often tuning involves writing xslt or css, and tweakng it with the document controls before stabilizing the code</p>
+    <qblock created="2023.05.25 15:33">
+      <p><q>Even at this point, this has been a successful project: new data structures, a few changes to styling, and when I'm done I should have a docbook integration.</q></p>
+      <caption>&emdash; Test subject</caption>
+    </qblock>
+    <div created="2023.04.04 11:10" open="open" m.top="3em">
+      <h>LinkedIn summaries</h>
+      <codeblock created="2023.04.02 22:07" sgscale="00.618em"><b>Digital sense making researcher</b>
+2013 - Present 10 years
+
+Digitization of personal monologues, conceptual frameworks, and logic systems| Self-actualization
+amplification| Healing stories &amp; communication networks
+
+Neuro-divergent, pattern-recognition, and data-geometry ergonomics| Navigation &amp; retrieval systems
+
+Bottom-up, values-based sense making, data modeling &amp; decision making| Natural-system vocabularies &amp;
+ontologies| Mappings to formalized logic systems
+
+<b>prodoc — Personalized professional documentation system</b>
+2013 - Present
+HTML-based Oxygen XML framework| WordPerfect replacement| Markup based on personal sense making 
+vocabularies and logic systems| Extends the semlAuth platform
+
+Knowledge flow modeling| Music notation| Semantic tables| Geometry-shifting hierarchical tables| 
+Purple numbers| Value canvas diagrams| Document-template-based integrated development environments|
+WordNet and SUMO mappings
+
+Iteratively-developed ecosystems| Doc-level reporting &amp; processing| Folder-level reporting &amp; navigation|
+Directory-based reporting &amp; book assembly| Email and code-publishing pipelines
+
+<b>semlAuth — Semantic markup language authoring platform</b>
+2013 - Present
+Open source, extensible HTML/XML-based platform| Document-level style controls for flexibility| 
+CSS stylesheets for consistency| Play with markup| Ditch word processing| Change the world
+
+H1 — semlAuth training doctype| Small HTML subset| Doc-level extensions| Semantic authoring 
+experimentation| Every semlAuth doc is a little language laboratory
+
+Hsa — Home for successful semantic markup authoring experiments| Author-developed personal-productivity
+apps| Formalize internal dialogues and logic| Personalized system interfaces| Ergonomic and 
+performance benefits
+
+Hsg — Integrate multiple perspectives| Bottom-up sense making, data modeling, and automated systems|
+Improve communications and collaboration
+
+Document-processing-silly-putty to build single-source laboratories &amp; ecosystems| Semi-formalized 
+capture of natural-system vocabularies &amp; ontologies| Individual, team, and community-based authoring,
+editing, and publishing pipelines| Lifecycle cost savings</codeblock>
+    </div>
+    <div created="2023.05.18 12:44" open="open">
+      <h id="outline">Abstract and reviewer outline</h>
+      <ull>
+        <lli level="1">
+          <p>The journey to replace WordPerfect w/ prodoc.dtd</p>
+        </lli>
+        <lli level="2">
+          <p>the path to prodoc? appendix</p>
+        </lli>
+        <lli level="2">
+          <p>prodoc evolved</p>
+        </lli>
+        <lli level="3">
+          <p>computer-assisted sense making</p>
+          <p>Kfam is the best example of what, exactly?</p>
+          <p>What does it mean to provide feedback (visual or otherwise) to a thinking process (let alone an evolving one)? I guess that seems confusing because I think of feedback as something that is provided to an actor (say from a court of law to an organization, from a manager to an employee, an audience to a comedian, or a scientist to a rat), not to a process.</p>
+        </lli>
+        <lli level="3">
+          <p>kfam semantics</p>
+          <p>knowledge architectures</p>
+        </lli>
+        <lli level="3">
+          <p>prodoc.dtd</p>
+          <p>what kind of language? Put to what use?</p>
+          <p>What does it mean to modify a DTD based on a (daily) priority?</p>
+        </lli>
+        <lli level="3">
+          <p>prodoc.css</p>
+          <p>What does it mean to “control CSS styling”?</p>
+          <p>What is “oXml” and its author mode</p>
+        </lli>
+        <lli level="2">
+          <p>Challenges &amp; techniques</p>
+        </lli>
+        <lli level="3">
+          <p>multi-perspective decision making</p>
+        </lli>
+        <lli level="3">
+          <p>negotiations</p>
+        </lli>
+        <lli level="3">
+          <p>formalizing ontologies</p>
+        </lli>
+        <lli level="3">
+          <p>natural system ontology dynamics</p>
+        </lli>
+        <lli level="3">
+          <p>wordnet and sumo integrations</p>
+        </lli>
+        <lli level="2">
+          <p>Baseline design scenarios</p>
+        </lli>
+        <lli level="3">
+          <p>hierarchies of structured text</p>
+        </lli>
+        <lli level="3">
+          <p>build editors and bots</p>
+          <p>Build a bot to do what?</p>
+        </lli>
+        <lli level="3">
+          <p>digitize and amplify logic systems</p>
+          <p>What does it mean to digitize or amplify a logic system? (And what on earth makes you think I’ve got one, let alone multiple? :-)</p>
+        </lli>
+        <lli level="3">
+          <p>improve collaboration</p>
+        </lli>
+        <lli level="3">
+          <p>improve bottom-up knowledge flows</p>
+        </lli>
+        <lli level="3">
+          <p>more intelligent value optimizations in organizational settings</p>
+        </lli>
+        <lli level="3">
+          <p>demonstrated vs anticipated</p>
+          <p>I am guessing that “iteratively-refine” and “too-compelling” are typos for “iteratively refine” and “too compelling”, respectively, yes? If not, these are terms that need to be defined.</p>
+          <p>personal value propositions</p>
+        </lli>
+        <lli level="3">
+          <p>motivations</p>
+        </lli>
+        <lli level="4">
+          <p>personal</p>
+          <p>ergonomics</p>
+        </lli>
+        <lli>
+          <p>path mechanics</p>
+        </lli>
+        <lli level="3">
+          <p>motivations?</p>
+          <p>“In case anyone else wants to walk this path” — what path? The previous paragraph was about a modeling language.</p>
+        </lli>
+        <lli level="3">
+          <p>semAuth definition, build your own, family of &hsa; doctypes</p>
+          <p>* “[T]here are multiple semantic authoring doctypes” … uh, why is a semantic authoring doctype useful for following this path, and where would one find these?</p>
+        </lli>
+        <lli level="3">
+          <p>h1</p>
+          <p>What is a bootcamp template?</p>
+        </lli>
+        <lli level="3">
+          <p>vocabulary</p>
+        </lli>
+        <lli level="2">
+          <p>glossary</p>
+        </lli>
+      </ull>
+    </div>
+  </div>
+  <appendix open="closed" include="no">
+    <h id="appendixE">appendix e</h>
+    <p>how specific prodoc time, other features were added, most notably a style language, which can be controlled through the <xa>kstyle</xa> attribute.</p>
+    <p>The following is the markup for the first two paragraphs in this section.</p>
+    <codeblock created="2023.05.19 13:52" sgscale="00.786em">&lt;p kstyle="line"
+    >kfam was created to help manage high-risk nuclear projects. It's organized around three core concepts:
+    &lt;agent>agents&lt;/agent>, &lt;artifact>artifacts&lt;/artifact>, and &lt;behavior>behaviors&lt;/behavior>. Those three
+    concepts are sufficient to describe a knowledge flow.&lt;/p>
+&lt;p kstyle="light"
+    >&lt;agent> Agents &lt;/agent> include individual, organizational and automated agents (bots). &lt;artifact>
+    Artifacts &lt;/artifact> include &lt;ka> knowledge artifacts (ka) &lt;/ka>. &lt;ka> Knowledge artifacts &lt;/ka> enable
+    &lt;agent> agents &lt;/agent>  to &lt;behavior> act and make decisions &lt;/behavior>.&lt;/p>    </codeblock>
+    <p>The association of CSS styles to the elements is indirect, through default <xa>k</xa> attributes</p>
+    <p>In time, additional markup features were added. At the block level, <xsol>kfam</xsol> is the primary modeling element. It is a table containing <xsol>kfamRow</xsol> and <xsol>kfamCell</xsol>, with <xsol>kfamCell</xsol> containing a very restricted content model.</p>
+  </appendix>
+  <div created="2023.05.21 13:39" open="closed" bgcolor="#eeeeee" include="no">
+    <h id="tomb">tomb</h>
+    <figure>
+      <p>On the plus side. Markup lets you connect pipelines. Your voice has no meaning if no one hears it. Connecting to monitizing roach motels is one thing. Building your own small editorial networks and pipelines where you set policy is quite something else. Also, integrating multiple perspectives is greatly simplified when they can be communicated through explicit data structures. At a mechanical level, markup enables reuse, reporting functions, navigation aides, etc. Text with explicit markup makes it easier to find needles in haystacks.</p>
+      <p>formalize meaning from your perspective Bottom-up sense making to realign global systems.</p>
+      <p>negotiations of meaning, timeframe, level of effort (worth doing, means delays), semantic bowtie here?</p>
+      <p>daily priorities: today I decide: this project (toc troubleshooting (default saxon parameter), switches to turn off hover and focus behaviors (performance), </p>
+      <p>geometry for pattern identification, css whitespace to improve readability</p>
+      <p>semantic authoring in practice/ negotiations: using a kfam element, adding multiple views of data and want to use unordered level lists, update dtd to add both <xsol>block</xsol> (effectively a wormhole for anything) and <xsol>ull</xsol> the data structure I want at this moment. General trend (authors want to put anything anywhere, and restrictions have been consistently opened up to create global options.</p>
+      <p>sensemaking wrap-up, next section, semantic authoring and sensemaking patterns</p>
+      <p><kwc>visual feedback is a critical part. included code in the hub format not to display and pass on values to test specific color values in real time before passing them to the calculator. most efficient use of author labor, give the bot all the bot work, not quite finished, needs a feedback loop to the authored document... pour entire hsl to rgb stylesheet into a oxy_xpath expression?</kwc></p>
+    </figure>
+    <p>around what can be considered bottom-up, semi-formalized ontologies based on formalized semantic markup.</p>
+    <p>The idea of giving semAuth users the ability to do sumo mappings led me to looking at formalizing the existing markup, starting with Bo's kfam (knowledge flow analysis &amp; modeling) language. </p>
+    <p>I tend to use kfam as a base ontology for much of my organizational and technical analysis and design work. Bo and I have also started conversations about adapting the data models that he developed as part of a meta knowledge repository prototype for the VA.</p>
+    <p>The journey to replace WordPerfect w/ prodoc.dtd?</p>
+    <p>by describing the knowledge flow analysis and modeling language (kfam), which is used to make sense of complex knowledge flows and system architectures and the semantic authoring extensions that were developed to organize information using these concepts.</p>
+    <p>kfam knowledge vector, information processing stage stages when knowledge becomes actionable, simon, sufficiency.</p>
+    <p>Replicating WP behaviors also involved list design. <xsol>oll</xsol> and <xsol>ull</xsol> stand for ordered level list, and unordered level list, where indentation is controled with the <xa>level</xa> attribute. This combination makes it easy to visualize a hierarchy without the expense of nesting.</p>
+    <p>Schema define doctypes that help ensure consistency across groups of authors and reduce software processing costs. meaningful names, typically anchored around real-world concepts or abstract organizing principles,</p>
+    <p>It extends the idea of semantic markup to semantic authoring, where authors assume the role of semantic authorities and create markup to express meaning from their perspectives. real world and abstract concepts</p>
+    <p>the idea of markup, the use of tags to define containers of reusable content in open and accessible text files</p>
+    <p><kwc>efficiency, faster, reusabilty better than typing, website updates, editor updates, people not understanding why the characteristics more efficient than regular. boggle community, personal not organizational, different value optimizations, internal benefits, beyond the digital document</kwc></p>
+    <p>This paper draws from work to introduce SGML to the US Department of Energy, negotiate strategic initiatives, and use formalized ontologies in business systems. It describes techniques based on these approaches to improve bottom-up communications, conceptualizations, and value alignments; and, more importantly, to speed change and align it with operational realities.</p>
+    <p>describes approaches for aligning systems around bottom-up value optimizations and priorities. It</p>
+    <p>One of the challenges of introducing SGML at Hanford was that the site had already standardized site documentation on a single file format, WordPerfect. Without those benefits, I was looking for specific datasets that could benefit from being formalized using SGML. It didn't occur to me that it would be <q>Bo-speak,</q> the peculiar terms and phrases that Bo used to discuss the project.</p>
+    <p>Most systems are a balance of two alignment mechanisms: negotiations and force. Most markup systems lean towards the force side of the equation. They are designed to protect downstream processing and publishing systems.</p>
+    <p>While word processors focus primary on the data</p>
+    <p>XML gives java something to do. kfam/vie helps figure out what to do</p>
+    <p>Ontologies tie logic to behavior, enabling data to be interpreted to inform knowledgeable (hopefully-intelligent) behavior.</p>
+    <p>markup is a largely-policy-neutral knowledge artifact encoding standard. It doesn't impose many logical requirements on the surrounding systems which provide processing logic to complete the formalization process.</p>
+    <p>sense of agency (my markup) vs loss of agency (their markup), bootcamp apps, improvisation, iteration, creativity, , decreasing conscious control, intuitive implicits, fuzzy informal logic, life is not scripted, agency and control, self of self</p>
+    <p>sense of agency (my markup) vs loss of agency (their markup), bootcamp apps, improvisation, iteration, creativity, , decreasing conscious control, intuitive implicits, fuzzy informal logic, life is not scripted, agency and control, self of self</p>
+    <p>km provides multi-perspective framework. the word is perceived. how to differentiate perspectives, which ones drive decisions</p>
+    <p>In this way, markup functions more like natural languages than rigorous data models, where some ambiguity in natural language enables it to function.</p>
+    <p>Well before the name kfam, knowledge flow analysis and modeling, became a primary conceptual framework during a 1992 project to research the use of SGML within DOE to transmit and archive Scientific and Technical Information.</p>
+    <p>Bo Newman, the program manager assigned to my SGML project, kept talking about knowledge, using familiar terms in very-specific ways. Just before I met him, he had applied these knowledge management and engineering principles to author an unchallenged set of bid specifications. This was for a laboratory management system that was so big that the award challenges were <q>just expected.</q> Bidders asked to use it as a reference for future contracts.</p>
+  </div>
+</prodoc>

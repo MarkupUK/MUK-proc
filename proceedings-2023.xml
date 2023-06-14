@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbookxi.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<book
+    xmlns="http://docbook.org/ns/docbook" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="5.0">
+    <info>
+        <editor><orgname>Markup UK</orgname></editor>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="xsl/img/background.jpg"/>
+            </imageobject>
+        </mediaobject>
+        <cover>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="xsl/img/background.jpg"/>
+                </imageobject>
+            </mediaobject>
+        </cover>
+        <title>Markup UK 2023 Proceedings</title>
+        
+    </info>
+    
+    <xi:include href="papers-2023/siegel/XProc%20as%20a%20command-line%20application%20engine.xml"/>
+    <!-- <xi:include href="papers-2023/arthurson/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <!-- <xi:include href="papers-2023/graham1/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <xi:include href="papers-2023/reinck/paper.xml"/>
+    <!-- <xi:include href="papers-2023/berndzen/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <xi:include href="papers-2023/kraetke/Martin_Kraetke_Bridging-the-Gaps-Between-TeX-and-XML.xml"/>
+    <!-- <xi:include href="papers-2023/nilsson/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <!-- <xi:include href="papers-2023/marchand/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <xi:include href="papers-2023/conrad/kwcWPmuk23paperDB_20230531.xml"/>
+    <!-- <xi:include href="papers-2023/lingunixtix/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <!-- <xi:include href="papers-2023/nadolu/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <!-- <xi:include href="papers-2023/graham2/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+	<!-- kay? -->
+    <!-- <xi:include href="papers-2023/sanchez/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    <!-- <xi:include href="papers-2023/quin/XProc%20as%20a%20command-line%20application%20engine.xml"/> -->
+    
+
+</book>

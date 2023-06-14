@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbookxi.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<book
+    xmlns="http://docbook.org/ns/docbook" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="5.0">
+    <info>
+        <editor><orgname>Markup UK</orgname></editor>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="xsl/img/background.jpg"/>
+            </imageobject>
+        </mediaobject>
+        <cover>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="xsl/img/background.jpg"/>
+                </imageobject>
+            </mediaobject>
+        </cover>
+        <title>Markup UK 2021 Proceedings</title>
+        
+    </info>
+    
+    <xi:include href="papers-2021/usdin/BTU-MarkupUK-2021/BTU-MarkupUK-paper-2021.xml"/>
+    <xi:include href="papers-2021/maus/dmaus-markupuk2021/paper.xml"/>
+    <xi:include href="papers-2021/couthures/XSLTForms%20for%20the%20%2720s.xml"/>
+    <xi:include href="papers-2021/kay/markupuk2021/paper.xml"/>
+    <xi:include href="papers-2021/siegel/paper/comprehensible-xml.xml"/>
+    <xi:include href="papers-2021/lapeyre/Lapeyre-Markup-UK-2021/Lapeyre-doc1.xml"/>
+    
+    <xi:include href="papers-2021/bredenberg-kaminski/Bredenberg_Kaminski.xml"/>
+    <xi:include href="papers-2021/lafontaine-whitaker/markupuk-laf06.xml"/>
+    <xi:include href="papers-2021/pemberton/pemberton/tutorial-design.xml"/>
+    <xi:include href="papers-2021/graham/paper.xml"/>
+    <xi:include href="papers-2021/quin/quin-csswithin.xml"/>
+
+</book>

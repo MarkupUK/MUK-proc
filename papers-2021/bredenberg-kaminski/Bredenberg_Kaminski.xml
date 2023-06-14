@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook"
+	 xmlns:xl="http://www.w3.org/1999/xlink"
+	 version="5.0" xml:lang="en">
+<info>
+  <title>2021 The Future of Distributed Markup Systems or ‘Help my package has become too large!’</title>
+
+<author>
+  <personname>Karin Bredenberg</personname>
+  <email>karin.bredenberg@sydarkivera.se</email>
+  <uri><link xlink:href="https://orcid.org/0000-0003-1627-2361"
+    xmlns:xlink="http://www.w3.org/1999/xlink"/></uri>
+  <personblurb><para><emphasis role="bold">Karin Bredenberg</emphasis> is a Metadata Strategist at Kommunalförbundet Sydarkivera. She currently serves as the chair of PREMIS EC, co-chair of TS EAS, chair of the DILCIS Board, and a member of the METS Board. Currently, Bredenberg is the activity lead for specifications in the project E-ARK3 and the European Commission’s eArchiving Building block.</para></personblurb>
+<affiliation>
+<jobtitle>Metadata Strategist</jobtitle>
+  <orgname>Kommunalförbundet Sydarkivera</orgname>
+  <address>
+    <country>Sweden</country>
+  </address>
+</affiliation>
+</author>
+  <author>
+    <personname>Jaime Kaminski</personname>
+    <email>highburyrd.jaime@gmail.com</email>
+    <uri><link xlink:href="https://orcid.org/0000-0003-2907-0128"
+      xmlns:xlink="http://www.w3.org/1999/xlink"/></uri>
+    <personblurb>
+      <para><emphasis role="bold">Jaime Kaminski</emphasis> BA, MA, PhD, is a training manager at Highbury R&amp;D. Before joining Highbury, Jaime spent 14 years in academia researching in the field of Digital Humanities where he has been working on EC-funded projects including EPOCH, 3D-COFORM, V-MUST, E-RHIS, ROMOR, E-ARK and E-ARK4ALL, as well as the UKRO-funded SEAHA project. Before joining academia, he spent seven years as a technical briefings manager and senior technology analyst for a Blue Chip ICT consultancy.</para>
+    </personblurb>
+    <affiliation>
+      <jobtitle>Training Manager</jobtitle>
+      <orgname>Highbury R&amp;D</orgname>
+      <address>
+        <country>Ireland</country>
+      </address>
+    </affiliation>
+  </author>
+
+  <keywordset>
+    <keyword>Archives</keyword>
+    <keyword>metadata</keyword>
+    <keyword>standards</keyword>
+    <keyword>de-facto standards</keyword>
+    <keyword>specifications</keyword>
+    <keyword>eArchiving building block</keyword>
+    <keyword>DILCIS Board</keyword>
+    <keyword>E-ARK</keyword>
+    <keyword>XML</keyword>
+    <keyword>XML-schema</keyword>
+    <keyword>Schematron</keyword>
+    <keyword>CITS</keyword>
+    <keyword>CSIP</keyword>
+    <keyword>SIARD</keyword>
+    <keyword>ERMS</keyword>
+    <keyword>Geospatialdata</keyword>
+    <keyword>eHealth</keyword>
+    <keyword>eHealth1</keyword>
+  </keywordset>
+
+<abstract>
+  <para>This paper expands on the themes developed in “Beyond the brick, for the past in the future, you find the archive!” which was presented by the authors at  Markup UK 2019. It explores the development of the European Commission’s eArchiving Building Block from the perspective of the underlying XML-based specifications. It will also look at some of the new specifications that have been developed by the Building block since 2019 and considers some key future challenges.</para>
+  </abstract>
+</info>
+  <section>
+    <title>Introduction</title>
+    <para>In 2019 you were introduced to the world of digital archiving and the eArchiving Building Block in a paper titled <link xl:href="https://markupuk.org/2019/webhelp/index.html#ar01.html">“Beyond the brick, for the past in the future, you find the archive!”</link>. We explored how common specifications have been used for describing both Information Packages and the Content Information Type Specifications (CITS) that can be placed in an Information Package. This is a new world for some and an old world for others, so let’s recap and introduce you to the challenges that follow.</para>
+  </section>
+<section>
+  <title>It all started with a declaration</title>
+  <para>In 2018 Estonia was the chair of the European Union, as the leadership switches every six months on a running schedule, so all countries get to be chair. Estonia is deeply engaged with the digital transformation and has been an inspiration for many.</para>
+  <para>During their presidency, all the European Union Member States and EFTA countries signed the ‘eGovernment Declaration’ in Tallinn on 6 October 2017. The so-called <link xl:href="https://digital-strategy.ec.europa.eu/en/news/ministerial-declaration-egovernment-tallinn-declaration"><citetitle>Tallinn Declaration</citetitle></link>, with its seven principles, focuses on high quality, user-centric digital public services for citizens as well as seamless cross-border public services for businesses. In December 2020, the Tallinn Declaration was further underpinned by the <link  xl:href="https://ec.europa.eu/isa2/sites/default/files/cdr_20201207_eu2020_berlin_declaration_on_digital_society_and_value-based_digital_government_.pdf"><citetitle>Berlin Declaration</citetitle></link>, which re-affirms Europe’s deep commitment to fundamental rights and European values and emphasises the importance of digital public services. The Berlin Declaration takes the principles formulated in the Tallinn Declaration further by enhancing the role of public administrations in driving Europe’s digital transformation.</para>
+</section>
+<section>
+  <title>The Building Blocks</title>
+  <para>Let’s start with the Connecting Europe Facility <link xl:href="https://ec.europa.eu/inea/en/connecting-europe-facility"><citetitle>CEF</citetitle></link> and its <link xl:href="https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/CEF+Digital+Home"><citetitle>Building Blocks</citetitle></link>; what are they? The European Union realise that the internet and digital technologies are transforming our world. They also see is that the digital landscape is becoming more diverse, creating challenges for cross-border interoperability and intercommunication. Europe is about working together but, Europeans still face barriers when using (cross-border) online tools and services. The implications are considerable. EU citizens can miss out on goods and services, and businesses in the EU miss out on market potential. At the same time, also the different governments in the EU cannot fully benefit from digital technologies. Therefore, the EU has described the Digital Single Market <link xl:href="https://ec.europa.eu/digital-single-market/en"><citetitle>(DSM)</citetitle></link> through which it aims to create a suitable environment for digital networks and services to flourish. The DSM is achieved by setting the right regulatory conditions and providing cross-border digital infrastructures and services. So, to support the DSM, the Connecting Europe Facility (CEF) programme is funding a set of generic and reusable Digital Service Infrastructures (DSI), known as Building Blocks. These Building Blocks offer reusable modular capabilities to enable digital public services across borders and sectors. There are currently nine Building Blocks: Big Data Test Infrastructure, the European Blockchain Services Infrastructure, Context Broker,  eDelivery, eID, eInvoicing, eSignature eTranslation and eArchiving. The main component of the Building Block is a Core Service Platform, provided and maintained by the European Commission. The Core Service Platform can include technical specifications, sample software and support services depending on the specific Building Block. The CEF Building Blocks provide basic capabilities that can be used to facilitate cross-border public service. The foundation of the CEF Building Blocks is interoperability agreements between the member states of the European Union. The objective of the Building Blocks is to facilitate interoperability between IT systems so that citizens, businesses and administrations can benefit from seamless digital public services wherever they may be in Europe.</para>
+  <figure xml:id="f.BBLayers" pgwide="1">
+    <title>The building block layers.</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="Images/BuildingBlocks.PNG" width="100%" scalefit="1"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>For each Building Block, the European Commission provides a Core Service Platform that consists of three layers:</para>
+  <para>  
+  <itemizedlist>
+      <listitem>
+        <para>At the core of each building block is a layer of standards and technical specifications;</para>
+      </listitem>
+      <listitem>
+        <para>for certain Building Blocks, a layer of compliant sample software exists to facilitate the implementation of the technical specifications and standards;</para>
+      </listitem>
+      <listitem>
+        <para>A layer of services (e.g. conformance testing, help desks, onboarding services, etc.) enables the adoption of the technical specifications and standards meant for use (which varies depending on the Building Block).</para>
+      </listitem>
+    </itemizedlist>
+  </para>
+  <para>All this means that the Building Blocks can be combined and used in projects in any domain or sector at the European, national or local level.</para>
+  <para>Can it be as simple as just described with the Building Blocks? No, during 2021, CEF is ending and will be transitioned to the Digital Europe Program <link xl:href="https://eufundingoverview.be/funding/digital-europe-programme"><citetitle>(DEP)</citetitle></link>, which will be funded for seven years. This brings challenges to all the Building Blocks. At the writing of this paper, the EU member states have still not finalised the details of the DEP programme. The programme itself will be housed in the eHealth part of the digital work within the EU nothing more is known.</para>
+</section>
+<section>
+  <title>Recap of the eArchiving Building Block</title>
+  <para>The <link xl:href="https://ec.europa.eu/cefdigital/wiki/display/CEFDIGITAL/eArchiving"><citetitle>eArchiving Building Block</citetitle></link> supported by The Connecting Europe Facility <link xl:href="https://ec.europa.eu/inea/en/connecting-europe-facility"><citetitle>(CEF)</citetitle></link> and the European Commission <link xl:href="https://ec.europa.eu"><citetitle>(EC)</citetitle></link> creates common specifications based on pre-existing standards that everyone can use to transfer data. eArchiving aims to provide the core specifications, software, training and knowledge to help data creators, software developers, and digital archives tackle the challenge of short, medium and long-term data management and reuse in a sustainable, authentic, cost-efficient, manageable and interoperable way. The birth took place in 2018 and was a long one ending in 2019. The result was several specifications for the different types of information packages found in the <link xl:href="https://www.iso.org/standard/57284.html"><citetitle>OAIS Reference model</citetitle></link> and Content Information Type Specifications (CITS) for structuring the content to be placed in the package. Tools were also developed, but let’s focus on the foundation, the specifications. In November 2019, a new two-year project named E-ARK3 was started, and is developing more specifications and enhancing those created previosuly. But where does this winding path take us? To more specifications and more data to transfer? The path will become more and more convoluted the longer we get on the journey of describing data as content in a content information type specification.</para>
+  <para>
+    <figure>
+      <title>The eArchiving building block and its services and specifications.</title>
+      <mediaobject>
+        <imageobject><imagedata fileref="Images/eArchiving%20services%20v2%20-%20with%20CS%20IP%20and%20CS%20CT.png" scale="40" scalefit="0"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </para>
+</section>
+  <section>
+    <title>Standards, de facto standards, and specifications</title>
+    <para>Jenn Riley’s <link xl:href="http://jennriley.com/metadatamap/"><citetitle>Visualisation of the Metadata Universe</citetitle></link> has been around for a while but still gives the best overview of standards used in the cultural sector, archives, libraries and museums. In the image, numerous standards are displayed in the context of their function and where they are used.</para>
+    <para>
+      <figure pgwide="1">
+        <title>The visualization of the Metadata Universe by Jenn Riley. (The recommendation is to look on-line)</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="Images/seeingstandards.png" width="100%" scalefit="1"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </para>
+    <para>Almost all standards on the metadata map created by Jenn Riley have an XML format available described with a DTD or an XML schema. For the XML schemas, both the ISO standard RelaxNG as well as W3C XML-schema formats are used. The choice depends solely on the skills of the creator of the schema. At the same time, it is also common to ensure that different types of schemas are available, so transformations from RelaxNG to XML schema and vice versa are often used. DTD is still around because old software is still in use, and it is often based upon using a DTD.</para>
+    <para>The most common way to use the different standards is to write a specification that describes a profile for your use case of the standard, which then is implemented in the setting you are operating. But here comes the part that the eArchiving building Block is tackling; we all write our own specifications on how to use the standards, so no one understands what anyone else has done. We need a set of common developed specifications that can be used and publicised in one central location, so they are easy to find for all. That is what eArchiving is trying to achieve.</para>
+  </section>
+  <section>
+    <title>The eArchiving specifications and its different faces</title>
+    <para>The core of eArchiving is the Information Package specifications. These describe a common format for storing bulk data and metadata in a platform-independent manner, authentic and understandable over the long term. The specifications are ideal for:</para>
+    <para>
+      <itemizedlist>
+        <listitem>
+          <para>migrating valuable long-term data between different generations of information systems,</para>
+        </listitem>
+        <listitem>
+          <para>transferring data to dedicated long-term repositories (such as digital archives), or</para>
+        </listitem>
+        <listitem>
+          <para>preserving and reusing data overextended (and shorter) periods and different generations of software systems.</para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>The layer outside the core is the Content information Type Specifications (CITS). These describe the content itself and ensure that the standards are suitable for transferring the content in a unified way.</para>
+    <para>The CITS are the specifications that currently are increasing in numbers. The information package specification is undergoing refinement and testing within the project by the team that is creating a validation tool for the information package. A first version of the validation has already been released, but it will be extended with more tests to ensure an information package follows the main specification for information packages.</para>
+    <para>
+      <figure>
+        <title>The eArchiving building block and the different specifications building up a Information Package (2021)</title>
+        <mediaobject>
+        <imageobject>
+          <imagedata fileref="Images/EARK_Specifications.png" width="100%" scalefit="1"/>
+        </imageobject>
+        </mediaobject>
+      </figure>
+    </para>
+    <para>With these two different types of specifications (all currently based on XML), an information package filled with content can be described and transferred. XML has long been the go-to format for the long-term preservation of information, mainly because it can structure information in a understandable way to both humans and machines. There have been concerns and comments raised regarding Json taking over the role of XML. However, in the archival setting, even if JSon is easier to use as a programmer in the long term, XML wins because of its readable elements and attributes explaining the information or what we call content placed in the document. However, at the same time, XML needs to be used wisely with the correct element and attribute names to facilitate understanding of the human reading of the XML document both now and in the future. There are also other formats used like tiff and pdf, but XML is the format to go to in most cases to reuse the information.</para>
+  </section>
+  <section>
+    <title>Defining a CITS with the help of experts</title>
+    <para>The information package itself is when you have the knowledge easy to create. But when we talk about the content, the challenges grow. For the content, the different content experts need to support creating the specification for the specification. A group of experts is not always easy to find since they need to know the content. They also need to understand the concept of specifications being able to use in different settings and by different users. For now, the creators of the specifications are part of the project. In the future, endorsement of specifications already in use and connections with content experts creating new specifications will be crucial to extend the numbers of specifications to cover all the content that can be found.</para>
+    <para>At the same time, the CITS that have been developed and are in development have shown the need for different ways of creating a CITS. The different ways also give different possibilities in validation services possible to create. Not to forget, how do we get this content out of a proprietary system?</para>
+    <para>The different ways are easiest described:
+      <itemizedlist>
+        <listitem>
+          <para>The specification endorses the use of an already created and widespread specification and provides minor detail on how it is placed into an information package.</para>
+        </listitem>
+        <listitem>
+          <para>The specification focuses on the placement of content in an information package. Some ordering of the content to make it understandable in the long term is described.</para>
+        </listitem>
+        <listitem>
+          <para>The specification gives thorough information on how the content itself is structured and how its content and files are placed in the information package.</para>
+        </listitem>
+      </itemizedlist>      
+    </para>
+    <para>This means that the challenge of defining a new CITS needs to not only being able to find the real experts on the content it is also about how many of the requirements will be placed in the specification where a different type of expert is needed. The number of requirements needed to be specified usually solves itself based upon the type of content and the prior work describing it. At the same time, an endorsement will be an important mechanism moving forward. An endorsement will include a description about how to place the content in the specification and then point to the content specification being maintained by an expert group on the content. An example here is the CITS for Archival Information which only gives a list of possible standards to use. The use of the archival standards is described at an expert group managing profiles for this.</para>
+  </section>
+  <section>
+    <title>A database specification</title>
+    <para>Databases are crucial for long-term preservation. In some cases, there will be a specification suitable for mapping from the database to an XML schema and thus giving an XML document (or more) which makes it possible to easily understand the content in the future. An example of this is Record Management Systems that can be mapped towards the CITS for Electronic Records Management Systems (CITS ERMS). But this is not always the case. There will always be databases that need to remain databases. You might think this is an easy task; just save the database dump, and we can just restore it ten years later and continue as before, but I can assure you it is not that easy. Databases need to be transformed into a sustainable format to ensure they can be preserved long term. The eArchiving Building Block uses the SIARD standard (Software Independent Archiving of Relational Database) developed by the Swiss Federal Archives <link xl:href="https://www.bar.admin.ch/bar/en/home.html"><citetitle>(SFA)</citetitle></link> and now maintained by SFA and the <link xl:href="https://dilcis.eu/"><citetitle>DILCIS Board</citetitle></link>. With the help of the available tools, SIARD transforms the database into an XML format. But many other files can be hidden in a database in the form of BLOBs and or CLOBs, which means that the total size of a database can be huge, and the number of files not suitable for transforming to XML enormous. So how do you transform a database with data in from simple values to an XML format with the files extracted and referenced in the XML document? In the transformation, the database content itself becomes XML, and the BLOBs and CLOBs become files referenced in the XML document. </para>
+    <para>At the same time, we want to transfer this XML document with its files to an archive, which means we want to put it into an information package to include some surrounding information, such as example definitions and explanations of value lists. An information package also adds the possibility of controlling checksums, to confirm that what has been transferred is what has been received. This means that all files are referenced in two XML documents. First, in the XML documents produced by the transformation, and second, in an information package XML document.</para>
+    <para>The complexity grows. Several questions arise:
+      <itemizedlist>
+        <listitem>
+          <para>How big can an information package become?</para>
+        </listitem>
+        <listitem>
+          <para>Can it grow indefinitely?</para>
+        </listitem>
+        <listitem>
+          <para>Can we put all the files in one folder and describe them in just the two XML documents?</para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>Going through the questions, we can see that all XML documents and files can be in one package, but that might give us an XML document that takes 24 hours to validate if the database was filled with files. Then time is needed for checking all the checksums needed to ensure that what was supposed to be transferred arrived without losses or spurious additions.</para>
+    <para>This means that we need to set up recommendations and rules about splitting the package into more packages, so the information is divided into more than one information package. This is where we are today, making the best recommendations on how to split a huge amount of content into different information packages.</para>
+  </section>
+  <section>
+    <title>Other “big” information types</title>
+    <para>Databases are not unique when it comes to creating challenges regarding the number of bytes that can be hosted or their content. Another area is eHealth. eHealth is an area where we can see many different systems being used. These include proprietary and bespoke systems alongside different standards focusing on many elements of healthcare provision. The central element for eHealth is clearly defined; it is the patient and the patient’s journal. This has its own challenge since usually, the focus for an archival transfer is the content. During this project, a specification has been developed based upon work performed in Norway for handling the transfer of deceased patient’s journals to the Norwegian Health Archive. The specification, in this case, does not go into which files are present; instead, it focuses on creating an information package with the patient-centric focus, which means the content is as it is just placed in the correct place. But considering the content with maybe numerous MRI scans and so on also, it needs to be possible to split the content into more than one information package to facilitate the transfer. A small hint – in this case, the splitting will follow the same rules defined for the databases.</para>
+    <para>
+      <figure>
+        <title>Marisa Merino Hernandes illustrated the eHealth1 specification in the following way.</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="Images/eHealth1_https_twitter.com_MarisaMerinoH.jpg" scale="80" scalefit="0"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </para>
+    <para>This eHealth specification will not be the only health specification, but it is the one focused on the patient. Another health specification that has been developed in the project relates to cancer registries and their transmission of information to different cancer information aggregators. For this specification, the focus has been on placing the content into the package with the addition of the extra information needed when you transfer the information for long-term preservation.</para>
+  </section>
+<section>
+  <title>How do we facilitate oversized information packages?</title>
+  <para>There will always be a problem with the package being too large to handle. The solution is not to get more powerful computers to handle the packages. It needs to be possible to achieve in different hardware and software environments and with varying staff skills. We cannot count on having access to the funding to get the hardware we want, but we still have to preserve the now for the future and so need to describe how we can split an information package into more parts. And not to be forgotten, we need to rebuild it again in the end when the content is going to be used. Moving forward will see more emphasis on the use of distributed systems, but not in the sense you most likely are thinking. Here we are more in the area of spreading the placement of content to different locations with the information package pointing to these locations instead of everything being contained in the information package.</para>
+</section>
+  <section>
+    <title>Where do I find my packages?</title>
+    <para>A question that we hope you appreciate is not easy to answer, but the work is ongoing to facilitate distributed content to keep the size of an information package manageable no matter whether it is distributed into interlinked packages or distributed storage with a central information package description.</para>
+  </section>
+</article>

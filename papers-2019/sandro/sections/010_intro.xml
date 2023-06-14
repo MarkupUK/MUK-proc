@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="5.0">
+    <title>Introduction</title>
+
+    <para>XSpec is a unit test and behaviour-driven development framework for XSLT, XQuery, and Schematron <xref xlink:href="#xspec"/>. XSpec test suites are generally executed: 
+        <itemizedlist>
+            <listitem>
+                <para>On a local machine using the shell or batch scripts, the oXygen XML editor, etc.</para>
+            </listitem>
+            <listitem>
+                <para>On a Continuous Integration (CI) server using software tools like Jenkins or
+                    online CI services like Travis, CircleCI, AppVeyor, etc.</para>
+            </listitem>
+        </itemizedlist>
+    </para>
+
+    <para>While running tests locally is typically performed by individual developers during their development process, running tests on a CI server is usually employed within a team to integrate code changes under version control.</para>
+
+    <para>CI servers like Jenkins offer fine grained control on how the test suite is executed and support both private and public version controlled repositories. However, this configuration requires a server to run the CI software and a system administrator to maintain both the server and the software.</para>
+
+    <para>Conversely, online CI services like Travis run entirely on the cloud and do not require system administration or server maintenance. On the other hand, these CI services are free to use only for open source projects in public repositories and charge fees for private repositories and improved capabilities.</para>
+
+    <para>The aim of this paper is to show an alternative approach using a serverless architecture built on AWS Lambda. This allows to run XSpec tests from private repositories while keeping costs low and avoiding server and software maintenance.</para>
+
+</section>

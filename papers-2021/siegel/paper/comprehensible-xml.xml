@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0">
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <info>
+    <title>Comprehensible XML</title>
+    <subtitle>Markup UK 2021</subtitle>
+    <pubdate>May 2021</pubdate>
+    <author>
+      <personname>Erik&#160;Siegel</personname>
+      <email>erik@xatapult.nl</email>
+      <affiliation><orgname>Xatapult</orgname></affiliation>
+    </author>
+    <abstract>
+      <para>Writing software, it is all too easy to forget that there is another side to it than just: it works. Most software goes through a life cycle of writing, testing debugging and maintenance. This makes it important that what you write is comprehensible, both for somebody else and yourself in a few months’ time. It reduces the chance of mistakes and bugs and shortens development time.</para>
+      <para>We have probably all seen, heard, or read something about how to write good code. We probably all to try to comply more or less, but given what we see around us, we do not always succeed.</para>
+      <para>This talk will try to provide directions, tips and tricks on how to make (in this case XML related) code more understandable. It will also provide background on why this important and why we should try to comply. How can we do this with minimum effort. It will be a mixture of things from literature and personal experience after 40 years of programming computers.</para>
+    </abstract>
+  </info>
+
+  <!-- ================================================================== -->
+
+  <sect1>
+    <title>Introduction</title>
+
+    <para>Writing software, it&#x2019;s all too easy to forget that there is another side to it than
+      just &#x201c;it works&#x201d; or &#x201c;it&#x2019;s fast&#x201d;. Most software, only throw
+      away scripts are probably exempt, goes through a life cycle of writing, testing debugging and
+      maintenance. </para>
+    <para>This makes it important that what you write is comprehensible, both for somebody else and
+      yourself in a few months’ time (or less). It is not just a matter of being nice: intelligible
+      code, being able to easily grasp what is meant, reduces the chance of mistakes and bugs, and
+      shortens development time.</para>
+    <para>Nobody is in the business of deliberately writing puzzling code. But given what we
+      probably all encounter now and then, there is a lot of jigsaw software in the world. What is
+      this XSLT trying to do? Why the <emphasis>%$#^</emphasis> is this XQuery not properly
+      indented, so I can see what <code>else</code> belongs to what <code>if</code>? What does this
+      variable store and what&#x2019;s its type? What am I supposed to pass to this parameter? </para>
+    <para>We all forget to pay attention to these kinds of things. We were hurried, hungry,
+      caffeine-depleted, tired, or stressed. We thought this piece of software would be thrown away,
+      but it miraculously survived for many, many years. We were in a flow and wanted to see an
+      end-result quickly. Even although we knew that a little attention now would save many, many
+      hours of maintenance and bug-hunting later, we did not pay enough attention.</para>
+    <para>So, what we can do about it? We have probably all seen, heard, or read something about how
+      to write good code. We probably all to try to comply, more or less, but given what we see
+      around us, we do not always succeed. We are <emphasis>not</emphasis> the computers we program;
+      our head contains a different kind of CPU and we must deal with that. </para>
+    <para>This talk will try to provide directions, tips and tricks on how to make code more
+      understandable. It will also provide some background on why this important and why we should
+      try to comply, despite all the excuses we give ourselves every day. How can we do this with
+      minimum effort. It&#x2019;s a mixture of things from literature and personal experience after
+      40 years of programming computers.</para>
+    <para>Comprehensible code is not something specifically for XML alone, so the applicability is
+      therefore wider. Examples will be for XML programming languages. </para>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>About the author</title>
+
+      <para>I&#x2019;m an XML specialist, doing things like consulting, designing and programming,
+        strictly XML technology (like XSLT, XQuery, Schemas, Schematron, etc.). Before that I worked
+        as a programmer and system architect, using languages like assembler, C, Visual Basic, PERL
+        and several others.</para>
+      <para>Besides the technical side of things I also like communicating about it. I&#x2019;m the
+        author of two books: one about eXist-db (together with Adam&#160;Retter) and one about
+        XProc&#160;3.0. There are several articles I have written on <link
+          xlink:href="https://www.xml.com"/>.</para>
+      <para>More about me at <link xlink:href="http://www.xatapult.com"/>.</para>
+
+    </sect2>
+
+  </sect1>
+
+  <!-- ================================================================== -->
+
+  <sect1>
+    <title>Why bother?</title>
+
+    <para>Unless you&#x2019;re a super-human programmer, you&#x2019;ve written software that
+      contains bugs. Small and obvious ones that were found during your own test runs or more hidden
+      ones that suddenly raised their ugly heads in production. There are entire books and
+      conferences devoted on to how to avoid this.</para>
+    <para>Besides things in the large (design, architecture, module structure, etc.), there are also
+      a lot of things in the small that can help to avoid or more easily detect problems. Making
+      your code more <emphasis>comprehensible</emphasis> is one of them. It&#x2019;ll help yourself
+      creating solid code and will be a sight for sore eyes for the maintenance people (yourself?),
+      later on in the product&#x2019;s life-cycle.</para>
+
+    <para>You can shrug about this, but bugs can be very costly. Or worse: deadly. If you wanna have
+      &#x201c;fun&#x201d;, read the Wikipedia page about bugs that matter: <link
+        xlink:href="https://en.wikipedia.org/wiki/List_of_software_bugs"/>. Or this one, that tries
+      to identify the worst software bug in history: <link
+        xlink:href="https://www.laserfiche.com/ecmblog/whats-worst-software-bug-history/"/>. Or
+      remember the very deadly problems with the Boeing&#160;737&#160;MAX, partly caused by a few
+      lines of code. </para>
+
+    <figure>
+      <title>The spectacular explosion of the Ariane&#160;5 flight in 1996, caused by a software
+        bug…</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="figures/Explosion_of_first_Ariane_5_flight.jpg" width="60%"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>Of course we don&#x2019;t all write rocket, flight guidance, medical or otherwise critical
+      stuff. What we do is usually very… non-critical, ordinary, boring, quotidian? Still, helping
+      yourself and others to easily comprehend what a piece of software is supposed to do is not
+      only just being nice. Some reasons for caring about this:</para>
+    <itemizedlist>
+      <listitem>
+        <para>Whether the software is critical or not, bugs are a nuisance. And understandable code
+          helps detecting them. By others but also, or maybe even foremost, by yourself.</para>
+      </listitem>
+      <listitem>
+        <para>It&#x2019;s a known fact that most software spends way more time being maintained than
+          initially written. Much of this maintenance time is spent trying to
+            <emphasis>understand</emphasis> what the software is trying to do, and how. Anything we
+          can do to help with this is pure profit.</para>
+      </listitem>
+      <listitem>
+        <para>Software is costly, a few hours spend on comprehensibility upfront saves many, many
+          hours later.</para>
+      </listitem>
+      <listitem>
+        <para>Professional pride…</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>With my focus here on things we can do during the actual writing of the code, I&#x2019;m
+      not saying that any measures in the large don&#x2019;t matter. They do, a lot. But since I
+      spend most of my time in the (XML) software writing trenches, this is what I know most about.
+      And since I encounter a lot of code where things are wrong (yes, also by myself), a little
+      refresher can&#x2019;t hurt.</para>
+
+  </sect1>
+
+  <!-- ======================================================================= -->
+
+  <sect1>
+    <title>What can we do?</title>
+
+    <para>This section contains the measures that IMHO (author&#x2019;s prerogative) are most
+      important in making code comprehensible. Most, if not all, is backed up by software
+      engineering literature. However, what is dealt with here is subjective, both in choice of
+      subjects, examples and proposed solutions. You might disagree or think I missed some key
+      point. I hope nonetheless we don&#x2019;t disagree about the <emphasis>importance</emphasis>
+      of making code comprehensible. We probably all struggle with this and try to do the best we
+      can. Let this all be at least be a source of inspiration and awareness.</para>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>Convention yourself</title>
+
+      <para>If there's one thing you can do yourself a lot of fun with, it's
+          <emphasis>conventions</emphasis>. Huh, conventions? Aren&#x2019;t that these long and
+        boring lists of things you need to comply with, from variable names to comment structure?
+        Which you never ever seem to be able to adhere to in full? Yes, that&#x2019;s what I
+        mean!</para>
+
+      <para role="keep-with-next">There are two main reasons why conventions are important:</para>
+      <itemizedlist>
+        <listitem>
+          <para>They provide more &#x201c;thinking space&#x201d;. What if you had to come up with a
+            variable naming convention every time you created one? What if you had to decide how to
+            format a function header on every occasion you started one? You don&#x2019;t want that.
+            Following a pattern, aka convention, is way easier to your working memory, already
+            filled with the many intricate details of a program&#x2019;s logic.</para>
+        </listitem>
+        <listitem>
+          <para>It boosts comprehensibility. Being able to see what this variable name stands for,
+            where a functions starts and ends, what <code>else</code> belongs to what
+              <code>if</code>, helps a lot in understanding a piece of software. </para>
+        </listitem>
+      </itemizedlist>
+
+      <para>I admit, conventions have a bad name. Sometimes they&#x2019;re used to wrap long red
+        tapes around programming efforts, which reduces all the fun. But applied properly they can
+        absolutely help improving the comprehensibility of the code. How can we make them
+        effective?</para>
+      <itemizedlist>
+        <listitem>
+          <para>There should&#x2019;t be too many of them. It must easily fit in your head. So maybe
+            a list of one or two pages long?</para>
+        </listitem>
+        <listitem>
+          <para>They should&#x2019;t be regarded as <emphasis>absolute</emphasis>. When following a
+            convention leads to ridiculous long names/indenting/indecipherable code/overly long
+            functions/… (cross out what does not apply), either change the convention or decide that
+            this is an exceptional case and break the rules.</para>
+        </listitem>
+        <listitem>
+          <para>And yes, you have to get used to them. If the list isn&#x2019;t too long and the
+            conventions more or less make sense, they&#x2019;ll soon become a habit.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>With respect to comprehensibility, what are the basic things important enough to have a
+        convention about?</para>
+      <itemizedlist>
+        <listitem>
+          <para>Names of variables, functions, data structures, etc.: Pick something and stick to
+            it. I personally prefer the <code>lower-case-with-hyphens</code> convention but
+            there&#x2019;s nothing sacred about it. The <code>lowerMixedCase</code>,
+              <code>UpperMixedCase</code>, <code>lower_case_with_underscores</code> or whatever are
+            just as good. You can also use multiple naming styles for different things in your
+            program, but don&#x2019;make choosing the right one too complicated!</para>
+          <para>The only thing I would definitely <emphasis>not</emphasis> recommend is using
+            something without some kind of word separation. The worst example probably being
+              <code>ALLCAPSWITHOUTANYSEPARATORS</code>: too hard to read and understand.</para>
+        </listitem>
+        <listitem>
+          <para>Layout: Things like indentation, whitespace, empty lines, separators, comment
+            styling, etc. Choose something and try to keep the code consistent. More about this in
+              <xref linkend="sect-rhythm-of-the-code"/>.</para>
+          <para>You can make it easy on yourself here: find out what the pretty-print functionality
+            of your IDE is capable of, and use <emphasis>that</emphasis> as (part of) your layout
+            convention…</para>
+        </listitem>
+        <listitem>
+          <para>Commenting: What to write comments about, how they&#x2019;re formatted, etc. See
+              <xref linkend="sect-comments"/>.</para>
+        </listitem>
+        <listitem>
+          <para>Filenames and directory structures: Again, pick some naming convention. Don&#x2019;t
+            forget to standardize the <emphasis>extensions</emphasis> (is an XQuery script
+              <code>*.xq</code>, <code>*.xql</code> or <code>*.xquery</code>?). If there
+            isn&#x2019;t already one, try to invent a convenient directory structure, using
+            standardized names, that fits the bill.</para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2 xml:id="sect-rhythm-of-the-code">
+      <title>The rhythm of the code</title>
+
+      <para>Layout is extremely important for the comprehensibility of the code.
+          <code>2+3&#160;*&#160;1+2</code> is <emphasis>not</emphasis>
+        <code>15</code> (what the spacing suggests) but <code>7</code>. Or what about this coding
+        horror:</para>
+
+      <programlisting xml:space="preserve" language="xml"><![CDATA[<xsl:function name="local:something">
+<…></xsl:function><xsl:function name="local:something-else"><…>  
+</xsl:function>]]></programlisting>
+
+      <para>What are the things we can do to enhance comprehensibility? First a few tips about
+        expressions and the likes:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Use parentheses abundantly. Write <code>(2+3)*(1+2)</code> if that&#x2019;s what you
+            mean. Parentheses help to communicate the intention of your expressions.</para>
+        </listitem>
+        <listitem>
+          <para>Choose a style about where to add spaces. Do you write: <code>(2+3)*(1+2)</code> or
+              <code>(&#160;2&#160;+&#160;3&#160;)&#160;*&#160;(&#160;1&#160;+&#160;2&#160;)</code>?
+            Format a function call like <code>add(1,2)</code> or <code>add(1,&#160;2)</code> or
+              <code>add(&#160;1,&#160;2&#160;)</code>… Again, pick something, stick to it.</para>
+        </listitem>
+        <listitem>
+          <para>If there&#x2019;s any syntactic sugar in your language that makes expressions easier
+            to read, by all means, use it. For instance, since version&#160;3.0, XPath has the
+              <code>=></code> operator. So instead of:</para>
+          <programlisting>lower-case(normalize-space(translate($name,&#160;'\',&#160;'/')))</programlisting>
+          <para>We can now write the, IMHO much clearer:</para>
+          <programlisting>$name => translate('\', '/') => normalize-space() => lower-case()</programlisting>
+        </listitem>
+      </itemizedlist>
+
+      <para>But what is, in my eyes, most important is the code&#x2019;s &#x201c;rhythm&#x201d;.
+        When you look at some script or module, can you easily see how it&#x2019;s structured? Where
+        things begin and end? What belongs to what? Here are my tips:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Choose an indentation style and try to keep this consistent.</para>
+          <para>For XML based languages like XSLT that's easy: indenting of XML is already
+            (unofficially) standardized. The only thing we can bicker about is <emphasis>how
+              many</emphasis> to indent and whether to use <emphasis>spaces or tabs</emphasis> (I
+            personally prefer an indent of two spaces and not to use tabs).</para>
+          <para>For text based languages like XQuery it&#x2019;s a little harder. I&#x2019;ve done a
+            lot of XQuery programming lately and noticed I couldn&#x2019;t come up with a consistent
+            and simple enough indentation strategy that works in all situations. Especially for
+            XQuery, make sure that it&#x2019;s clear what code belongs to what FLWOR expression or
+              <code>if/then/else</code> branch. Whatever you choose, it&#x2019;s always making the
+              <emphasis>intention</emphasis> of the code clear that matters most.</para>
+        </listitem>
+        <listitem>
+          <para>Open some code module in your editor, scroll a bit, and look at it as from afar. Can
+            you see how it's structured? What the building blocks are? When you&#x2019;re looking
+            for some template/function/section in the code, can you quickly find it? And in a glance
+            see where things start and end? </para>
+          <para>Clearly separate the main parts of your code. For instance, an XSLT program consists
+            mainly of templates. Make it very clear where one begins and ends. Create a
+              <emphasis>sectioned layout</emphasis>, like chapters/sections in an article or
+            book.</para>
+          <para>I personally prefer using &#x201c;comment lines&#x201d; for this:</para>
+
+          <programlisting xml:space="preserve" language="xml"><![CDATA[<xsl:template …>
+…
+</xsl:template>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<xsl:template …>
+…
+</xsl:template>]]></programlisting>
+          <para>And use a &#x201c;heavier&#x201d; line in between sets of templates that belong
+            together:</para>
+
+          <programlisting xml:space="preserve" language="xml"><![CDATA[<!-- ======================================================================= -->]]></programlisting>
+          <para>And no, it&#x2019;s <emphasis>not</emphasis> awkward to insert (type) these kinds of
+            lines all the time, see <xref linkend="sect-debunking"/>. But you can also decide to use
+            multiple empty lines. Or whatever works for you.</para>
+        </listitem>
+        <listitem>
+          <para>Use empty lines and comment headers to give code inside a template/function/… a
+            &#x201c;rhythm&#x201d;:</para>
+          <programlisting xml:space="preserve"><![CDATA[(: Initialize: :)
+…
+
+(: Compute the value for … :)
+…
+
+(: Write it to disk: :)
+…
+]]></programlisting>
+
+          <para>Splitting code in blocks like this serves two main purposes, analogue to paragraphs
+            in prose:</para>
+          <itemizedlist>
+            <listitem>
+              <para>They force you to think more structured and do the things that belong together
+                together.</para>
+            </listitem>
+            <listitem>
+              <para>Somebody which is new to the code can more easily grasp what it&#x2019;s about
+                (especially when the comment headers are helpful, see <xref linkend="sect-comments"
+                />).</para>
+            </listitem>
+          </itemizedlist>
+
+          <para>The code blocks should&#x2019;t be very long, max.&#160;10 to&#160;20 lines,
+            preferably shorter. Just a single line is ok if it serves the purpose.</para>
+        </listitem>
+        <listitem>
+          <para>Use a maximum line width to prevent your lines from overflowing/wrapping and making
+            them hard to follow. Older books about software engineering advocate 80 characters.
+            Given our modern big screens and the tendency not to print things, I personally prefer
+            ~150. </para>
+          <para>Using a line width can even flag incomprehensibility issues! When a piece of code
+            starts regularly overflowing this, it&#x2019;s usually a clear indicator the code is too
+            complex and you&#x2019;d better refactor/split it…</para>
+        </listitem>
+      </itemizedlist>
+
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2>
+      <title>Names, names, names (and declarations)</title>
+
+      <para>Choosing the right name for something (variables, functions, templates, etc.) is
+        extremely important. A function named <code>computeIt</code> doesn&#x2019;really communicate
+        much meaning. If we decide to call it <code>computeTaxForCustomer</code>, its intent is much
+        clearer. Naming matters.</para>
+
+      <para>Here are some comprehensibility measures with regards to naming:</para>
+      <itemizedlist>
+
+        <listitem>
+          <para>Don&#x2019;t be shy of using long and descriptive names. We&#x2019;re a long way
+            from computer languages that forbid names longer than 8 or 16 characters. Most IDEs
+            support you by providing pop-up lists of names to choose from if you want to refer to a
+            variable, function or template (and even if not we have copy/paste!).</para>
+        </listitem>
+
+        <listitem>
+          <para>Use descriptive names. This is the absolute winner in making code self-documenting.
+            For instance:</para>
+          <programlisting  language="xml" xml:space="preserve"><![CDATA[<xsl:variable name="f" as="xs:double" select="($c - 32) * 0.5556"/>]]></programlisting>
+          <para>It takes a comment to tell the reader that this converts a temperature in Celsius to
+            Fahrenheit. But if the variable names were chosen more wisely this is no longer
+            necessary:</para>
+          <programlisting language="xml" xml:space="preserve"><![CDATA[<xsl:variable name="temperature-in-fahrenheit" as="xs:double"
+  select="($temperature-in-celsius - 32) * 0.5556"/>]]></programlisting>
+          <para>Or even better: break out such an expression in a function:</para>
+          <programlisting language="xml" xml:space="preserve"><![CDATA[<xsl:function name="mod:celsius-to-fahrenheit" as="xs:double">
+  <xsl:param name="temperature-in-celsius" as="xs:double"/>
+  <xsl:sequence select="($temperature-in-celsius - 32) * 0.5556"/>
+</xsl:function>]]></programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Break a long and complicated expression into smaller parts using aptly named
+            variables. For instance:</para>
+          <programlisting xml:space="preserve"><![CDATA[if (($status eq $status-success) or 
+  (($amount ge $amount-limit) and (not($special-account-type)))) 
+then …]]></programlisting>
+          <para>We can make its intent more clear if we rewrite it to:</para>
+          <programlisting xml:space="preserve"><![CDATA[let $successful-attempt as xs:boolean := $status eq $status-success
+let $large-withdrawal-permitted as xs:boolean := 
+  ($amount ge $amount-limit) and (not($special-account-type))    
+return
+  if ($successful-attempt or $large-withdrawal-permitted) 
+  then …]]></programlisting>
+          <para>Don&#x2019;t worry: only in very rare circumstances you have to be concerned about
+            the performance impact creating a bunch of additional variables. And probably, the
+            compiler will optimize them away for you.</para>
+        </listitem>
+
+        <listitem>
+          <para>If something is in a certain unit (meters, inches, kilograms, dollars, zorkian
+            foepies), stick the unit to the name. For an example see the Celsius to Fahrenheit
+            conversion above.</para>
+          <para>I specifically mention this because of a bug classic: a software mismatch between
+            the metric system and the English measurement system caused the NASA Mars Climate
+            Orbiter to crash in 1998, at the cost of $125 million (<link
+              xlink:href="https://www.simscale.com/blog/2017/12/nasa-mars-climate-orbiter-metric/"
+            />).</para>
+        </listitem>
+
+        <listitem>
+          <para>Magic values, numeric and string constants with special meanings, should be given a
+            name. Declaring such magic values centralizes their definition, which makes them easier
+            to lookup and/or change and prevents bugs caused by mistyping a value. A good name
+            clearly communicates the intent of the value.</para>
+          <para>Here&#x2019;s a classic example:</para>
+          <programlisting xml:space="preserve" language="xml"><![CDATA[<xsl:for-each select="1 to 12">]]></programlisting>
+          <para>Why 12? Ah, this is better:</para>
+          <programlisting xml:space="preserve" language="xml"><![CDATA[<xsl:for-each select="1 to $months-per-year">]]></programlisting>
+          <para>It&#x2019;s not that I expect that the number of months in a year is going to change
+            anytime soon. This is about communicating the intent: we&#x2019;re iterating over months
+            here…</para>
+
+          <para role="keep-with-next">Sometimes there is grumbling (me included) about having to
+            create long and boring lists of magic name declarations, like this:</para>
+          <programlisting xml:space="preserve"><![CDATA[declare variable $mod:status-error as xs:string := 'error';
+declare variable $mod:status-warning as xs:string := 'warning';
+…]]></programlisting>
+          <para>That looks superfluous, until you make a hard to spot &#x201c;typo&#x201d;
+            bug:</para>
+          <programlisting xml:space="preserve"><![CDATA[if ($status eq 'errror') then …]]></programlisting>
+        </listitem>
+
+        <listitem>
+          <para>A convention for building the names is also good. Things like:</para>
+          <itemizedlist>
+            <listitem>
+              <para>Which abbreviations can be used (<code>max</code>, <code>min</code>,
+                  <code>ptr</code>, etc.)</para>
+            </listitem>
+            <listitem>
+              <para>Use something like object-action (<code>file-read</code>,
+                  <code>status-get</code>, etc.) or action-object (<code>read-file</code>,
+                  <code>get-status</code>, etc.)</para>
+            </listitem>
+            <listitem>
+              <para>Special prefixes for booleans (<code>is-…</code>, <code>do-…</code>).</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>If you declare something, make that declaration<emphasis> as complete as you
+              possibly can</emphasis>. For a variable or parameter, <emphasis>always</emphasis>
+            specify it&#x2019;s type. For a function, always specify the return value&#x2019;s type.
+            Even XSLT named templates can declare a return type (in an <code>as</code> attribute);
+            specifying this is unusual but definitely not wrong!</para>
+          <para>Always specifying datatypes has double benefits. It tells you more about the
+            declaration, increasing its comprehensibility. It will also cause a whole bunch of
+            errors to surface sooner if you make mistakes.</para>
+        </listitem>
+
+      </itemizedlist>
+
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2 xml:id="sect-comments">
+      <title>Comments? What comments?</title>
+
+      <para>Probably everyone knows the famous saying &#x201c;better no comment than a wrong
+        one&#x201d;, or one of its variations. And it&#x2019;s true: it&#x2019;s extremely confusing
+        reading what a piece of software is supposed do and find out it does something different… Of
+        course, it happens to all of us. You wrote something once, including informative comments.
+        Then you refactor it, then refactor some more, and in having to deal with all the
+        complexities of getting it to work, forget to update the comments.</para>
+      <para>Here are some best practices for commenting:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Make a clear distinction between <emphasis>black-box</emphasis> and
+              <emphasis>white-box</emphasis> comments.</para>
+          <itemizedlist>
+            <listitem>
+              <para>Black-box comments are things that should be understandable without having to
+                consult the code. For instance module, template and function descriptions. These
+                comments must still make sense when they&#x2019;re sperated from the code, as for
+                instance happens with XQuery xqDoc (<link xlink:href="http://xqdoc.org"/>) comments
+                (between <code>(:~&#160;…&#160;:)</code>) in some environments.</para>
+            </listitem>
+            <listitem>
+              <para>White-box comments are <emphasis>about</emphasis> the code. These comments
+                should help the reader to grasp what&#x2019;s going on.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+        <listitem>
+          <para>Do not comment the obvious, comment the <emphasis>intent</emphasis>. This, for
+            instance, is completely superfluous:</para>
+          <programlisting xml:space="preserve" language="xml"><![CDATA[<!-- Store the number of <thing> elements in $things-count: -->
+<xsl:variable name="things-count" as="xs:integer" select="count(//things)"/>]]></programlisting>
+          <para>Both the (well-chosen) variable name as the expression already tell you this. This
+            however tells the reader what the intent of the code is:</para>
+          <programlisting xml:space="preserve" language="xml"><![CDATA[<!-- Add a prompt attribute to every thing for easier reporting later: -->
+<xsl:variable name="things-count" as="xs:integer" select="count(//things)"/>
+<xsl:for-each select="//things">
+  <xsl:copy>
+    <xsl:attribute name="prompt" select="position() || '/'|| $things-count"/>
+    <xsl:apply-templates select="@* | node()"/>
+  </xsl:copy>
+</xsl:for-each>]]></programlisting>
+        </listitem>
+        <listitem>
+          <para>Use comments (and empty lines) for creating &#x201c;rhythm&#x201d;. See <xref
+              linkend="sect-rhythm-of-the-code"/>.</para>
+        </listitem>
+        <listitem>
+          <para>Use comments as the equivalent of <emphasis>section titles</emphasis>, even if what
+            the comment says is obvious when you <emphasis>know</emphasis> the code. Remember, the
+            reader is&#x2019;t always that knowledgeable.</para>
+          <programlisting xml:space="preserve"><![CDATA[<!-- Initialize: -->
+…
+
+<!-- Compute the values for … -->
+…
+            
+<!-- Done, wrap up: -->
+…]]></programlisting>
+          <para>This creates an additional, smaller, rhythm inside the bigger rhythm of templates
+            and functions.</para>
+        </listitem>
+        <listitem>
+          <para>Some movies on DVD (when we used to have DVDs, old-man&#x2019;s reminiscences) had
+            the option to turn &#x201c;director&#x2019;s comments&#x201d; on. You then heard the
+            movie director in a voice-over about certain scenes: how they were taken, why certain
+            choices were made, etc. One of the best pieces of advise about commenting I ever had was
+            that comments should be exactly like that: like a director telling you about the
+            code.</para>
+          <itemizedlist>
+            <listitem>
+              <para>Why is this code different from the rest? (bug workaround…)</para>
+            </listitem>
+            <listitem>
+              <para>Why this completely incomprehensible expression? (performance…)</para>
+            </listitem>
+            <listitem>
+              <para>What you did to make this working? (prevent problems already solved…)</para>
+            </listitem>
+            <listitem>
+              <para>What trap not to fall into when maintaining this code? (point out obvious
+                mistakes…) </para>
+            </listitem>
+          </itemizedlist>
+          <para>Fantasizing about being a famous movie director and providing comments about your
+            brilliant artistic choices is a constructive mindset for creating high quality
+            comments.</para>
+        </listitem>
+        <listitem>
+          <para>Be very careful with blocks of commented-out code. Don&#x2019;t make the reader
+            guess about why you left it in. Forgotten to delete? Laziness? Carelessness? Is this
+            still important? Can I delete it now or was there a good reason to keep it? At least
+            provide some comment about the why if you really think it still serves a purpose.</para>
+        </listitem>
+      </itemizedlist>
+
+    </sect2>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <sect2 xml:id="sect-process">
+      <title>It&#x2019;s the process…</title>
+
+      <para>In a presentation for MarkupUK 2019 called <emphasis>Documenting XML
+          structures</emphasis>, I introduced the term &#x201c;knowledge bubble&#x201d; (<link
+          xlink:href="https://markupuk.org/2019/webhelp/index.html#ar12.html"/>). What I meant is
+        that when you&#x2019;re busy doing something complicated, like programming, it&#x2019;s very
+        hard to imagine what people on the outside don&#x2019;t know or will understand.
+        You&#x2019;re in the middle of it now and everything is therefore understood and crystal
+        clear.</para>
+      <para>You have to acknowledge to yourself that you&#x2019;re <emphasis>in a knowledge
+          bubble</emphasis> during development. And being in a knowledge bubble means it&#x2019;s
+        impossible to write good documentation because you don&#x2019;t really realize what the
+        reader doesn&#x2019;t know. This is not only true for documenting things (in separate
+        documentation), but also for writing good code comments <emphasis>and</emphasis> judging
+        code comprehensibility.</para>
+      <para>So how can we overcome this obstacle? Here&#x2019;s how I try do this:</para>
+      <itemizedlist>
+        <listitem>
+          <para>I write my software with in the back of my mind that I will come back to it later.
+            That makes it OK (and not laziness) to flag missing comments and sometimes missing
+            non-essential pieces of code with a <emphasis>TBD</emphasis> marker (or whatever you
+            want to use meaning <emphasis>To Be Done</emphasis>).</para>
+          <para>Adding these TBD markers is important so you won&#x2019;t forget or overlook
+            anything later. Writing a function but not feeling like adding the descriptive header
+            comment? Add a comment with TBD. Having to write some error handling code that is not
+            essential during initial development? Add a comment saying TBD. I think you get the
+            picture.</para>
+        </listitem>
+        <listitem>
+          <para>Find some time, later that week, maybe after a weekend, to review your code and fill
+            in the TBDs. Try to do it when the knowledge bubble has deflated to a reasonable size
+            (so not <emphasis>immediately</emphasis> after finishing coding).</para>
+          <para>Even if the code is flawless (which never happens), you&#x2019;ll be astonished what
+            you find with regard to comprehensibility issues. </para>
+        </listitem>
+      </itemizedlist>
+      <para>Key is that after you <emphasis>think</emphasis> you&#x2019;re done programming, take a
+        pause/break/weekend/vacation/cup of tea and <emphasis>always</emphasis> revise/review what
+        you&#x2019;ve written. And also: important commenting is best left to review time.</para>
+
+    </sect2>
+
+  </sect1>
+
+  <!-- ======================================================================= -->
+
+  <sect1 xml:id="sect-debunking">
+    <title>Debunking some obstacles</title>
+
+    <para>When I talk with people about this, I hear two counterarguments over and over. Let me try
+      to debunk them, once and for all.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>&#x201c;This costs too much performance…&#x201d; Nonsense:</para>
+        <itemizedlist>
+          <listitem>
+            <para>On our modern hyper-fast machines you won&#x2019;t notice those few milliseconds
+              for creating an extra variable or performing that additional function call. If it
+              takes time anyway, because…</para>
+          </listitem>
+          <listitem>
+            <para>Compilers/interpreters are smarter than you imagine and optimize a lot of your
+              troubles away.</para>
+          </listitem>
+          <listitem>
+            <para>There will always be exceptions, usually loops that iterate so often you have to
+              squeeze out the very last millisecond. If that&#x2019;s the case, of course, just do
+              it. But please comment any weird, unusual or indecipherable construction lavishly, so
+              it becomes comprehensible again.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+      <listitem>
+        <para role="keep-with-next">&#x201c;XML comments, lines and stuff like that are too many
+          keystrokes, it slows me down…&#x201d;. Nonsense: </para>
+        <para>In most IDEs you can put stuff like starting a comment, inserting a line or whatever
+          under some ctrl/alt/shift/apple combination. For instance, on my system inserting a
+          comment is just a single keystroke away and leaves the cursor in between the
+            <code><![CDATA[<!--  -->]]></code> markers, ready to type!</para>
+        <para>It&#x2019;s a matter of finding out how this works in your environment and spend an
+          hour or so customizing things. Well worth the effort.</para>
+      </listitem>
+
+    </itemizedlist>
+
+
+  </sect1>
+
+  <!-- ======================================================================= -->
+
+
+  <sect1>
+    <title>Further reading?</title>
+
+    <para>There are numerous books about software engineering in general but only a few about coding
+      itself. The ones I know of:</para>
+    <itemizedlist>
+      <listitem>
+        <para>Code Complete; Steve McConnell; Microsoft Press; 2004.</para>
+      </listitem>
+      <listitem>
+        <para>Clean Code; Robert Martin; Addison-Wesley; 2009</para>
+      </listitem>
+    </itemizedlist>
+    <para>Both still available and warmly recommended.</para>
+
+  </sect1>
+</article>

@@ -1,0 +1,23 @@
+@startuml
+object Model << (S,#FF7700) Map >> {
+  base-uri: "root source location"
+  project: "Name of project"
+  files: {Files}
+}
+
+Object File << (S,#FF7700) Map >> {
+ Model - File : has >
+ path: source relative to base-uri
+ href: target path in generated o/p
+ namespace: module namespace
+ xqdoc: xqDoc XMLdocument
+ xparse: xparse XML document
+ annotations: 
+}
+
+Object XQDoc<< (S,#FF7700) Element(xqdoc:xqdoc) >> {
+
+}
+Model o-- "has" File
+File --- XQDoc
+@enduml

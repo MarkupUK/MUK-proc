@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="docbook.css" type="text/css"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	 version="5.0" xml:id="helloder">
+   <title>On the Design of a Self-Referential Tutorial</title>
+   <info>
+      <abstract>
+	 <para>
+	    XForms
+	    <link linkend="xf1">[XF1</link>][<link linkend="xf2">XF2</link>] is
+	    a declarative programming language, with a different programming
+	    paradigm compared to traditional programming languages. Since it
+	    requires a new way of thinking about programming, learning
+	    materials are paramount for people wanting to use the language and
+	    understand its benefits.
+	 </para>
+	 <para>
+	    This paper discusses the method used to build a hands-on tutorial
+	    for XForms, using XForms, with the decisions taken, the techniques
+	    used, and the benefits that the approach gave.
+	 </para>
+      </abstract>
+      <author>
+	 <personname>
+            <firstname>Steven</firstname>
+            <surname>Pemberton</surname>
+	 </personname>
+	 <personblurb>
+	    <para>
+	       Steven Pemberton is a researcher affiliated with CWI,
+	       Amsterdam. His research is in interaction, and how the
+	       underlying software architecture can support users.
+	    </para>
+	    <para>He co-designed the ABC programming language that formed
+	    the basis for Python and was one of the first handful of
+	    people on the open internet in Europe, when the CWI set it up
+	    in 1988. Involved with the Web from the beginning, he
+	    organised two workshops at the first Web Conference in
+	    1994. For the best part of a decade he chaired the W3C HTML
+	    working group, and has co-authored many web standards,
+	    including HTML, XHTML, CSS, XForms and RDFa. He now chairs
+	    the W3C XForms and Invisible Markup groups.
+	    More details at http://www.cwi.nl/~steven
+	    </para>
+	 </personblurb>	 
+	 <affiliation>
+	    <jobtitle>Researcher</jobtitle>
+	    <orgname>CWI, Amsterdam</orgname>
+	 </affiliation>
+	 <email>steven.pemberton@cwi.nl</email>
+	 <uri>http://www.cwi.nl/~steven/</uri>
+      </author>
+      <keywordset role="author">
+	 <keyword>XForms</keyword>
+	 <keyword>tutorial</keyword>
+	 <keyword>design</keyword>
+      </keywordset>
+   </info>
+  <section xml:id="tutorials">
+    <title>Tutorials</title>
+    <para>
+      A tutorial is a challenging educational setting, both for those
+      learning and those instructing. Time is severely limited, and
+      there is inevitably far more material on the subject than can
+      possibly be taught in the time available. Unavoidably, compromises
+      have to be made: do you make it deep and narrow, where you learn a
+      subset of the material in great detail, or broad and shallow,
+      where you get an overview of the whole, with less detail? Should
+      it be a teaser to tempt attendees to later self-study, or a
+      starter, so that attendees have at least a working knowledge of
+      some of the material?
+    </para>
+    <para>
+      And then there is the method of presentation: should it be lecture
+      style, permitting coverage of more of the material, or hands-on,
+      allowing attendees more direct acquaintance with the material,
+      while reducing the coverage?
+    </para>
+    <section xml:id="xforms-tutorials">
+      <title>XForms Tutorials</title>
+      <para>
+        Most XForms tutorials [e.g. <link linkend="t1">t1</link>,
+        <link linkend="t2">t2</link>] had to-date been of the lecture
+        style, covering most of the language. However, a request for a
+        hands-on tutorial motivated a new approach.
+      </para>
+      <para>
+        After attending several hands-on tutorials on other topics, the
+        author concluded that in order to optimally use the time
+        available for exercises, attendees shouldn’t be required to
+        start from scratch, since precious time is lost dealing with
+        trivial issues like set up and syntax. Rather, the exercises
+        should all require the attendee to make a change to an existing,
+        working, example, using the newly-acquired knowledge. In that
+        way, you get the advantage of the hands-on approach, while
+        minimising trivial administrative details, with the added
+        advantage of attendees being confronted with larger working
+        examples right from the start.
+      </para>
+      <para>
+        As a consequence, the tutorial was designed as a rapid-fire
+        sequence of exercises, each consisting of 5 minutes of
+        presentation, followed by 5 minutes of coding. This has the
+        added advantage of maximising the attendees’ concentration,
+        thanks to the recurrent switching of activities. The exercises
+        themselves are mostly not stand-alone, but cumulative, each one
+        building on an earlier one, so that at the end the attendee has
+        a handful of small, but in themselves useful, applications.
+        Although the tutorial was designed to be part of a live event,
+        it also supports the use of self-study.
+      </para>
+      <para>
+        The resulting tutorial [<link linkend="t3">t3</link>] is
+        interesting in that it is not only <emphasis>about</emphasis>
+        XForms, but is also built <emphasis>in</emphasis> XForms, which
+        in itself gave surprising possibilities.
+      </para>
+    </section>
+  </section>
+  <section xml:id="content">
+    <title>Content</title>
+    <para>
+      The first task in designing a tutorial is to identify the topics
+      to be taught. This was a fairly easy job in this case, since it
+      only involved running through the headings of the XForms
+      specification, and selecting topics. Naturally enough, a
+      structured XML document listing those topics, and their relative
+      structure was created as part of this process:
+    </para>
+    <programlisting language="xml">&lt;learn title=&quot;What you will learn&quot;&gt;
+   &lt;topic name=&quot;Structure of an XForm&quot;&gt;
+      &lt;topic done=&quot;&quot; name=&quot;&amp;lt;model&gt;&quot;/&gt;
+      &lt;topic done=&quot;&quot; name=&quot;content&quot;/&gt;
+   &lt;/topic&gt;
+   &lt;topic name=&quot;Instance data&quot;&gt;
+      &lt;topic done=&quot;&quot; name=&quot;internal &amp;lt;instance&gt;&quot;/&gt;
+      &lt;topic done=&quot;&quot; name=&quot;external &amp;lt;instance @resource&gt;&quot;/&gt;
+      &lt;topic done=&quot;&quot; name=&quot;&amp;lt;bind&gt;&quot;&gt;
+     &lt;topic done=&quot;&quot; name=&quot;@ref&quot;/&gt;
+     &lt;topic done=&quot;&quot; name=&quot;@type&quot;/&gt;
+     &lt;topic done=&quot;&quot; name=&quot;@calculate&quot;/&gt;
+     &lt;topic done=&quot;&quot; name=&quot;@relevant&quot;/&gt;
+     &lt;topic done=&quot;&quot; name=&quot;@required&quot;/&gt;
+     &lt;topic done=&quot;&quot; name=&quot;@readonly&quot;/&gt;
+     &lt;topic done=&quot;&quot; name=&quot;@constraint&quot;/&gt;
+      &lt;/topic&gt;
+   &lt;/topic&gt;
+   ...</programlisting>
+    <para>
+      In fact this one document ended up being used in three ways:
+      firstly and primarily as the list of topics that needed to be
+      covered, that could then be checked off one by one as the tutorial
+      was written, as a check for completeness. But additionally it
+      ended up displayed in two different ways in the tutorial itself:
+      once at the beginning as an overview of what would be taught in
+      the course, and again at the end of the course, though displayed
+      in a different way, as a summary of what had been taught, allowing
+      the reader to check each topic off as a reminder of what had been
+      learned (a correspondent had indicated that tutorials that
+      included such a check-list on average were evaluated by attendees
+      10% higher). In fact this last section, allowing the attendee to
+      check off topics learned, was the first written, so that as the
+      tutorial was developed, the topics could be checked off.
+    </para>
+    <para>
+      The next step is to decide the <emphasis>order</emphasis> these
+      topics need to be taught. This was done by creating a dependency
+      graph: to understand this topic, you need to know about these
+      topics, to understand <emphasis>those</emphasis> topics, you need
+      to know about these other topics, and so on. This gives a partial
+      ordering of topics, which can then be ordered linearly at will.
+    </para>
+    <para>
+      For example, to understand the <literal>alert</literal> element,
+      you need to know about validity; to understand validity, you need
+      to know about <literal>type</literal>,
+      <literal>constraint</literal>, and <literal>required</literal>, to
+      know about those, you need to know about <literal>bind</literal>,
+      and <literal>ref</literal>, to know about those you need to know
+      about <literal>instance</literal>.
+      <figure>
+	 <title>A simplified partial dependency graph</title>
+        <mediaobject><imageobject>
+          <imagedata fileref="dependency.png" width="100%" scalefit="1" contentdepth="100%" />
+        </imageobject></mediaobject>
+      </figure>
+    </para>
+    <para>
+      It is worth pointing out that there is some leeway in even the
+      partial ordering that the dependency graph generates, because
+      rather than completely covering all the  antecedents of a topic
+      first, you can use progressive disclosure
+      [<link linkend="pd">pd</link>]; for instance you could partially
+      cover validity, talking only about types, and then extend it later
+      with constraints and <literal>required</literal>. What the graph
+      does reveal though is the order the partial disclosure has to
+      happen.
+    </para>
+    <para>
+      This then leads to a fundamental decision: should the topics be
+      taught top-down, or bottom-up? Bottom-up starts at the leaves of
+      the dependency graph and works upwards building higher
+      abstractions out of the lower-level ones; top-down works in the
+      other direction, starting with the high-level abstractions, and
+      working down towards the leaves. I am not aware of studies of the
+      relative effectiveness of the two methods, nor whether one is more
+      effective than the other with certain types of audience. I
+      personally believe, based on experience of teaching, that top-down
+      works better in general, especially with knowledgeable audiences,
+      since it gives more opportunity to see the wood for the trees:
+      each new thing you learn, you understand how it fits in the larger
+      picture.
+    </para>
+  </section>
+  <section xml:id="structure">
+    <title>Structure</title>
+    <para>
+      The topics were largely treated one per chapter, and in general
+      written in the order they would be presented. It was attempted to
+      make each chapter not more than one screen-full long, around 50-60
+      lines of text, followed by its exercise.
+    </para>
+    <para>
+      Each chapter was built as a single XHTML+XForms document; if it
+      became too long, it could be split into two chapters;
+      occasionally, if a chapter was very short, or if context demanded
+      it, two concepts would be covered in a single chapter.
+    </para>
+    <para>
+      An XML document was kept as chapters were written documenting the
+      title, filename, concepts covered, name of the exercise file, and
+      name of the example answer file:
+    </para>
+    <programlisting language="xml">&lt;tutorial&gt;
+   &lt;entry&gt;
+      &lt;title&gt;Introduction&lt;/title&gt;
+      &lt;file&gt;intro.xhtml&lt;/file&gt;
+      &lt;concept&gt;implementations&lt;/concept&gt;
+      &lt;concept&gt;W3C standard&lt;/concept&gt;
+      &lt;concept&gt;future&lt;/concept&gt;
+   &lt;/entry&gt;
+   &lt;entry&gt;
+      &lt;title&gt;What you will learn&lt;/title&gt;
+      &lt;file&gt;learn.xhtml&lt;/file&gt;
+      &lt;concept&gt;quick reference&lt;/concept&gt;
+   &lt;/entry&gt;
+   &lt;entry&gt;
+      &lt;title&gt;The structure of an XForm&lt;/title&gt;
+      &lt;file&gt;structure.xhtml&lt;/file&gt;
+      &lt;concept&gt;structure&lt;/concept&gt;
+      &lt;concept&gt;model&lt;/concept&gt;
+      &lt;concept&gt;instance&lt;/concept&gt;
+      &lt;concept&gt;controls&lt;/concept&gt;
+      &lt;concept&gt;XML&lt;/concept&gt;
+      &lt;concept&gt;media type&lt;/concept&gt;
+   &lt;/entry&gt;
+   &lt;entry&gt;
+      &lt;title&gt;Data Instances and the Input Control&lt;/title&gt;
+      &lt;file&gt;input.xhtml&lt;/file&gt;
+      &lt;exercise&gt;input-exercise.xhtml&lt;/exercise&gt;
+      &lt;answer&gt;input-answer.xhtml&lt;/answer&gt;
+      &lt;concept&gt;&amp;lt;instance resource=&quot;&quot;/&gt;&lt;/concept&gt;
+      &lt;concept&gt;&amp;lt;bind ref=&quot;&quot;/&gt;&lt;/concept&gt;
+      &lt;concept&gt;@type&lt;/concept&gt;
+      &lt;concept&gt;integer type&lt;/concept&gt;
+      &lt;concept&gt;date type&lt;/concept&gt;
+      &lt;concept&gt;string type&lt;/concept&gt;
+      &lt;concept&gt;boolean type&lt;/concept&gt;
+      &lt;concept&gt;&amp;lt;input ref=&quot;&quot;/&gt; control&lt;/concept&gt;
+      &lt;concept&gt;&amp;lt;label&gt;&lt;/concept&gt;
+      &lt;concept&gt;@incremental&lt;/concept&gt;
+   &lt;/entry&gt;
+   &lt;entry&gt;
+      &lt;title&gt;The output control&lt;/title&gt;
+      &lt;file&gt;output.xhtml&lt;/file&gt;
+      &lt;exercise&gt;output-exercise.xhtml&lt;/exercise&gt;
+      &lt;answer&gt;output-answer.xhtml&lt;/answer&gt;
+      &lt;concept&gt;&amp;lt;output ref=&quot;&quot;/&gt; control&lt;/concept&gt;
+      &lt;concept&gt;@value&lt;/concept&gt;
+      &lt;concept&gt;XPath / @ *&lt;/concept&gt;
+      &lt;concept&gt;count() function&lt;/concept&gt;
+   &lt;/entry&gt;
+   ...</programlisting>
+  </section>
+  <section xml:id="navigation">
+    <title>Navigation</title>
+    <para>
+      This document of chapters was then used as the basis of the
+      navigation part of the tutorial. This was modelled on the
+      navigation used in an earlier XForms application, the XForms 2.0
+      test suite [<link linkend="ts">ts</link>].
+    </para>
+    <para>
+      A navigation instance was created containing
+    </para>
+    <orderedlist spacing="compact">
+      <listitem>
+        <para>
+          a value <literal>base</literal> that defines where the chapter
+          files are stored,
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          a value for the filename of the chapter that is currently
+          being read,
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          a value that constructs the required URL from the base and the
+          filename:
+        </para>
+      </listitem>
+    </orderedlist>
+    <programlisting language="xml">&lt;instance id=&quot;nav&quot;&gt;
+   &lt;nav xmlns=&quot;&quot;&gt;
+      &lt;base&gt;chapters/&lt;/base&gt;
+      &lt;file/&gt;
+      &lt;url/&gt;
+   &lt;/nav&gt;
+&lt;/instance&gt;
+&lt;bind ref=&quot;instance('nav')/url&quot; calculate=&quot;concat(../base, ../file)&quot;/&gt;</programlisting>
+    <para>
+      To set the filename, a <literal>select1</literal> control is
+      populated using the tutorial chapters instance: the labels are the
+      title of the chapter, and the value is the file name of that
+      chapter:
+    </para>
+    <programlisting language="xml">&lt;select1 ref=&quot;instance('nav')/file&quot;&gt;
+   &lt;itemset ref=&quot;instance('tut')/entry&quot;&gt;
+       &lt;label ref=&quot;title&quot;/&gt;
+       &lt;value value=&quot;file&quot;/&gt;
+   &lt;/itemset&gt;
+&lt;/select1&gt;</programlisting>
+    <para>
+      Either side of this control, are triggers that decrement and
+      increment this value (with judicious use of
+      <literal>preceding-sibling</literal> and
+      <literal>following-sibling</literal>):
+    </para>
+    <programlisting language="xml">&lt;trigger 
+      ref=&quot;instance('tut')/entry[file=instance('nav')/file]/preceding-sibling::entry[1]&quot;&gt;
+   &lt;label&gt;←&lt;/label&gt;
+   &lt;hint&gt;&lt;output ref=&quot;title&quot;/&gt;&lt;/hint&gt;
+   &lt;setvalue ref=&quot;instance('nav')/file&quot;
+             value=&quot;context()/file&quot;
+             ev:event=&quot;DOMActivate&quot;/&gt;
+&lt;/trigger&gt;</programlisting>
+    <para>
+      In this way, the user can select a chapter either from the drop
+      down, or by navigating from chapter to chapter using the arrows.
+      <screenshot>
+      <title>Selecting a chapter</title>
+        <mediaobject><imageobject>
+          <imagedata fileref="nav1.png" width="100%" scalefit="1" contentdepth="100%" />
+        </imageobject></mediaobject>
+      </screenshot>
+    </para>
+    <para>
+      Note that thanks to how the <literal>ref</literal> on the trigger
+      works in XForms, in this case referencing the previous chapter, if
+      there is no previous chapter, the trigger will not be displayed.
+      <screenshot>
+	 <title>The initial chapter, with no previous</title>
+         <mediaobject><imageobject>
+          <imagedata fileref="nav2.png" width="100%" scalefit="1" contentdepth="100%" />
+        </imageobject></mediaobject>
+      </screenshot>
+    </para>
+    <para>
+      To display the content of the chapter, an html iframe is used:
+    </para>
+    <programlisting language="xml">&lt;html:iframe id=&quot;chapter&quot; src=&quot;{instance('nav')/url}&quot;&gt;&lt;/html:iframe&gt;</programlisting>
+    <para>
+      Thanks to how XForms works, whenever the <literal>file</literal>
+      value gets changed, the <literal>url</literal> value automatically
+      gets updated, and so the new chapter is displayed.
+    </para>
+    <para>
+      The upshot of all this is that the tutorial instance doesn’t
+      <emphasis>describe</emphasis> the structure of the tutorial but
+      actually <emphasis>defines</emphasis> it. If a chapter needs to be
+      moved, you just move it in the tutorial instance; if a new chapter
+      is written, add it to the tutorial document. The navigation will
+      consequently automatically be updated, and the chapter can be
+      displayed.
+    </para>
+  </section>
+  <section xml:id="chapters">
+    <title>Chapters</title>
+    <para>
+      Each chapter is thus a separate XForms document. This has amazing
+      advantages when talking about XForms, because the text can
+      actually contain the examples it is describing, rather than
+      descriptions of the expected output.
+    </para>
+    <para>
+      For example, if a chapter contains the text:
+    </para>
+    <informalexample>
+      <para>
+        By default, outputs directly after each other will abut. If a is
+        3, and b is 4, then
+      </para>
+      <programlisting language="xml">&lt;output ref=&quot;a&quot;/&gt;&lt;output ref=&quot;b&quot;/&gt;</programlisting>
+      <para>
+        will output:
+      </para>
+      <programlisting language="xml">34</programlisting>
+    </informalexample>
+    <para>
+      the underlying code is:
+    </para>
+    <programlisting language="xml">By default, outputs directly after each other will abut.
+If a is &lt;output  ref=&quot;a&quot;/&gt;, and b is &lt;output ref=&quot;b&quot;/&gt;, then
+&lt;group class=&quot;pre&quot;&gt;
+   &amp;lt;output ref=&quot;a&quot;/&gt;&amp;lt;output ref=&quot;b&quot;/&gt;
+&lt;/group&gt;
+will output:
+&lt;group class=&quot;pre&quot;&gt;
+   &lt;output ref=&quot;a&quot;/&gt;&lt;output ref=&quot;b&quot;/&gt;
+&lt;/group&gt;</programlisting>
+    <para>
+      In other words a really <emphasis>is</emphasis> 3, and b really
+      <emphasis>is</emphasis> 4, and the example output is produced by
+      the code itself.
+    </para>
+    <para>
+      This of course has immense advantage: you make fewer mistakes, you
+      can put decisions off, or make changes easily without worrying
+      about consistency between text and results.
+    </para>
+  </section>
+  <section xml:id="exercises">
+    <title>Exercises</title>
+    <para>
+      The exercises are based on 5 example applications: a short initial
+      ‘toy’ one covering two exercises introducing the basic concepts
+      such as instances, types, input and output, and then two large
+      ones each covering 10 exercises, both broken in the middle by two
+      small examples. The large examples helped with ordering the
+      partial order of the material, since concepts could be introduced
+      as they were needed for enlarging the functionality of the
+      applications.
+    </para>
+    <para>
+      The first large example introduces external instances loaded over
+      the internet, in this case the exchange values of a large number
+      of currencies, and builds an application to display the exchange
+      rate between two currencies of choice.
+    </para>
+    <para>
+      It is broken in the middle with a small application to show how
+      times are manipulated, and to introduce the concept of events.
+    </para>
+    <para>
+      Submission is then introduced to show how to to load new
+      instances, and how to deal with submission errors, and then how to
+      generate a URL for use in submission.
+    </para>
+    <para>
+      The second application is a to-do list, in order to show how to
+      manipulate lists, how to use submission to save data, how to
+      detect when data needs saving, and finally how to automatically
+      save data when it has changed.
+    </para>
+    <para>
+      It is broken in the middle with a small log-in application, that
+      shows how to input passwords, and how to deal with validity
+      errors.
+    </para>
+    <para>
+      In some senses, finding suitable examples that were expandable in
+      this way, gradually adding new concepts as they were needed was
+      the hardest part of designing the tutorial. It is easy to create
+      one tiny toy example for each concept being taught, but more work
+      to design ones that are meaningful and useful applications that
+      have the right collection of necessary concepts.
+    </para>
+  </section>
+  <section xml:id="server">
+    <title>Server</title>
+    <para>
+      One of the requirements for following the tutorial is that the
+      user have access to an HTTP server, and furthermore, one that
+      supports the PUT method [<link linkend="put">put</link>], since
+      several of the exercises use it. For reasons that are not entirely
+      clear, most HTTP servers available don’t support PUT at all, or
+      otherwise only with a lot of extra work. So the options for the
+      tutorial apparently are: require the attendees to locate and
+      install an existing server that accepts PUT; run a server and then
+      require anybody who wants to use the tutorial to acquire a
+      username and login for it; or supply a minimal server that the
+      user can easily install and use. We opted for the third.
+    </para>
+    <para>
+      Luckily, writing a simple server without the normal
+      industrial-strength requirements of large-scale servers is fairly
+      easy, and since we had already written one for the XForms Test
+      Suite [<link linkend="ts">ts</link>], XContents
+      [<link linkend="xc">xc</link>], we used that, a few hundred lines
+      of C code, which we then compiled for a number of standard
+      platforms. Unfortunately, during testing, we discovered that on
+      Windows, one virus scanner falsely identified the server as
+      malware, and so for the people who ran against that problem we
+      also wrote a JavaScript version which runs under Node.
+    </para>
+    <para>
+      Since the tutorial demands a server that uses PUT, the tutorial
+      itself could use it for its own purposes. In particular whenever
+      the user navigates to a new chapter, the current state is saved so
+      that should the user stop and log out, on return the tutorial is
+      restarted at the last-used location.
+    </para>
+  </section>
+  <section xml:id="experience">
+    <title>Experience</title>
+    <para>
+      At the time of writing, the tutorial has been given once, not
+      counting a couple of try-outs with single victims.
+    </para>
+    <para>
+      With only 2 hours allocated, and each exercise being budgeted for
+      5 minutes presentation and 5 minutes working, only 12 of the 25
+      sections were handled. Nevertheless, this wasn’t seen as a
+      problem, since the tutorial is also designed for self-study, and
+      so the attendees could do the rest of the tutorial at their
+      leisure.
+    </para>
+    <para>
+      There is a problem with doing a tutorial remotely, as was the
+      case, that there is far less contact with the individual
+      attendees, in order to solve problems, and less opportunity to
+      assess if people have properly finished an exercise, especially
+      since later exercises use the results of previous exercises. In
+      fact this could be seen as a disadvantage of the cumulative
+      approach to the exercises, in that it requires previous exercises
+      to be completed before you can continue.
+    </para>
+    <para>
+      The tutorial was well-received; it revealed a few places where the
+      exposition could be clarified, but otherwise went well.
+    </para>
+  </section>
+  <section xml:id="conclusion">
+    <title>Conclusion</title>
+    <para>
+       Tutorial design, like any curriculum design, is hard! It is a
+       surprising amount of work, with a lot of internal
+       dependencies. However I have to admit that writing this one was
+       a lot of fun, being about and in XForms allowed me to submerge
+       myself fully in the subject, and allowed a lot of the internal
+       dependencies to take care of themselves. Using XForms for the
+       navigation introduced a large amount of flexibility in the
+       construction of the tutorial.
+    </para>
+  </section>
+  <bibliography xml:id="pemberton-references">
+	<biblioentry xml:id="t1">
+	   <abbrev>t1</abbrev>
+	   <author>
+	      <personname><firstname>Steven</firstname><surname>Pemberton</surname></personname>
+	   </author>
+	   <title>Declarative Applications with XForms</title>
+	   <publisher>
+              <publishername>XML Prague</publishername>
+	   </publisher>
+	   <pubdate>2020</pubdate>
+	   <bibliomisc>
+	      <link xlink:href="https://homepages.cwi.nl/%7Esteven/Talks/2020/02-13-xforms/">https://homepages.cwi.nl/~steven/Talks/2020/02-13-xforms/</link>
+	   </bibliomisc>
+	</biblioentry>
+	<biblioentry xml:id="t2">
+	   <abbrev>t2</abbrev>
+	   <author>
+	      <personname><firstname>Steven</firstname><surname>Pemberton</surname></personname>
+	   </author>
+	   <title>Web Applications with XForms 2.0</title>
+	   <publisher>
+              <publishername>WWW 2013</publishername>
+	   </publisher>
+	   <pubdate>2013</pubdate>
+	   <bibliomisc>
+	      <link xlink:href="https://homepages.cwi.nl/%7Esteven/Talks/2013/05-14-webapps-xforms2/">https://homepages.cwi.nl/~steven/Talks/2013/05-14-webapps-xforms2/</link>
+	   </bibliomisc>
+	</biblioentry>
+    <biblioentry xml:id="t3">
+       <abbrev>t3</abbrev>
+       <author>
+	  <personname><firstname>Steven</firstname><surname>Pemberton</surname></personname>
+       </author>
+       <title>XForms Hands On</title>
+       <publisher>
+          <publishername>Declarative Amsterdam</publishername>
+       </publisher>
+       <pubdate>2020</pubdate>
+       <bibliomisc>
+	  <link xlink:href="https://homepages.cwi.nl/%7Esteven/Talks/2020/10-08-tutorial/">https://homepages.cwi.nl/~steven/Talks/2020/10-08-tutorial/</link>
+       </bibliomisc>
+    </biblioentry>
+    <biblioentry xml:id="xf1">
+       <abbrev>xf1</abbrev>
+       <editor>
+	  <personname><firstname>John</firstname><surname>Boyer</surname></personname>
+       </editor>
+       <title>XForms 1.1</title>
+       <pubdate>2009</pubdate>
+       <publisher>
+          <publishername>W3C</publishername>
+       </publisher>
+       <bibliomisc>
+	  <link xlink:href="https://www.w3.org/TR/xforms11">https://www.w3.org/TR/xforms11</link>
+       </bibliomisc>
+    </biblioentry>
+    <biblioentry xml:id="xf2">
+       <abbrev>xf2</abbrev>
+       <editor>
+	  <personname><firstname>Erik</firstname><surname>Bruchez et al. (eds)</surname></personname>
+       </editor>
+       <title>XForms 2.0</title>
+       <publisher>
+          <publishername>W3C</publishername>
+       </publisher>
+       <pubdate>2021</pubdate>
+       <bibliomisc>
+	  <link xlink:href="https://www.w3.org/community/xformsusers/wiki/XForms_2.0">https://www.w3.org/community/xformsusers/wiki/XForms_2.0</link>
+       </bibliomisc>
+    </biblioentry>
+    <biblioentry xml:id="put">
+       <abbrev>put</abbrev>
+       <editor>
+	  <personname><firstname>T.</firstname><surname>Berners-Lee et al.</surname></personname>
+       </editor>
+       <title>Hypertext Transfer Protocol -- HTTP/1.0 (appendix D.1.1)</title>
+       <publisher>
+          <publishername></publishername>
+       </publisher>
+       <publisher>
+          <publishername>IETF</publishername>
+       </publisher>
+       <pubdate>1996</pubdate>
+       <bibliomisc>
+	  <link xlink:href="https://tools.ietf.org/html/rfc1945#appendix-D.1.1">https://tools.ietf.org/html/rfc1945#appendix-D.1.1</link>
+       </bibliomisc>
+    </biblioentry>
+    <biblioentry xml:id="ts">
+       <abbrev>ts</abbrev>
+       <author>
+	  <personname><firstname>Steven</firstname><surname>Pemberton</surname></personname>
+       </author>
+       <title>The XForms 2.0 Test Suite</title>
+       <publisher>
+          <publishername>MarkupUK</publishername>
+       </publisher>
+       <pubdate>2018</pubdate>
+       <bibliomisc>
+	  <link xlink:href="https://markupuk.org/2018/webhelp/index.html#ar14.html">https://markupuk.org/2018/webhelp/index.html#ar14.html</link>
+       </bibliomisc>
+    </biblioentry>
+    <biblioentry xml:id="xc">
+       <abbrev>xc</abbrev>
+       <author>
+	  <personname><firstname>Steven</firstname><surname>Pemberton</surname></personname>
+       </author>
+       <title>XContents Minimal Web Server</title>
+       <publisher>
+          <publishername>CWI</publishername>
+       </publisher>
+       <pubdate>2020</pubdate>
+       <bibliomisc>
+	  <link xlink:href="https://homepages.cwi.nl/%7Esteven/xcontents/xcontents.c">https://homepages.cwi.nl/~steven/xcontents/xcontents.c</link>
+       </bibliomisc>
+    </biblioentry>
+    <biblioentry xml:id="pd">
+       <abbrev>pd</abbrev>
+       <author>
+	  <personname><firstname>Frank</firstname><surname>Spillers</surname></personname>
+       </author>
+       <title>Progressive Disclosure, in Soegaard and Dam (eds.), The Glossary of Human Computer Interaction, Chapter 44</title>
+       <publisher>
+          <publishername>The Interaction Design Foundation</publishername>
+       </publisher>
+       <pubdate>undated</pubdate>
+       <bibliomisc xml:id="xf">
+	  <link xlink:href="https://www.interaction-design.org/literature/book/the-glossary-of-human-computer-interaction/progressive-disclosure">https://www.interaction-design.org/literature/book/the-glossary-of-human-computer-interaction/progressive-disclosure</link>
+       </bibliomisc>
+    </biblioentry>
+ </bibliography>
+</article>

@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="5.0">
+    <title>Scrap the App, Keep the Data</title>
+    <info>
+        <date>2019-05-23</date>
+        <author>
+            <personname><firstname>Barnabas</firstname><surname>Davoti</surname></personname>
+            <affiliation>
+                <org>
+                    <orgname>Ovitas AS</orgname>
+                    <address><street>Storgata 3</street><postcode>0155</postcode><city>Oslo</city><country>Norway</country></address>
+                    <uri>www.ovitas.no</uri>
+                </org>
+            </affiliation>
+            <email>barna@ovitas.no</email>
+        </author>
+        <abstract>
+            <para>Whether by reacting swiftly to shifting market conditions and disruptive
+                technologies or by growing through mergers and acquisitions, the ability to adapt is
+                critical to success in the digital age.</para>
+            <para>As business processes and workflows evolve, new technologies and systems are
+                constantly introduced to support them. Over time, IT estates become fragmented, and
+                the number of legacy systems increases year by year. Valuable data ends up in
+                isolated silos, only accessible via otherwise unnecessary applications that are
+                expensive to maintain and license or are approaching the end of life.</para>
+            <para>This paper suggests a generic approach to transform arbitrary relational data into
+                aggregated, hierarchical form and build a thin application to provide read access to
+                end users.</para>
+            <para>In my presentation, I would like to point out why the relational model falls short
+                when it comes to data aggregation.</para>
+            <para>XML can easily model both relational and hierarchical data. It's an excellent
+                choice for data re-modeling and also for building a thin, data access
+                application.</para>
+            <para>The approach is based on experience from multiple projects.</para>
+            <para>XML "<emphasis>bricks</emphasis>" used in the solution:<itemizedlist>
+                    <listitem>
+                        <para>processing pipeline configuration as XML (Apache Ant)</para>
+                    </listitem>
+                    <listitem>
+                        <para>XSLT</para>
+                    </listitem>
+                    <listitem>
+                        <para>XQuery</para>
+                    </listitem>
+                    <listitem>
+                        <para>XML database</para>
+                    </listitem>
+                </itemizedlist></para>
+        </abstract>
+    </info>
+    <sect1>
+        <title>Business issue</title>
+        <para>Quite often applications are built to be the only gate to its data. Business
+            requirements change all the time, and when the app cannot adapt to a new workflow, or
+            for other reasons becomes obsolete, it's a bottleneck.</para>
+        <para>Read-only access to the data is still essential for the business, but they cannot
+            justify keeping, maintaining the app. </para>
+        <para>A possible solution is to replace the complex data-creator app with a simple, thin,
+            data-access app. </para>
+        <para>The approach I'm sketching here is based on experience from multiple projects. Also,
+            some projects were so massive that we had to work with vastly diverse data. These
+            circumstances pushed us to think generic. </para>
+        <para>Let me explain this through example use cases.</para>
+        <sect2>
+            <title>Data archiving and application decommissioning</title>
+            <para>It is the most common use case. For example, a company changes the financial
+                software because of an acquisition. According to the regulations, they still have to
+                keep its data for a few years.</para>
+            <para>It's historical data that won't change anymore, however, occasionally it has to be
+                accessible to end users as a reference, also for auditors.</para>
+            <para>For this use case, the natural choice for backend and user interface is an
+                archiving solution. It usually provides a wizard to configure a search application
+                GUI and implements the archive administration workflow (user roles, retention
+                policy, etc).</para>
+            <para>However, the archiving system requires data packages with aggregated records,
+                which is a challenge.</para>
+        </sect2>
+        <sect2>
+            <title>Freeing up licenses</title>
+            <para>A corporation pays for expensive PLM (product lifecycle management) software
+                licenses for hundreds of users. However, only a handful of users change any product
+                data in the system; the rest use it as a read-only reference. </para>
+            <para>The company decides to keep only a few licenses and migrate the data nightly into
+                a database which gives read-only access. The new, thin app could also provide a more
+                easy to use, intuitive GUI for the less demanding user.</para>
+        </sect2>
+        <sect2>
+            <title>Merging data silos</title>
+            <para>In this scenario, multiple applications from different vendors are used in one
+                company workflow. The applications are not integrated, and their data is isolated,
+                only accessible by a single application.</para>
+            <para>From the user's perspective, the data across these databases should be connected.
+                Switching between these apps all the time makes the work inefficient, and is a
+                source of frustration for the users.</para>
+            <para>If there are distinct user roles for data creation and data access, it could be
+                highly beneficial for the data access user to see all the data related, harmonized,
+                and accessible via a single GUI.</para>
+            <para>Finding the right connection points between the silos can be challenging, but if
+                there are some permanent global identifiers, which are not vendor/system specific,
+                then those can be used to make the connections, aggregate the data across the
+                isolated silos.</para>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Technical angle</title>
+        <para>Our ultimate goal is to provide access to the data via a thin app, <emphasis>as simple
+                as possible</emphasis>. With other words: <emphasis>as cheap as possible</emphasis>
+            to implement, or perhaps even generate it via a wizard, no coding needed.</para>
+        <para>When a user wants to access information via a traditional application with a
+            relational database backend, it does two things in real time:</para>
+        <orderedlist>
+            <listitem>
+                <para>Filters records</para>
+            </listitem>
+            <listitem>
+                <para>Aggregates data</para>
+            </listitem>
+        </orderedlist>
+        <para>The data always have to be aggregated for human consumption. The only question is when
+            we do this: <orderedlist>
+                <listitem>
+                    <para>In real time - when the user queries the data, <emphasis role="bold"
+                            >OR</emphasis></para>
+                </listitem>
+                <listitem>
+                    <para>In advance - so we store the data aggregated</para>
+                </listitem>
+            </orderedlist>
+        </para>
+        <para>Aggregated data is usually redundant, and a data creator application can't afford
+            this. The relational data model is efficient because it does not store data redundantly.
+            However, on-demand data aggregation can be very complex and resource-intensive.</para>
+        <para>Can we persist the data in an aggregated form, so the application can be simplified
+            and only needs to deal with record filtering? The relational model falls short on this.
+            It can do aggregation partly, but not entirely. The hierarchical model is a better
+            choice.</para>
+        <sect2>
+            <title>Relational data</title>
+            <para>Let's look into this via an example. We want to build a thin app which gives
+                access to travel reports. Our aggregated data record - what the thin app's search
+                interface will filter on - is a <emphasis>report</emphasis>, which has a header
+                (travel date, reason, employee info, etc.) and a list of transactions (cost
+                items).</para>
+            <para>The following simple tables hold data about a travel report.</para>
+            <table frame="all">
+                <title>Travel table - holds one record per trip</title>
+                <tgroup cols="4">
+                    <colspec colname="c1" colnum="1" colwidth="1*"/>
+                    <colspec colname="c2" colnum="2" colwidth="1*"/>
+                    <colspec colname="c3" colnum="3" colwidth="1*"/>
+                    <colspec colname="c4" colnum="4" colwidth="1*"/>
+                    <thead>
+                        <row>
+                            <entry>travel id</entry>
+                            <entry>employee id</entry>
+                            <entry>date</entry>
+                            <entry>reason</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>t1</entry>
+                            <entry>e1</entry>
+                            <entry>2019-05-15</entry>
+                            <entry>Customer meeting in Oslo</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <table frame="all">
+                <title>Employee table - one row per employee</title>
+                <tgroup cols="3">
+                    <colspec colname="c1" colnum="1" colwidth="1*"/>
+                    <colspec colname="c2" colnum="2" colwidth="1*"/>
+                    <colspec colname="c3" colnum="3" colwidth="1*"/>
+                    <thead>
+                        <row>
+                            <entry>employee id</entry>
+                            <entry>first name</entry>
+                            <entry>second name</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>e1</entry>
+                            <entry>Ola</entry>
+                            <entry>Nordmann</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <table frame="all">
+                <title>Transaction table - one row describes one transaction</title>
+                <tgroup cols="5">
+                    <colspec colname="c1" colnum="1" colwidth="1*"/>
+                    <colspec colname="c2" colnum="2" colwidth="1*"/>
+                    <colspec colname="c3" colnum="3" colwidth="1*"/>
+                    <colspec colname="c4" colnum="4" colwidth="1*"/>
+                    <colspec colname="c5" colnum="5" colwidth="1*"/>
+                    <thead>
+                        <row>
+                            <entry>transaction id</entry>
+                            <entry>travel id</entry>
+                            <entry>item name</entry>
+                            <entry>cost</entry>
+                            <entry>currency</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>c1</entry>
+                            <entry>t1</entry>
+                            <entry>bus ticket</entry>
+                            <entry>100</entry>
+                            <entry>NOK</entry>
+                        </row>
+                        <row>
+                            <entry>c2</entry>
+                            <entry>t1</entry>
+                            <entry>accommodation</entry>
+                            <entry>1000</entry>
+                            <entry>NOK</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <para>Can we make an aggregate table where a single record holds the whole report? Only
+                partly.</para>
+            <table frame="all">
+                <title>Aggregate table</title>
+                <tgroup cols="10">
+                    <colspec colname="c1" colnum="1" colwidth="1*"/>
+                    <colspec colname="c2" colnum="2" colwidth="1*"/>
+                    <colspec colname="c3" colnum="3" colwidth="1*"/>
+                    <colspec colname="c4" colnum="4" colwidth="1*"/>
+                    <colspec colname="c5" colnum="5" colwidth="1*"/>
+                    <colspec colname="c6" colnum="6" colwidth="1*"/>
+                    <colspec colname="c7" colnum="7" colwidth="1*"/>
+                    <colspec colname="c8" colnum="8" colwidth="1*"/>
+                    <colspec colname="c9" colnum="9" colwidth="1*"/>
+                    <colspec colname="c10" colnum="10" colwidth="1*"/>
+                    <thead>
+                        <row>
+                            <entry>travel id</entry>
+                            <entry>empl.id</entry>
+                            <entry>first name</entry>
+                            <entry>second name</entry>
+                            <entry>date</entry>
+                            <entry>reason</entry>
+                            <entry>trans id</entry>
+                            <entry>item name</entry>
+                            <entry>cost</entry>
+                            <entry>currency</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>t1</entry>
+                            <entry>e1</entry>
+                            <entry>Ola</entry>
+                            <entry>Nordmann</entry>
+                            <entry>2019-05-15</entry>
+                            <entry>Customer meeting in Oslo</entry>
+                            <entry>c1</entry>
+                            <entry>bus ticket</entry>
+                            <entry>100</entry>
+                            <entry>NOK</entry>
+                        </row>
+                        <row>
+                            <entry>t1</entry>
+                            <entry>e1</entry>
+                            <entry>Ola</entry>
+                            <entry>Nordmann</entry>
+                            <entry>2019-05-15</entry>
+                            <entry>Customer meeting in Oslo</entry>
+                            <entry>c2</entry>
+                            <entry>accomodation</entry>
+                            <entry>1000</entry>
+                            <entry>NOK</entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+            <para>The aggregate table is highly redundant; still, it does not let us add all report
+                data into a single record. Any application that uses this as a source will have to
+                do further aggregation beyond record filtering. </para>
+        </sect2>
+        <sect2>
+            <title>Hierarchical data</title>
+            <example>
+                <title>Aggregated record as a hierarchy:</title>
+                <itemizedlist>
+                    <listitem>
+                        <para>travel id=t1</para>
+                        <itemizedlist>
+                            <listitem dir="ltr">
+                                <para dir="ltr">date: 2019-05-15</para>
+                            </listitem>
+                            <listitem dir="ltr">
+                                <para dir="ltr">reason: Customer meeting in Oslo</para>
+                            </listitem>
+                            <listitem dir="ltr">
+                                <para dir="ltr">employee name: Ola Nordmann</para>
+                            </listitem>
+                            <listitem dir="ltr">
+                                <para dir="ltr">transactions</para>
+                                <itemizedlist>
+                                    <listitem dir="ltr">
+                                        <para dir="ltr">bus ticket - 100 NOK</para>
+                                    </listitem>
+                                    <listitem dir="ltr">
+                                        <para dir="ltr">accommodation - 1000 NOK</para>
+                                    </listitem>
+                                </itemizedlist>
+                            </listitem>
+                        </itemizedlist>
+                    </listitem>
+                </itemizedlist>
+            </example>
+            <example>
+                <title>Serialized as XML:</title>
+                <programlisting language="xml"><![CDATA[<travel id="t1">
+   <date>2019-05-15</date>
+   <reason>Customer meeting in Oslo</reason>
+   <employee id="e1">
+       <first-name>Ola</first-name>
+       <second-name>Nordmann</second-name>
+   </employee>
+   <transactions>
+       <transaction id="c1">
+           <item-name>bus ticket</item-name>
+           <cost currency="NOK">100</cost>
+       </transaction>
+       <transaction id="c2">
+           <item-name>accommodation</item-name>
+           <cost currency="NOK">1000</cost>
+       </transaction>
+   </transactions>
+</travel>]]></programlisting>
+                <para>A hierarchical (XML) database can store records like this, and a thin app then
+                    should only filter the records relevant to the user and render it.</para>
+            </example>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Different paths to consider</title>
+        <para>Depending on data complexity and the availability of the different options, we need to
+            choose the best path from the list below. </para>
+        <sect2>
+            <title>Use a proprietary connector</title>
+            <para>This is the fastest and safest way. For example, SAP has a connector for the
+                archiving software what we used, but it only covered 10% of all the scenarios in our
+                projects.</para>
+        </sect2>
+        <sect2>
+            <title>Use the app's export/import functionality</title>
+            <para>Use the data creator app's high-level export/report functionality - one last time
+                if the application will be decommissioned - to get all the data out aggregated. It's
+                usually a reliable way, assuming it's a mature product. </para>
+            <para>Then we get</para>
+            <orderedlist>
+                <listitem>
+                    <para><emphasis role="bold">Aggregated and structured data </emphasis></para>
+                    <para>Likely we need to transform this further to be able present this to the
+                        user, but it's already aggregated, so it's easy. </para>
+                </listitem>
+                <listitem>
+                    <para><emphasis role="bold">Aggregated and unstructured data </emphasis></para>
+                    <para>The report tool could produce PDFs, which is human-readable, but
+                        searchability is terrible. We need at least some metadata on top of the
+                        documents.</para>
+                </listitem>
+            </orderedlist>
+        </sect2>
+        <sect2>
+            <title>Export the data from the app's relational database and aggregate it into
+                hierarchical XML records</title>
+            <para><emphasis role="bold">Timing - </emphasis>​The archiving scenario: at the point of
+                time of an app decommissioning, we could likely still find people in the company who
+                know the data. Maybe that knowledge will disappear later on, so doing the
+                aggregation as early as possible is an advantage. </para>
+            <para><emphasis role="bold">Complexity -</emphasis>​ It's a low-level approach, so a
+                reasonable level of understanding the database schema is necessary. It depends on
+                the application, of course. Sometimes it's also possible to work with
+                    <emphasis>"aggregation tables"</emphasis>,​ which at least partly aggregates the
+                data in the relational database, which makes our job easier. </para>
+            <example>
+                <title>Travel reports:</title>
+                <para>In one project, we had to aggregate and archive travel records - similar to
+                    the example I used earlier in this paper. It has a header (date, employee...)
+                    and transaction items in the body.</para>
+                <para>It's quite simple on the database schema level:</para>
+                <orderedlist>
+                    <listitem>
+                        <para>Main travel table - one record per trip.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Transaction table - one record per transaction.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Attachment table - one record with the attachment metadata and a
+                            column with content, for ex. PDF, stored as BLOB.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Approx. a dozen other tables were <emphasis>"​register
+                                tables"</emphasis> . For example, based on the employee ID we could
+                            look up the employee's name from another table.</para>
+                    </listitem>
+                </orderedlist>
+                <para>All in all, we used about 15 tables, and aggregated the records with XQuery
+                    that was not so complicated, less than 100 lines and the same patterns were
+                    repeating. More about this later.</para>
+            </example>
+        </sect2>
+        <sect2>
+            <title>Export the data from the app's relational database, serialize and store it as
+                relational XML records</title>
+            <para>In this scenario, we skip the aggregation step. We serialize the relational tables
+                    "<emphasis>as-is</emphasis>" as XML during the export process without remodeling
+                the data.</para>
+            <para>Maybe, in theory, this scenario does not make too much sense, but is quite often
+                applied in case of a data archive. Simply because the archive application provides
+                the thin app out of the box, and also the data management workflow.</para>
+            <para>Then for fetching the relevant info, we have to do two things on demand:</para>
+            <orderedlist>
+                <listitem>
+                    <para>filter the records</para>
+                </listitem>
+                <listitem>
+                    <para>aggregate the data</para>
+                </listitem>
+            </orderedlist>
+            <para>So we need to write almost the same aggregator XQuery what we use in the previous
+                scenario, but this is run on-demand by the end-user in real-time and not in advance
+                as part of the data migration. </para>
+            <itemizedlist>
+                <title>Pros:</title>
+                <listitem>
+                    <para>more flexible than the pre-aggregated</para>
+                </listitem>
+            </itemizedlist>
+            <itemizedlist>
+                <title>Cons:</title>
+                <listitem>
+                    <para>could lead to bad performance </para>
+                </listitem>
+                <listitem>
+                    <para>more complex application </para>
+                </listitem>
+                <listitem>
+                    <para>the relational model know-how might disappear from the corporation in the
+                        meantime </para>
+                </listitem>
+            </itemizedlist>
+        </sect2>
+        <sect2>
+            <title>Data virtualization</title>
+            <para>With a generic data virtualization tool, it's also possible to query a relational
+                database via XQuery and build aggregated, hierarchical XML directly. It can provide
+                a reliable platform and decrease the complexity of the data aggregation. At the time
+                we worked on these projects, I was not aware of this option. </para>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Implementation</title>
+        <para>In this paper, we'll focus on exporting the data from the app's relational database
+            and aggregating it into hierarchical XML records.</para>
+        <itemizedlist>
+            <title>Our data pipeline: </title>
+            <listitem>
+                <para><emphasis role="bold">source:</emphasis>​ arbitrary relational database </para>
+            </listitem>
+            <listitem>
+                <para><emphasis role="bold">target:</emphasis>​ XML database with aggregated,
+                    hierarchical records </para>
+            </listitem>
+        </itemizedlist>
+        <para>We could use another hierarchical format, like JSON, but the XML platform is mature
+            and gives us all that we need: serialization format, schema-, transformation- and query
+            language, and also a native database for persistence. (I might be partial.) </para>
+        <para>The suggested solution does use some lines of Java code, but it's kept to the minimum
+            and prefers the XML technology stack. </para>
+        <sect2>
+            <title>Execution framework</title>
+            <para>The data pipeline is based on Apache Ant (open source). Its main configuration is
+                XML-based. </para>
+            <para>It might count deprecated as a build tool, but it still shines as a process
+                execution framework with rich standard features, like:</para>
+            <orderedlist>
+                <listitem>
+                    <para>Process execution (command line, Java, etc.)</para>
+                </listitem>
+                <listitem>
+                    <para>File operations</para>
+                </listitem>
+                <listitem>
+                    <para>XML operations (XSLT execution, schema validation, etc)</para>
+                </listitem>
+            </orderedlist>
+            <para>Beyond the standard features, also 3rd party tools integrate with Apache Ant,
+                like:</para>
+            <itemizedlist>
+                <listitem>
+                    <para>DBUnit, the tool we used to export data from relational databases</para>
+                </listitem>
+                <listitem>
+                    <para>An archiving system we used during our projects</para>
+                </listitem>
+            </itemizedlist>
+        </sect2>
+        <sect2>
+            <title>Execution steps</title>
+            <sect3>
+                <title>Export</title>
+                <para>The export process fetches metadata and data from a relational database and
+                    persists it as XML files.</para>
+                <orderedlist>
+                    <title>It does the following:</title>
+                    <listitem>
+                        <para>Extracts database metadata information (table- and columns names,
+                            types, etc.) using Java code (JDBC) and serializes it as XML.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Uses this metadata XML as an input and creates an Ant export
+                            configuration for DBUnit. Code: XSLT. </para>
+                    </listitem>
+                    <listitem>
+                        <para>Runs DBUnit to export the data and serializes it as XML (relational
+                            model), since - as mentioned earlier - DBUnit has Apache Ant
+                            integration.  Code: XML.</para>
+                    </listitem>
+                </orderedlist>
+                <para>DBUnit is an open source tool to export and import database data to and from
+                    XML datasets. It's database vendor agnostic, has a connector for most widely
+                    used databases. It has a streaming mode to deal with big data. In our
+                    configuration, we exported each table into a single XML file. The largest XML
+                    output file so far was 43 GB.</para>
+                <example>
+                    <title>XML data using the relational model - from DBUnit:</title>
+                    <programlisting language="xml"><![CDATA[<table name="employee">
+    <column>employee-id</column>
+    <column>first-name</column>
+    <column>second-name</column>
+    <row>
+        <value>e1</value>
+        <value>Ola</value>
+        <value>Nordmann</value>
+    </row>
+    <row>...</row>
+</table>]]></programlisting>
+                </example>
+            </sect3>
+            <sect3>
+                <title>Transformation</title>
+                <sect4>
+                    <title>XML serialization</title>
+                    <para>Serialization of any data into XML has its challenges. First of all,
+                        DBUnit has to figure out the type of the data field. Is it:</para>
+                    <itemizedlist>
+                        <listitem>
+                            <para>text</para>
+                        </listitem>
+                        <listitem>
+                            <para>numeric</para>
+                        </listitem>
+                        <listitem>
+                            <para>binary</para>
+                        </listitem>
+                    </itemizedlist>
+                    <para>If it's binary, then it gets embedded into XML as a Base64 encoded string.
+                        All the 64 characters this encoding uses are valid XML characters.</para>
+                    <para>Serializing numeric values is easy. However, text data can contain
+                        characters which are invalid in XML. For example, some legacy applications
+                        used "<emphasis>control characters</emphasis>" - below decimal 32 (space
+                        char). Most of those are invalid in XML 1.0. XML 1.1 expands the set of
+                        allowed characters.</para>
+                    <para>Of course, we could work around this by Base64 encoding all textual data,
+                        but this would result in cumbersome processes when we query the data.</para>
+                    <para>In projects, we did stick with XML 1.0, and when we faced illegal XML
+                        characters in the DBUnit output, mostly we could simply remove them safely
+                        with a low level (text) process.</para>
+                </sect4>
+                <sect4>
+                    <title>Data types</title>
+                    <para>Getting the data types converted correctly is a challenging part of the
+                        process. SQL implementations bring vendor-specific data types. All of them
+                        have to be mapped accurately to XML schema data types. This is done via
+                        configuration.</para>
+                </sect4>
+                <sect4>
+                    <title>Row customizer</title>
+                    <para>In our framework, we tried to implement the process to be as generic as
+                        possible, but we also added customization options.</para>
+                    <para>Our row customizer is a custom XQuery that gets a single row as input and
+                        can filter or modify it.</para>
+                </sect4>
+                <sect4>
+                    <title>Format conversion</title>
+                    <para>The serialization format DBUnit uses is not the best when we want to query
+                        the data set. It's worth to write generic code to turn XML with column names
+                        as text, into XML with column names used as element names.</para>
+                    <example>
+                        <title>XML data using the relational model - better semantics:</title>
+                        <programlisting language="xml"><![CDATA[<employee>
+    <row>
+        <employee-id>e1</employee-id>
+        <first-name>Ola</first-name>
+        <second-name>Nordmann</second-name>
+    </row>
+</employee>]]></programlisting>
+                    </example>
+                </sect4>
+            </sect3>
+            <sect3>
+                <title>Aggregation</title>
+                <para>The most challenging step in this data flow is to re-model the relational data
+                    into aggregated, hierarchical data. A relational database table becomes one (or
+                    more) XML document during the data export, which can be quite large, often
+                    several gigabytes. During the aggregation, we need to "​<emphasis role="italic"
+                        >join</emphasis>​" these large "<emphasis>table
+                    documents</emphasis>".</para>
+                <para>We can use SAX, StAX or XSLT streaming mode to process large files, but the
+                    parallel processing of several large documents is problematic. Here comes the
+                    power of an XML database and XQuery. Configuring proper indexes is a
+                    must.</para>
+                <para>As I have described before, the complexity of the XQuery is not too bad, since
+                    we tend to reuse the same patterns multiple times.</para>
+                <para>This XQuery is specific to the database schema we work with, and cannot be
+                    written generically. This query script is the only part of the data pipeline
+                    which is custom made for each relational database schema; the other operations
+                    are generic and work with any database.</para>
+                <para>Most importantly, we need to have a decent knowledge of the relational
+                    database schema, and also the end user requirements about how this data will be
+                    searched and used.</para>
+                <example>
+                    <title>Aggregated records in hierarchical XML:</title>
+                    <programlisting language="xml"><![CDATA[<travels>
+    <travel id="t1">
+        <date>2019-05-15</date>
+        <reason>Customer meeting in Oslo</reason>
+        <employee id="e1">
+            <first-name>Ola</first-name>
+            <second-name>Nordmann</second-name>
+        </employee>
+        <transactions>
+            <transaction id="c1">
+               <item-name>bus ticket</item-name>
+               <cost currency="NOK">100</cost>
+            </transaction>
+            <transaction id="c2">
+                <item-name>accommodation</item-name>
+                <cost currency="NOK">1000</cost>
+            </transaction>
+        </transactions>
+    </travel>
+    <travel>...</travel>
+    ...
+</travels>]]></programlisting>
+                </example>
+                <para>It's also possible that the data from one database is not aggregated into a
+                    single list of records, but into multiple lists of records using different XML
+                    schemas.</para>
+            </sect3>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Conclusion</title>
+        <para>We had great focus to make this solution as generic as possible to</para>
+        <orderedlist>
+            <listitem>
+                <para>optimize productivity</para>
+            </listitem>
+            <listitem>
+                <para>provide good control on the process</para>
+            </listitem>
+        </orderedlist>
+        <para>The first statement is likely trivial, while the second requires a bit more
+            consideration. It's quite challenging to test complex data migration processes. We can
+            count records, but if we want to compare data, that's a demanding task. The easiest way
+            to ensure quality is to build a robust, generic framework, which has only a few
+                "<emphasis>moving parts</emphasis>", code which is database schema specific.</para>
+        <para>When the data aggregation is done, we either use an application platform or archiving
+            system to create a thin app via an app wizard, or we build it on top of the (XML)
+            database using XQuery.</para>
+        <para>If we feed an archiving system with aggregated, hierarchical records, it can provide
+            the complete end-user application via simple configuration: the end user GUI (search
+            forms), the result rendering, and even the record filtering query (for example XQuery)
+            can be auto-generated.</para>
+    </sect1>
+</article>

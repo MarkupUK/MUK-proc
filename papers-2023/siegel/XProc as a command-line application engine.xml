@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
+
+  <info>
+    <title>XProc as a command-line application engine</title>
+
+    <author>
+      <personname>Erik Segel</personname>
+      <email>erik@xatapult.nl</email>
+      <uri>http://www.xatapult.com</uri>
+      <personblurb>
+        <para>My name is Erik Siegel. <link xl:href="http://www.xatapult.com">Xatapult</link> is my (one-man) company,
+          specialized in content engineering and XML processing. Most of my clients are in the publishing industry or
+          involved in standardization.</para>
+        <para>I come from a technical IT background. Xatapult is deliberately looking for content and XML related
+          projects on all levels: from the strategic use of standards to developing processing applications.</para>
+        <para>I do not just strive for the best solution from a business and technical perspective, but also for optimal
+          understandability. Therefore, documentation is never an afterthought. I consider my ability to explain and
+          clarify complex technical stuff, both live and in prose, as an important non-technical skill. I’m the author
+          of three books on XML technology.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>freelance</jobtitle>
+        <orgname>Xatapult</orgname>
+      </affiliation>
+    </author>
+
+    <keywordset>
+      <keyword>XML</keyword>
+      <keyword>XProc</keyword>
+    </keywordset>
+
+    <abstract>
+
+      <para>This paper explores the use of XProc 3.0 in developing a set of command-line applications for converting XML
+        documents into various derivatives. XProc is used as the core of the application and it experiments with
+        building the application logic in XProc, including command-line handling and file/directory management. The
+        paper proposes two design patterns that can be widely applied to use XProc effectively in developing
+        command-line applications.</para>
+
+    </abstract>
+
+  </info>
+
+  <!-- ======================================================================= -->
+
+  <section>
+    <title>Introduction</title>
+
+    <para>A recent assignment required me to write a set of command-line applications to convert (many) XML documents
+      into various derivatives, some in XML, some in other formats. XProc, especially the recent 3.0 version, seemed to
+      be a perfect fit for this. Being well acquainted with the language, and with Achim’s excellent Morgana XProc
+      processor freely available, I decided to use it for the application&#x2019;s core.</para>
+    <para>But would it also be possible to build the application logic in XProc? For example things like command line
+      handling, doing things based on command line options, file and directory handling, etc.? And do this well, in a
+      satisfying way? After some experimentation I came up with two &#x201c;design patterns&#x201d; that are probably
+      more widely applicable.</para>
+    <para>This paper and the accompanying presentation does not contain ready-made solutions. Instead it explores the
+      two &#x201c;design patterns&#x201d; that proved useful in writing such an application: job tickets and
+      command-line wrappers. There are some data and code examples for inspiration and to help you on your way, but no
+      definitive, ready-to-run stuff.</para>
+
+  </section>
+
+  <!-- ======================================================================= -->
+
+  <section>
+    <title>What is XProc?</title>
+
+    <para>XProc is an XML based programming language for processing documents in pipelines: chaining conversions and
+      other steps together to achieve the desired results. It has been around in its 1.0 version since 2010. The much
+      more versatile 3.0 version was finalized in 2022.</para>
+
+    <para>Some high level characteristics:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>XProc is a <emphasis>programming language</emphasis>, expressed in XML, in which you can write
+            <emphasis>pipelines</emphasis>.</para>
+      </listitem>
+      <listitem>
+        <para>An XProc <emphasis>pipeline</emphasis> takes data as its input (often XML) and passes this through
+          specialized <emphasis>steps</emphasis> to produce end results.</para>
+      </listitem>
+      <listitem>
+        <para>Steps range from simple ones, like reading and writing data, to more complex stuff like
+          splitting/combining/pruning, transformations with XSLT and XQuery, validations against schemas, etc.</para>
+      </listitem>
+      <listitem>
+        <para>Within a pipeline you can do things like working with variables, branching, looping, catch errors, etc.
+          Everything is based on the data flowing through.</para>
+      </listitem>
+      <listitem>
+        <para>XProc pipelines are not limited to a linear succession of steps. They can fork and merge.</para>
+      </listitem>
+      <listitem>
+        <para>XProc allows you to create custom steps by combining other steps. These custom steps can be used just like
+          any other. Custom steps can be collected into libraries.</para>
+      </listitem>
+      <listitem>
+        <para>XProc aids in the housekeeping surrounding the processing, like inspecting directories, reading documents
+          from zip files, writing things to disk, etc</para>
+      </listitem>
+      <listitem>
+        <para>There is software that can execute these pipelines, the so-called XProc
+          <emphasis>processors</emphasis>.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>There is of course much more to say about XProc: </para>
+    <itemizedlist>
+      <listitem>
+        <para>The <link xl:href="https://xproc.org/index.html">XProc main website</link> has a page with <link
+            xl:href="https://xproc.org/learning.html">learning materials</link>.</para>
+      </listitem>
+      <listitem>
+        <para>The <link xl:href="https://www.xml.com/articles/?tag=xproc">xml.com</link> hosts a number of articles
+          about XProc, including a full <link xl:href="https://www.xml.com/articles/2019/11/05/introduction-xproc-30/"
+            >introduction</link>.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>To execute XProc you&#x2019;ll need an XProc processor. Information about this is <link
+        xl:href="https://xproc.org/processors.html">here</link>. The author uses <link
+        xl:href="https://www.xml-project.com/morganaxproc-iiise.html">MorganaXProc-IIIse</link>.</para>
+
+  </section>
+
+  <!-- ======================================================================= -->
+
+  <section>
+    <title>The problem domain</title>
+
+    <para>The application set I’m working on downloads files using a REST service and turns these into various
+      derivatives, some in XML, some in other formats. In doing that it creates sets of files in a specific,
+      complicated, directory structure. There are lots of variants, all doing roughly the same things, but with their
+      own specification, REST URLs, sets of files to copy, and transformation stylesheets.</para>
+
+    <para>The customer I&#x2019;m doing this for is <link xl:href="https://nictiz.nl/">Nictiz</link>: the Dutch
+      competence center for digital information management in healthcare. They maintain and support the use of digital
+      healthcare standards in The Netherlands.</para>
+
+    <para>There are many domains where healthcare standards are applicable. Each of these domains (called
+      &#x201c;applications&#x201d;) has their own set of versions, use-cases and end-products. This leads to a
+      combinatorial explosion of stuff that needs to be produced and maintained.</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/problem-domain.png"/>
+      </imageobject>
+    </mediaobject>
+
+    <para>The current implementation is made with Ant as main engine and uses XSLT for the actual transformations. There
+      are over a 100 Ant scripts. The whole set, organically grown over the years, is now considered outdated, hard to
+      maintain and in dire need of refactoring.</para>
+
+    <para>Here is an overview of the main data flow in this application. It all starts with specification documents
+      downloaded through a REST service. These are preprocessed (transformed using XSLT) and stored on disk in a complex
+      directory structure. From this, several end-products are made with additional scripting.</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/example-existing-flow.png"/>
+      </imageobject>
+    </mediaobject>
+
+  </section>
+
+  <!-- ======================================================================= -->
+
+  <section>
+    <title>Is XProc a suitable language?</title>
+
+    <para>The first question is of course: does XProc have enough functionality on board to, theoretically, do this? The
+      answer to that is, fortunately, yes:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>REST services can be called using the <code><![CDATA[<p:http-request>]]></code> step (<link
+            xl:href="https://spec.xproc.org/master/head/steps/#c.http-request"/>).</para>
+      </listitem>
+      <listitem>
+        <para>XProc has a set of &#x201c;file steps&#x201d; (<link xl:href="https://spec.xproc.org/master/head/file/"/>)
+          that allow you to do things like inspecting/creating/deleting directories, write/read/delete all kinds of
+          files, etc</para>
+      </listitem>
+      <listitem>
+        <para>And, of course, processing documents using XSLT can be done using the <code><![CDATA[<p:xslt>]]></code>
+          step (<link xl:href="https://spec.xproc.org/master/head/steps/#c.xslt"/>).</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>So, from a functional point of view, nothing stands in your way.</para>
+
+  </section>
+
+  <!-- ======================================================================= -->
+
+  <section>
+    <title>Design pattern 1: Job tickets</title>
+
+    <para>The thing that really helped writing this application well was working with what I call a &#x201c;job
+      ticket&#x201d;. A job ticket is some kind of description of what the application has to do: get these files, copy
+      them there, transform these using that stylesheet, store the result there, etc. A job ticket format can be seen as
+      a Domain Specific Language (DSL). </para>
+
+    <para>I use XML as the job ticket&#x2019;s format, but other (XProc supported) formats, like JSON, are of course also
+      possible. </para>
+
+    <para>Let&#x2019;s assume we have such a job ticket (more about this later). The clue to efficiently process this in
+      XProc was in making it the <emphasis>primary</emphasis> document that flows through the pipeline:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/processing-1.png"/>
+      </imageobject>
+    </mediaobject>
+
+    <para>Usually the documents the pipeline is about are the primary ones, the drivers of the process. But in this
+      case, since we were doing what the job ticket prescribed, it turned out to be way easier to let the job ticket
+      determine the flow. The underlying application logic became simpler and easier to understand.</para>
+
+    <para>However, there are of course still the (data) documents that are processed/produced to cater with. The way to
+      handle this is add <emphasis>another port</emphasis> on the processing steps and pass them on through this:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/processing-2.png"/>
+      </imageobject>
+    </mediaobject>
+
+    <para>In XProc, that&#x2019;s easy to do, just add another (non-primary) port in the step&#x2019;s prolog:</para>
+
+    <programlisting language="xml"><![CDATA[<p:declare-step … type="steps:step2" name="step2">
+
+  <!-- The job ticket is passed, unchanged -->
+  <p:input port="source" primary="true"/> 
+  <p:output port="result" primary="true" pipe="source@step2">
+
+  <!– Documents are passed using another port (if necessary) -->
+  <p:input port="docs-in" primary="false" sequence="true"/>
+  <p:output port="docs-out" primary="false" sequence="true"/>
+
+  …
+
+</p:declare-step>]]></programlisting>
+
+    <itemizedlist>
+      <listitem>
+        <para>The primary output port (called <code>result</code>) is defined in such a way (using its <code>pipe</code>
+          attribute) that it passes what flows in on the input port (called <code>source</code>) unchanged.</para>
+      </listitem>
+      <listitem>
+        <para>The <code>docs-in</code> and <code>docs-out</code> ports are defined as <code>sequence="true"</code>,
+          meaning they can handle a sequence (zero or more) documents flowing through.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>And here is an example of how to chain steps like this in an encompassing step:</para>
+
+    <programlisting language="xml"><![CDATA[<p:declare-step … name="encompassing-step">
+
+  … (acquire job ticket)
+
+  <steps:step1 name="step1-invocation"/>
+
+  <steps:step2 name="step2-invocation">
+    <p:with-input port="docs-in" pipe="docs-out@step-1-invocation"/>
+  </steps:step2>
+
+  <steps:step3 name="step3-invocation">
+    <p:with-input port="docs-in" pipe="docs-out@step-2-invocation"/>
+  </steps:step3>
+
+</p:declare-step>]]></programlisting>
+
+    <para>The primary document (the job ticket) &#x201c;falls through&#x201d; the steps, because of the implicit primary
+      port connections. The document port connections need to made explicit.</para>
+
+    <para>If you need to produce console messages during processing you can use the <code>message</code> attribute on
+      steps:</para>
+
+    <programlisting language="xml"><![CDATA[<p:file-copy message="* Copying {$hrefTarget} to {$hrefTarget}"/>
+
+<p:xslt message="* Transforming …">
+  …
+</p:xslt>]]></programlisting>
+
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+    <section>
+      <title>The job ticket</title>
+
+      <para>Of course, to be able to process a job ticket, we first need to acquire it. Basically this means: find out
+        what needs to be done (for instance by inspecting the command-line arguments) and create it. In my case, it
+        worked like this: </para>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/job-ticket-1.png"/>
+        </imageobject>
+      </mediaobject>
+
+
+      <para>I created an overarching job ticket document that held tickets for several jobs, specified in some internal
+        Domain Specific Language (DSL). Here&#x2019;s a simplified example, just to give you an impression (the details
+        and functionality do not matter here):</para>
+
+      <programlisting language="xml"><![CDATA[<jobtickets … >
+
+  <application name="bgz" version="2017" source-project-name="zib2017-nl">
+      <setup usecase="kwalificatie" directory-id="bgzkwal">
+          <retrieve name="searchset.xml" url="…" directory-id="bgzkwal-instance"/>
+          <copy-project-schemas>
+            <include glob="*$USECASE.xsd"/>
+          </copy-project-schemas>    
+      </setup>
+      <build>
+          <stylesheet href="../xsl/…"/>
+          <input-document directory="@bgzkwal-instance" name="searchset.xml"/>
+          <output directory="@bgzkwal/wiki_instance" name="wiki-bgz.txt"/>
+          <parameter name="adaReleaseFilename" value="zib2017bbr-decor.xml"/>
+      </build>
+  </application>
+  
+  <application … >
+    …
+  </application>
+
+</jobtickets>]]></programlisting>
+
+      <para>For a setup like this I would very strongly advocate the use of XML validation. Actually, my advice is to
+          <emphasis>always</emphasis> create a schema for XML documents that are hand-edited, even when it&#x2019;s
+        &#x201c;just&#x201d; an internal data file:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>When using a schema-aware editor (like oXygen), it helps you in creating and maintaining the
+            file.</para>
+        </listitem>
+        <listitem>
+          <para>Consider adding a Schematron schema as well for the more difficult rules (like, for instance, identifier
+            references). It&#x2019;s really helpful when a minor typo in an obscure identifier get&#x2019;s flagged
+            immediately.</para>
+        </listitem>
+        <listitem>
+          <para>XProc has several validation steps. In fact, validation has become so easy, it&#x2019;s almost criminal
+            not to do it.</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>A next step would be to filter the main document, based on the job that needs to be done. In my case I threw
+        everything away that didn&#x2019;t belong to the application I was handling. Assume the name of this application
+        is in a variable (or option) <code>$application</code>, then the code for this is a single line of XProc:</para>
+
+      <programlisting language="xml"><![CDATA[<p:delete match="/*/application[@name ne '{$application}']"/>]]></programlisting>
+
+      <para>The next step in processing the job ticket proved <emphasis>crucial</emphasis> for the applicability of the
+        job ticket design pattern: job ticket need to be <emphasis>enhanced</emphasis>. Enhancement here means:
+        everything you can do or calculate up-front must be done first, before the actual processing starts. </para>
+
+      <para>When file or directory names are involved, calculate their full absolute values up-front. For instance, in
+        my case, names sometimes depended on global parameters (some main directory), attribute values of the current
+        and parent elements (subdirectories) and some global settings made elsewhere (version numbers, etc.). All this
+        was tricky to compute. Also: absolute file and directory names <emphasis>must</emphasis> be URIs (having
+          <code>file:///</code> in front). You have to make sure this is the case before using them in XProc
+        steps.</para>
+
+      <para>XProc support the full XPath&#160;3.1 language, so, yes, in theory, you could do these kinds of computations
+        directly in your XProc pipeline. However, this would lead to very complicated and overly long XPath expressions,
+        especially because XPath functions (which would help, a bit) are not (yet?) supported. I would recommend doing
+        all these up-front enhancements in XSLT, which is a language much more suited to these kinds of things.</para>
+
+      <para>Here is an example of a snippet of an enhanced job ticket:</para>
+
+      <programlisting language="xml"><![CDATA[<application _target-dir="file:///C:/.../lab/3.0.0"
+             _source-dir="file:///C:/.../lab/3.0.0"
+             name="lab"
+             version="3.0.0">
+
+  <setup _target-dir="file:///C:/.../lab/3.0.0/sturen_laboratoriumresultaten"
+         _source-dir="file:///C:/.../lab/3.0.0/sturen_laboratoriumresultaten"
+         usecase="sturen_laboratoriumresultaten"
+         directory-id="slr">
+
+     <copy-data _target-dir="file:///C:/.../ada_instance_repo"
+                _source-dir="file:///C:/.../sturen_laboratoriumresultaten/ada_instance_repo"
+                target-subdir="ada_instance_repo"
+                source-subdir="ada_instance_repo"
+                directory-id="ada-instance-repo">
+
+        <include _pattern="\.xml$"
+                 glob="*.xml"/>
+
+     </copy-data>]]></programlisting>
+
+      <para>Target and source directories are computed at every level of the document (the <code>__target-dir</code> and
+          <code>_source-dir</code> attributes). When the job ticket processing wants to do something, based on one of
+        these elements, it can simply lift the URI from the applicable attribute.</para>
+
+      <para>Another enhancement here is that a UNIX-style glob was provided (the <code>include/@glob</code> attribute).
+        However, XProc works with regular expressions with regards to including/excluding files, so this glob had to be
+        converted into an XPath regular expression. This was added in the <code>_pattern</code> attribute.</para>
+
+      <para>One last thing about these kinds of data documents is that XProc makes it very easy to setup support for
+        includes. Create an include structure using XInclude <code>&lt;xi:include href="…"/&gt;</code> elements (the
+        namespace prefix <code>xi</code> is bound to the XInclude namespace
+        <code>http://www.w3.org/2001/XInclude</code>). In XProc, the <code>&lt;p:xinclude/&gt;</code> step does all the
+        work for you and flattens the document by resolving all the includes. That&#x2019;s all there is to it.</para>
+
+      <para>When processing the resulting job ticket, we need take decisions about what to do, in my case based on
+        element names. In XSLT this would be rather simple: call <code>&lt;xsl:apply-templates&gt;</code> and write a
+        template for all applicable elements. However, XProc does not have such a mechanism. You&#x2019;ll,
+        unfortunately, have to write dispatching code like this:</para>
+
+      <programlisting language="xml"><![CDATA[<p:for-each>
+  <p:with-input select="/*/*"/>
+  
+  <p:choose>
+    <p:when test="/*/self::copy-data">
+      …
+    </p:when>
+    <p:when test="/*/self::copy-schemas">
+      …
+    </p:when>
+    <p:when test="/*/self::build">
+      …
+    </p:when>
+    <p:otherwise>
+      … (error)
+    </p:otherwise>
+  <p:choose>
+
+</p:for-each>]]></programlisting>
+
+    </section>
+
+  </section>
+
+  <!-- ======================================================================= -->
+
+  <section>
+    <title>Design pattern 2: Command line wrappers</title>
+
+    <para>So assume we have created a pipeline using the job ticket pattern, how do we get this started from the command
+      line? It turned out that adding a &#x201c;command wrapper step&#x201d; made a lot of sense. Here is how this
+      works:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/cw.png"/>
+      </imageobject>
+    </mediaobject>
+
+    <itemizedlist>
+      <listitem>
+        <para>The command on the command-line starts a batch/shell script that fires the XProc processor (with all the
+          correct flags and arguments).</para>
+      </listitem>
+      <listitem>
+        <para>This starts a &#x201c;command wrapper step&#x201d;: an XProc step whose sole purpose is to unravel and
+          interpret the command line.</para>
+      </listitem>
+      <listitem>
+        <para>The command wrapper step then fires the appropriate step(s) that implements the actual functionality of
+          what we&#x2019;re trying to achieve.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>Why is this useful? In XProc steps you&#x2019;ve written can be easily re-used. So it makes sense to keep
+      steps that implement application logic &#x201c;pure&#x201d;: as unaware of the environment they&#x2019;re running
+      in as possible. Sometimes you&#x2019;re using them as part of a command line tool and, maybe, sometimes in other
+      contexts. Making them aware of things like command line arguments severely hinders re-use. So best to keep the
+      interface of the functional steps simple using &#x201d;straight&#x201d; options (booleans, strings, numbers
+      etc.).</para>
+
+    <para>What would such a command-line wrapper step look like? You can of course make this is complex as you like. I
+      used a fairly simple setup that turned out to be sufficient for my purposes:</para>
+
+    <programlisting language="xml"><![CDATA[<p:declare-step … >
+
+  <p:option name="commandLine" as="xs:string"/>
+
+  …
+
+  <p:variable name="commandParts" as="xs:string*" select="tokenize($commandLine, '\s+')[.]"/>
+  <p:variable name="commandFlags" as="xs:string*" select="$commandParts[starts-with(., '-')]"/>
+  <p:variable name="commandArguments" as="xs:string*" select="$commandParts[not(starts-with(., '-'))]"/>
+
+  <p:choose>
+    <p:when test="'-help' = $commandArguments">
+      … (output a help text)
+    </p:when
+
+    …
+
+  </p:choose>
+
+</p:declare-step>]]></programlisting>
+
+    <itemizedlist>
+      <listitem>
+        <para>The full, unparsed, command line is passed to the command wrapper step in the <code>$commandLine</code>
+          option.</para>
+      </listitem>
+      <listitem>
+        <para>This is tokenized into words (based on whitespace as separator) and then separated into:</para>
+        <itemizedlist>
+          <listitem>
+            <para>Flags (anything that starts with a hyphen, for instance <code>-help</code>)</para>
+          </listitem>
+          <listitem>
+            <para>Arguments (anything else)</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+      <listitem>
+        <para>A <code><![CDATA[<p:choose>]]></code> makes decisions based on the flags/arguments present.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <!-- ======================================================================= -->
+
+  <section>
+    <title>Wrap-up and conclusions</title>
+
+    <para>XProc can be used very well for implementing command line applications that work lots of documents, processing/building
+      directory structures, etc. There are two design patterns that help:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Job tickets, using some internal Domain Specific Language (DSL), greatly simplifies the application
+          logic.</para>
+      </listitem>
+      <listitem>
+        <para>If you handle the command line in a separate wrapper step, the steps that implement the actual
+          functionality become more reusable.</para>
+      </listitem>
+    </itemizedlist>
+
+  </section>
+
+  <!-- ======================================================================= -->
+
+
+</article>

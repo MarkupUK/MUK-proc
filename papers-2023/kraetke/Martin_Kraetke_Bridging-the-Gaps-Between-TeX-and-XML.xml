@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook"
+	 xmlns:xlink="http://www.w3.org/1999/xlink"
+	 version="5.0" xml:lang="en">
+  <info>
+    <title>Bridging the Gaps Between XML and TEX</title>
+    <subtitle>An approach to convert from arbitrary XML to LaTeX by utilizing an XSLT/XProc‐based framework.</subtitle>
+    <author>
+      <personname><firstname>Martin</firstname> <surname>Kraetke</surname></personname>
+      <email>martin.kraetke@le-tex.de</email>
+      <uri>https://xporc.net</uri>
+      <personblurb>
+        <para>Martin Kraetke graduated as engineer for print production and is Lead Content Engineer at le-tex in Leipzig where he works on the transpect framework and the xerif typesetting system. He teaches XML and XSLT at the Leipzig University of Applied Sciences.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Lead Content Engineer</jobtitle>
+        <orgname>le-tex publishing services GmbH</orgname>
+      </affiliation>
+    </author>
+    <keywordset>
+      <keyword>TeX</keyword>
+      <keyword>xmltex</keyword>
+      <keyword>xml2tex</keyword>
+      <keyword>PassiveTeX</keyword>
+      <keyword>XSLT</keyword>
+      <keyword>XML</keyword>
+      <keyword>transpect</keyword>
+    </keywordset>
+    <abstract>
+      <para>There are established software solutions to convert from XML to TeX. Nevertheless, these approaches either limit the configurability of the TeX output or introduce a lot of programming effort. In this paper, we will discuss these methods and present an alternative approach that hopes to offer the greatest possible flexibility based on fixed conversions, an extensible configuration and the injection of XSLT, and that forms the basis for our Open Source typesetting system xerif.</para>
+    </abstract>
+  </info>
+  <acknowledgements>
+    <title>Acknowledgements</title>
+    <para>Patrick Schulz for patiently explaining all the peculiarities of TeX. Gerrit Imsieke for his careful review and his very appreciated suggestions.</para>
+  </acknowledgements>
+   <section xml:id="Chap2">
+      <title role="Heading1">Introduction</title>
+      <para>TeX is a powerful typesetting system and popular in scientific publishing due to the superior typesetting of mathematical formulae. The software is published under a permissive Open Source license and offers a rich ecosystem of packages that extend its functionality. LaTeX, a macro system built on top of TeX, provides descriptive commands for common layout elements and simplifies the use of TeX. Although XML and LaTeX are both markup languages, there are several limitations that make it difficult for converting XML to LaTeX. This paper describes common problems, presents existing software solutions and introduces a declarative approach for transforming XML to LaTeX.</para>
+   </section>
+   <section xml:id="Chap3">
+      <title role="Heading1">The Gaps Between XML and LaTeX</title>
+      <para>XML and LaTeX were designed to serve different purposes but the most obvious difference is the syntax. TeX commands usually start with backslashes, may contain optional arguments in square brackets and mandatory arguments in curly braces. A LaTeX document starts with a preamble that includes the document class, metadata and references to packages. The document body is placed between \begin{document} and \end{document}. A minimal example of a LaTeX document is shown below:</para>
+      <programlisting><![CDATA[\documentclass{article}
+\usepackage[british]{babel}
+\title{my Markup UK paper}
+\author{Martin Kraetke}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Introduction}
+This is a paragraph with \textit{italicized text}.
+\end{document}
+]]></programlisting>
+      <para>While the principles of this syntax are consistent, LaTeX has two main modes with syntactical differences: Text mode is used for regular text and math mode is used for mathematical expressions.</para>
+      <orderedlist numeration="arabic">
+         <listitem override="1.">
+            <para role="Listenabsatz">In text mode, special characters such as backslash, curly braces, and percent signs have a specific meaning and if they are part of the regular text, they need to be escaped with the backslash character. There are various LaTeX macros to markup the text. For example, \textsubscript{…} and \textsuperscript{…} are used for sub‐ and superscripted text. </para>
+         </listitem>
+         <listitem override="2.">
+            <para role="Listenabsatz">Math mode has a slightly different syntax. Math mode can be entered using either LaTeX environments like \begin{equation}…\end{equation} or dollar signs ($ or $$). Furthermore, math mode introduces new commands and special characters for mathematical expressions. In contrast to text mode, the underscore symbol (_) indicates a subscript and the caret symbol denotes a superscript.</para>
+         </listitem>
+      </orderedlist>
+      <para>Another difference between XML and TeX is Unicode‐compatibility. LaTeX was developed before Unicode and had limited support for non‐ASCII characters. Support for Unicode in LaTeX depends on the TeX rendering engines being used. The traditional pdfTeX engine is not Unicode‐compatible by default. The input encoding needs to be set correctly and additional font packages need to be used because the original default font encoding (OT1) of TeX was 7‐bit and used fonts that only had 128 glyphs. LuaTeX and XeTeX are newer TeX engines and both designed to work with Unicode and OpenType fonts. In summary, when you convert XML to TeX, you need to know which TeX engine is used.</para>
+      <para>While XML has namespaces to add new semantics, LaTeX allows you to include additional functionality through document classes, packages and custom commands or macros. These mechanisms can extend the capabilities of LaTeX by adding new features or modify existing ones. The sheer number of available packages is one of the major advantages of LaTeX, but can become also a challenge. Certain packages have different approaches for the same problem which results sometimes in an overlapping feature set: For instance, if you just want to underline text, you can do this in several ways. As alternative to the built‐in macro \underline{...}, the soul package provides \ul{…} and the ulem package has \uline{…} for the same purpose. You can also define custom macros with \newcommand{\name}{definition}. The fact that TeX/LaTeX is a programming language in its own right and not just a pure markup language makes processing LaTeX files with other programming languages sometimes a challenge. Parsing XML and converting it to LaTeX is definitely easier than parsing arbitrary LaTeX and converting it to XML.</para>
+      <para>Even though there are a number of macros that are built‐in LaTeX and can be considered standard, the choice of macros depends on the available package, the use case and personal preferences. This aspect must be taken into account when implementing an XML to TeX transformation.</para>
+      <para>Many XML grammars include the CALS or the HTML table model, or offer different schema variants with these models. In LaTeX, tables are a feature that is provided by external packages like tabularx<footnote xml:id="Fn1">
+            <para>
+               David Carlisle (2020): The tabularx package. Available at <link xlink:href="http://mirrors.ctan.org/macros/latex/required/tools/tabularx.pdf">
+                 <link xlink:href="http://mirrors.ctan.org/macros/latex/required/tools/tabularx.pdf">http://mirrors.ctan.org/macros/latex/required/tools/tabularx.pdf</link>
+               </link> (Accessed: May 16, 2023)</para>
+         </footnote>. Here is a brief example:</para>
+      <programlisting><![CDATA[\begin{tabularx}{|c|c|}
+Firstname &amp; Surname \\
+\hline
+Geert &amp; Bormans \\
+Ari &amp; Nordström \\
+Andrew &amp; Sales \\
+Rebecca &amp; Shoob \\
+\end{tabularx}
+]]></programlisting>
+      <para>This code creates a table with four rows and two columns. The first argument of tabular provides the column declaration. The letter “c” creates a centered column and the pipe (|) symbol indicates a vertical line. Table cells are separated with an ampersand symbol (&amp;) and each row ends with a double backslash (\\). \hline is used to indicate a horizontal line.</para>
+      <para>If you want to insert a cell that spans across several columns, you can use the \multicolumn instruction. Despite the fact that you are able to adjust the column span with tabularx, the functionality to have row spans as well is not included. Therefore, you need to add another package called multirow<footnote xml:id="Fn2">
+            <para>
+               Pieter van Oostrum et al. (2021) The multirow, bigstrut and bigdelim packages. Available at <link xlink:href="http://mirrors.ctan.org/macros/latex/contrib/multirow/multirow.pdf">http://mirrors.ctan.org/macros/latex/contrib/multirow/multirow.pdf</link> (Accessed: May 15, 2023)</para>
+         </footnote>. Even though you can use multirow together with tabularx, it seems a bit odd to have different packages for a feature that the author would consider as basic functionality. Of course, you need additional packages for colored borders and cells, when you want to wrap tables over several pages or rotate a table.</para>
+   </section>
+   <section xml:id="Chap4">
+      <title role="Heading1">Methods to Convert XML to LaTeX</title>
+      <section xml:id="Sec1">
+         <title role="Heading2">xmltex</title>
+         <para>xmltex is a simple, non‐validating XML parser implemented in TeX by David Carlisle that allows to use LaTeX's typesetting capabilities not just for LaTeX documents but for XML documents as well. xmltex can associate TeX code with XML elements, attributes, processing instructions, and entities as well. However, xmltex can neither validate the XML document with a DTD nor resolve external DTD entities but is able to process local entity declarations.<footnote xml:id="Fn3">
+               <para>
+                   David Carlisle (2000) xmltex: A non validating (and not 100% conforming) namespace aware XML parser implemented in TeX. Available at <link xlink:href="https://ctan.space-pro.be/tex-archive/macros/xmltex/base/manual.html">https://ctan.space-pro.be/tex-archive/macros/xmltex/base/manual.html</link> (Accessed: May 24, 2023)</para>
+            </footnote>
+         </para>
+         <para>Because xmltex is written in TeX, you need TeX to invoke xmltex with LaTeX. Here is an example that loads doc.xml with xmltex from a TeX document.</para>
+         <programlisting><![CDATA[\def\xmlfile{doc.xml} % xml file
+\input xmltex.tex % load xmltex
+]]></programlisting>
+         <para>The parser supports XML namespaces to some extent and can be configured for arbitrary XML, for example a TEI document that contains MathML. For this purpose, namespaces can be defined within a separate macro file, usually with an xmt extension<footnote xml:id="Fn4">
+               <para>
+                  The null namespace, the XML namespace (<link xlink:href="http://www.w3.org/1998/xml">http://www.w3.org/1998/xml</link>) and the xmltex namespace (<link xlink:href="http://www.dcarlisle.demon.co.uk/xmltex">http://www.dcarlisle.demon.co.uk/xmltex</link>) are predeclared.</para>
+            </footnote>. For each XML document type, a separate xmt file is required. Whenever xmltex processes an XML element with a particular namespace, it loads the corresponding xmt file. The following command can be added to a catalogue configuration (cfg extension) to associate a namespace with a particular xmt file:</para>
+         <programlisting><![CDATA[\NAMESPACE{URL}{xmt‐file}
+]]></programlisting>
+         <para>The xmltex catalogue configuration allows to associate XML contexts with TeX instructions. For example, you can specify with <programlisting>\XMLelement{element‐qname}{attribute‐spec} {begin‐code}{end‐code}</programlisting> a TeX command for an element. Whenever xmltex encounters the element with this name, the begin and end code are inserted. A minimal xmltex catalogue configuration for TEI is shown in the code listing below.</para>
+         <programlisting><![CDATA[\DeclareNamespace{tei}{http://www.tei-c.org/ns/1.0}
+\XMLelement{tei:TEI}
+{}
+  {\documentclass{article}
+     \begin{document}
+  }
+  {\end{document}}
+\XMLelement{tei:teiHeader}
+{}
+  {}{}
+\XMLelement{tei:title}
+{}
+  {\xmlgrab}
+  {\title{#1}
+     \maketitle}
+\XMLelement{tei:p}
+{}
+{\par}
+  {\par}
+]]></programlisting>
+         <para>An xmltex project would usually include a TeX file, a configuration, xmt files for each namespace, and the input XML file. Below is what a typical xmltex project directory structure would look like:</para>
+         <programlisting><![CDATA[MyProject/
+  |--main.tex 
+  |--main.cfg (xmltex‐configuration)
+  |--doc.xml (XML input)
+  |--tei.xmt (xmltex‐mapping for TEI)
+]]></programlisting>
+         <figure>
+            <title>xmltex inputs and outputs</title>
+            <mediaobject>
+               <imageobject>
+                 <imagedata fileref="images/xmltex.svg"/>
+               </imageobject>
+            </mediaobject>
+         </figure>
+         <para>To configure xmltex for an XML schema like TEI, you need to know the nesting depth of a &lt;head/&gt; element to determine whether it is mapped to \chapter{} or \section{}. The xmltex syntax only provides TeX statements that can be mapped to specific XML node names, but does not take into account their actual position in the XML. To address this issue with xmltex, you need to introduce a counter that counts the number of ancestor &lt;div&gt; elements:</para>
+         <programlisting><![CDATA[\newcount\div@counter \div@counter=0
+\XMLelement{tei:head}
+  {}
+  {\xmlgrab}
+  {%
+\ifnum\div@counter=1\relax
+  \chapter{#1}%
+\else
+  \ifnum\div@counter=2\relax
+    \section{#1}%
+  \fi
+\fi
+}
+\XMLelement{tei:dvi}
+  {}
+  {\global\advance\div@counter1}
+  {\global\advance\div@counter‑1}
+]]></programlisting>
+         <para>xmltex does not offer a powerful query language like XPath, on the contrary, you can only associate plain element and attribute names to TeX instructions. More complex context queries represent a programming task that can prove very daunting, given TeX’s macro‐expanding processing model. The code is less declarative and hard to maintain.</para>
+         <para>If this method is getting too complicated, xmtex allows also to modify the output by placing TeX commands directly into the XML source. The xmltex documentation suggests to use elements either with the xmltex namespace or a custom namespace to inject TeX instructions<footnote xml:id="Fn5">
+               <para>
+                  David Carlisle (2000) Xml2tex. Accessing TeX. Available at <link xlink:href="https://ftp.agdsn.de/pub/mirrors/latex/dante/macros/xmltex/base/manual.html#manualN1059">https://ftp.agdsn.de/pub/mirrors/latex/dante/macros/xmltex/base/manual.html#manualN1059</link> (Accessed May 30, 2023)</para>
+            </footnote>. Another mechanism is provided by using xmltex processing instructions:</para>
+         <para>
+            <programlisting>&lt;?xmltex TeX commands ?&gt;</programlisting>
+         </para>
+         <para>Furthermore, error reporting is virtually nonexistent and various constraints on XML are not enforced. For example, you can configure element names with characters that are not allowed in XML. Another problem is that xmltex isn’t actively maintained. The code was last modified in 2000 and moved to GitHub in 2012 without any notable changes except the initial commit<footnote xml:id="Fn6">
+               <para>
+                  David Carlisle (2012) xm2tex source code on GitHub. Available at <link xlink:href="https://github.com/davidcarlisle/dpctex/tree/main/xmltex">https://github.com/davidcarlisle/dpctex/tree/main/xmltex</link> (Accessed: May 30, 2023)</para>
+            </footnote>.</para>
+         <para>
+            <phrase>Within a TeX environment, xmltex can be a useful tool for XML processing. It offers a lightweight and declarative (apart from programmatic content manipulation where necessary, as mentioned above) syntax that TeX users should not be unfamiliar with. For XML users, not only the syntactical differences might prove to be a stumbling block</phrase>
+            <phrase>.</phrase>
+         </para>
+      </section>
+      <section xml:id="Sec2">
+         <title role="Heading2">PassiveTeX</title>
+         <para>Michel Goossens and Sebastian Rahtz were apparently not deterred by the challenges posed by xmltex. They’ve developed a library of TeX macros based on xmltex called PassiveTeX<footnote xml:id="Fn7">
+               <para>
+                  Michel Goossens and Sebastian Rahtz (2000): PassiveTEX. Available at <link xlink:href="https://ctan.org/pkg/passivetex">https://ctan.org/pkg/passivetex</link> (Accessed: May 30, 2023)</para>
+            </footnote> that process XML documents that comply with the Formatting Objects (FO) schema<footnote xml:id="Fn8">
+               <para>
+                  W3C (2006) Extensible Stylesheet Language (XSL) Version 1.1. Formatting Objects. Available at <link xlink:href="https://www.w3.org/TR/xsl/#fo-section">https://www.w3.org/TR/xsl/#fo-section</link> (Accessed: May 30, 2023)</para>
+            </footnote>.</para>
+         <para>Formatting Objects provides an XML vocabulary for formatting XML documents<footnote xml:id="Fn9">
+               <para>
+                  I’m not going to explain the vocabulary of Formatting Objects in any detail. For an introduction, please refer to: J. David Eisenberg (2001) Using XSL Formatting Objects. Available at <link xlink:href="https://www.xml.com/pub/a/2001/01/17/xsl-fo/index.html">https://www.xml.com/pub/a/2001/01/17/xsl-fo/index.html</link> (Accessed May 30, 2023)</para>
+            </footnote>. Unlike HTML, it has only presentational markup and compared to CSS, it contains also the complete content such as text, tables and images. The FO document is typically generated by XSLT and then passed to a FO formatter. The formatter renders the output format, most commonly this is a PDF. In the case of PassiveTeX, the FO formatter is TeX.</para>
+         <figure>
+            <title>Passive TeX transformation</title>
+            <mediaobject>
+               <imageobject>
+                 <imagedata fileref="images/passive-tex.svg"/>
+               </imageobject>
+            </mediaobject>
+         </figure>
+         <para>Here is an excerpt of the fotex.xmt from PassiveTeX. In this code snippet, a basic TeX document structure is associated with the root element of FO. A similarly named package fotex.sty is referenced which adds macros and configuration options to render the FO document.</para>
+         <programlisting><![CDATA[\XMLelement{fo:root}
+  {}
+  {\documentclass{article}
+   \usepackage{fotex}
+   \begin{document}
+   \pagestyle{empty}
+   \FOSetHyphenation
+   %\ignorewhitespace
+   }
+  {\end{document}}
+]]></programlisting>
+         <para>Just as an aside, FO and TeX overlap in terms of functionality. With PassiveTeX, you could decide whether you want to use FO’s &lt;fo:page‐number‐citation&gt; to create a table of contents or LaTeX’s built‐in \tableofcontents macro. This applies to other elements such as counters, labels and other listings, too.</para>
+         <para>Compared to a pure xmltex approach, PassiveTeX has some benefits: You don’t have to care about configuring xmltex, you only need to create FO from your XML input e.g., with a programming language with proper XPath support. If you already have an FO‑based workflow, you can consider TeX as alternative to your existing FO formatter. A TeX‐based FO formatter should have clear advantages when it comes to mathematical equations.</para>
+         <para>PassiveTeX is an experimental approach and has never seen wide acceptance, neither in the XML nor in the TeX communities. We can speculate about the reasons for its marginal adoption, but it seems likely that PassiveTeX just inherited the problems of its xmltex and FO foundations. Some general disadvantages of xmltex are mentioned above. In the context of PassiveTeX, Goossens and Rahtz criticized that the biggest problem with using xmltex for PassiveTeX is that it is complicated to extend the package<footnote xml:id="Fn10">
+               <para>
+                  Michel Goossens and Sebastian Rahtz (2000): PassiveTEX: From XML to PDF in TUGboat, Volume 21 (2000), No. 3—Proceedings of the 2000 Annual Meeting, p.224. Available at <link xlink:href="http://tug.org/TUGboat/tb21-3/tb68goos.pdf">http://tug.org/TUGboat/tb21-3/tb68goos.pdf</link> (Accessed: May 30, 2023)</para>
+            </footnote>. Like xmltex, FO remained a technology for a specific niche, considered complex to master and only adopted by users already acquainted with XML. In addition, many developers are reluctant to use technologies that are not part of their usual stack. In this sense, it may not very appealing to XML developers to use TeX as an FO formatter, while TeX developers might prefer xmltex over converting XML to FO.</para>
+      </section>
+      <section xml:id="Sec3">
+         <title role="Heading2">Pandoc</title>
+         <para>Pandoc is a popular Haskell library for converting markup formats into one another<footnote xml:id="Fn11">
+               <para>
+                  Pandoc (2023) Pandoc. A universal document converter. Available at <link xlink:href="https://pandoc.org/">https://pandoc.org/</link> (Accessed: May 30, 2023)</para>
+            </footnote>. Pandoc can be invoked via an easy command line client and supports a variety of input and output formats, among others also XML formats like DocBook and JATS. Pandoc supports also LaTeX as output format and uses the Haskell library texmath<footnote xml:id="Fn12">
+               <para>
+                  John MacFarlane, Matthew Pickering (2023) texmath. Available at <link xlink:href="https://hackage.haskell.org/package/texmath">https://hackage.haskell.org/package/texmath</link> (Accessed: May 30, 2023)</para>
+            </footnote> for converting MathML formulas to TeX. </para>
+         <para>With these features, Pandoc can be also used to convert from XML to LaTeX. In contrast to xmltex and PassiveTeX, you don't have to be a programmer to use Pandoc. Basic knowledge of how to use the command line is sufficient. To test Pandoc, I prepared a small DocBook test document.</para>
+         <programlisting><![CDATA[
+&lt;?xml version="1.0" encoding="UTF‑8"?&gt;<br/>
+&lt;article xmlns="<link xlink:href="http://docbook.org/ns/docbook">http://docbook.org/ns/docbook</link>"
+  xmlns:xlink="<link xlink:href="http://www.w3.org/1999/xlink">http://www.w3.org/1999/xlink</link>"
+  version="5.0"&gt;
+  &lt;title/&gt;
+  &lt;section&gt;
+    &lt;title&gt;Area of a Triangle&lt;/title&gt;
+    &lt;equation&gt;
+      &lt;math xmlns="<link xlink:href="http://www.w3.org/1998/Math/MathML">http://www.w3.org/1998/Math/MathML</link>" display="block"&gt;
+        &lt;mi&gt;A&lt;/mi&gt;
+        &lt;mo&gt;=&lt;/mo&gt;
+        &lt;mfrac&gt;
+          &lt;msup&gt;
+            &lt;mi fontstyle="italic"&gt;a&lt;/mi&gt;
+            &lt;mn&gt;4&lt;/mn&gt;
+          &lt;/msup&gt;
+          &lt;mn&gt;4&lt;/mn&gt;
+        &lt;/mfrac&gt;
+        &lt;mo&gt;&amp;#x22c5;&lt;/mo&gt;
+        &lt;mroot&gt;
+          &lt;mn&gt;3&lt;/mn&gt;
+          &lt;mrow/&gt;
+        &lt;/mroot&gt;
+      &lt;/math&gt;
+    &lt;/equation&gt;
+  &lt;/section&gt;
+  &lt;bibliography&gt;
+    &lt;biblioentry&gt;
+      &lt;citetitle&gt;Geometry Workbook For Dummies&lt;/citetitle&gt;
+      &lt;author&gt;
+        &lt;personname&gt;&lt;firstname&gt;Mark&lt;/firstname&gt;&lt;surname&gt;Ryan&lt;/surname&gt;&lt;/personname&gt;
+      &lt;/author&gt;
+      &lt;biblioid role="isbn"&gt;978–0471799405&lt;/biblioid&gt;
+      &lt;pubdate&gt;2006&lt;/pubdate&gt;
+      &lt;publisher&gt;
+        &lt;publishername&gt;For Dummies&lt;/publishername&gt;
+      &lt;/publisher&gt;
+    &lt;/biblioentry&gt;
+  &lt;/bibliography&gt;
+&lt;/article&gt;
+]]></programlisting>
+         <para>The results that Pandoc delivered were not very promising. Pandoc failed to convert MathML to TeX, even though it worked in other attempts. Moreover, Pandoc was not able to convert the bibliographical entry. While the MathML was quietly removed from the output, the contents of the bibliography were just printed as plain text but with an empty \section{} above. Pandoc’s output is shown below:</para>
+         <programlisting><![CDATA[\section{Area of a Triangle}
+\section{}
+Geometry Workbook For Dummies MarkRyan 978–0471799405 2006 For Dummies
+]]></programlisting>
+         <para>On the Pandoc website, the tool is described as a Swiss army knife for markup formats. What applies to Swiss Army Knives applies to Pandoc, too: If the built‐in tools are not suitable for the purpose, you have to get another tool yourself.</para>
+         <para>
+            <phrase>Pandoc provides an interface for users to write their own transformations, called filters. These are small programs that convert to or from Pandoc’s intermediate abstract syntax tree</phrase>
+            <phrase> (AST). Traditional Pandoc filters work on a JSON representation of the Pandoc AST and can be written in any programming language</phrase>
+            <footnote xml:id="Fn13">
+               <para>
+                  Pandoc (2023) Pandoc Lua Filters. Available at <link xlink:href="https://pandoc.org/lua-filters.html">https://pandoc.org/lua-filters.html</link> (Accessed: May 30, 2023)</para>
+            </footnote>
+            <phrase>. But the whole thing is very cumbersome: JSON has to be written to stdout and read from stdin and the filter only works if the programming language is also available on the user’s system. Starting with version 2.0, Pandoc allows to write filters entirely in Lua which requires no external software to be installed.</phrase>
+         </para>
+         <para>Apart from the less declarative and time‐consuming method of programming filters, Pandoc offers not very much extensibility. Unfortunately, there are also just a few configuration options to customize the output. Another downside is that you don't always get an error message when Pandoc is unable to process content. That leads me to the conclusion that Pandoc may <phrase role="rynqvb">not be suitable for professional scenarios, but might be useful for occasional conversions of lightweight documents where the users can fix the output themselves if necessary.</phrase>
+         </para>
+      </section>
+      <section xml:id="Sec4">
+         <title role="Heading2">XSLT</title>
+         <para>XSLT<footnote xml:id="Fn14">
+               <para>
+                  W3C (2017) XSL Transformations (XSLT) Version 3.0. Available at <link xlink:href="https://www.w3.org/TR/xslt-30/">https://www.w3.org/TR/xslt-30/</link> (Accessed: May 30, 2023)</para>
+            </footnote> is well‐known for its capabilities to convert from one XML vocabulary into another. Nevertheless, XSLT allows to output text‐based content, too. Starting with XSLT 2.0 that became a W3C standard in 2007, its powerful query language XPath, grouping mechanisms and regular expressions make XSLT an interesting alternative for converting XML to LaTeX.</para>
+         <para>
+            <phrase>To output LaTeX in XSLT is quite simple. You need to add &lt;xsl:output method="text"/&gt; </phrase>
+            <phrase>to your stylesheet. Then you can start writing your accustomed templates and associate XML nodes with TeX output. Here is a minimal example to demonstrate this method.</phrase>
+         </para>
+         <programlisting><![CDATA[&lt;?xml version="1.0" encoding="UTF‑8"?&gt;
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  version="2.0"&gt;
+            &lt;xsl:output method="text"/&gt;
+            &lt;xsl:template match="/article"&gt;
+            &lt;xsl:text&gt;\documentclass{article}&amp;#xa;&lt;/xsl:text&gt;
+            &lt;xsl:text&gt;\begin{document}&amp;#xa;&lt;/xsl:text&gt;
+            &lt;xsl:apply‐templates/&gt;
+            &lt;xsl:text&gt;\end{document}&lt;/xsl:text&gt;
+            &lt;/xsl:template&gt;
+            &lt;/xsl:stylesheet&gt;
+]]></programlisting>
+         <para>However, to program a full‐fledged XML to LaTeX transformation will not remain as simple as the template above suggests. Templates to convert figures, tables and other elements will add up. Programming a transformation of MathML to TeX formulas will considerably be one of the biggest tasks. For anything in your XML documents that cannot be covered by standard LaTeX, you need to implement additional TeX packages that provide the required functionality. Depending on the Unicode support of your TeX engine, you also need to map Unicode characters such as <phrase>ω</phrase> (Greek Small Letter Omega U+03C9) to the corresponding TeX command <emphasis>\omega</emphasis>.</para>
+         <para>Given the extensibility of XSLT via imports and includes, it’s easier to reuse the code and override it for other projects. But that’s only true when the source XML does not change. For example, when you change from CALS to HTML tables, you basically find yourself completely rewriting your code. In any case, adapting your stylesheet to handle multiple XML vocabularies would impose a challenge.</para>
+      </section>
+   </section>
+   <section xml:id="Chap5">
+      <title role="Heading1">An Alternative Approach</title>
+      <para>The methods presented in the previous section are more or less suitable for converting XML to TeX. They vary between ready‐to‐use applications that are difficult to configure (PassiveTeX, Pandoc) and programming approaches from scratch (xmltex, XSLT). The methods have all in common that they are not well‐suited to be configured for arbitrary XML vocabularies.</para>
+      <para>When I was in the situation of knowing virtually nothing about TeX and given the task of developing an alternative to Chikrii’s Word2TeX plugin<footnote xml:id="Fn15">
+            <para>
+               Chikrii (2022) Word2Tex. Available at <link xlink:href="http://www.chikrii.com/products/word2tex/">http://www.chikrii.com/products/word2tex/</link> (Accessed: May 30, 2023)</para>
+         </footnote> for Microsoft Word eight years ago, I’ve also been thinking of a way to handle arbitrary XML vocabularies by one library. But I learned from my colleagues in the typesetting department that the library must be configurable not only for different ML inputs, but for different TeX outputs as well: Depending on the customer or product, other TeX packages and engines are used. For example, we use LuaTeX with unciode‐math<footnote xml:id="Fn16">
+            <para>
+               Will Robertson (2020) Experimental Unicode mathematical</para>
+            <para>typesetting: The unicode‐math package. Available at: <link xlink:href="https://ctan.org/pkg/unicode-math">https://ctan.org/pkg/unicode-math</link> (Accessed: May 30, 2023)</para>
+         </footnote> for the conversion of NISO STS standards to TeX while we still use pdflatex for traditional typesetting projects in TeX.</para>
+      <para>
+         <phrase>xml2tex is a module of the le‑tex transpect</phrase>
+         <footnote xml:id="Fn17">
+            <para>
+               le‑tex (2023) transpect framework documentation. Available at <link xlink:href="https://transpect.io">https://transpect.io</link> (Accessed: May 30, 2023)</para>
+         </footnote>
+         <phrase> framework and covers various aspects of converting arbitrary XML to TeX‐based formats. It is based on XProc and XSLT and built around an XML vocabulary agnostic</phrase>
+         <phrase> configuration that allows to associate XML contexts with TeX instructions. xml2tex consists of three more or less configurable components:</phrase>
+      </para>
+      <orderedlist numeration="arabic">
+         <listitem override="1.">
+            <para role="Listenabsatz">Convert CALS/HTML tables to tabular or htmltabs<footnote xml:id="Fn18">
+                  <para>
+                     transpect (2023) htmltabs source code. Available at <link xlink:href="https://github.com/transpect/xerif/blob/main/latex-oops/htmltabs.sty">https://github.com/transpect/xerif/blob/main/latex-oops/htmltabs.sty</link> (Accessed: May 30, 2023)</para>
+               </footnote>
+            </para>
+         </listitem>
+         <listitem override="2.">
+            <para role="Listenabsatz">Transform MathML to TeX</para>
+         </listitem>
+         <listitem override="3.">
+            <para role="Listenabsatz">Transform XML to TeX</para>
+         </listitem>
+      </orderedlist>
+      <para>The components for converting mathematical formulas and tables are prefabricated XSLT stylesheets that are only configurable to some extent. The third transformation is based on a configuration.</para>
+      <figure>
+         <title>xml2tex conversion pipeline</title>
+         <mediaobject>
+            <imageobject>
+              <imagedata fileref="images/xml2tex.svg"/>
+            </imageobject>
+         </mediaobject>
+      </figure>
+      <para>
+         <phrase>Convert CALS/HTML tables to tabular or htmltabs</phrase>
+      </para>
+      <para>First, CALS tables are normalized. Therefore, we adopted Andrew J. Welch’s table normalization<footnote xml:id="Fn19">
+            <para>
+               Andrew J.Welch (2006) Table Normalization in XSLT 2.0. Available at <link xlink:href="http://ajwelch.blogspot.com/2006/09/table-normalization-in-xslt-20.html">http://ajwelch.blogspot.com/2006/09/table-normalization-in-xslt-20.html</link> (Accessed: May 30, 2023)</para>
+         </footnote> and implemented it for CALS tables. If the input consists of HTML tables, they are converted to CALS before. The table normalization facilitates converting the tables to TeX later.</para>
+      <programlisting><![CDATA[+-----------+-----------+      +-----+-----+-----+-----+
+| a         | b         |      | a   | a   | b   | b   |
+|           +-----+-----+      +-----+-----+-----+-----+
+|           | c   | d   |      | a   | a   | c   | d   |
++-----------+-----+     |  =>  +-----+-----+-----+-----+
+| e               |     |      | e   | e   | e   | d   |
++-----+-----+-----+     |      +-----+-----+-----+-----+
+| f   | g   | h   |     |      | f   | g   | h   | d   |
++-----+-----+-----+-----+      +-----+-----+-----+-----+
+]]></programlisting>
+      <para>Depending on the used options, another stylesheet converts the normalized tables either to tabular or htmltabs tables. The TeX tables are inserted as processing instructions into the original XML document.</para>
+      <section xml:id="Sec5">
+         <title role="Heading2">Math Transform MathML to TeX</title>
+         <para>Second, MathML equations are normalized and transformed to TeX. An XProc library entitled mml‐normalize has a number of built‐in heuristics to normalize badly authored equations e.g., resolving superscripts with an empty base symbol. After this step, the XProc library mml2tex transforms MathML and inserts the TeX equations as processing instructions into the XML document. When you take the example from the Pandoc section as input, this would be the output of mml2tex:</para>
+         <programlisting><![CDATA[&lt;?xml version="1.0" encoding="UTF‑8"?&gt;
+&lt;article xmlns="http://docbook.org/ns/docbook" version="5.0"&gt;
+  &lt;title&gt;Area enclosed by a circle&lt;/title&gt;
+  &lt;equation&gt;
+    &lt;?mml2tex A=\frac{a^{4}}{4}\cdot \sqrt{3}?&gt;
+  &lt;/equation&gt;
+&lt;/article&gt;
+]]></programlisting>
+         <para>The third step is the central aspect of an xml2tex conversion. The xml2tex configuration is converted to an XSLT stylesheet which is applied on the XML input document later. But let me walk you through the main aspects of our xml2tex configuration.</para>
+      </section>
+      <section xml:id="Sec6">
+         <title role="Heading2">Transform XML to TeX</title>
+         <para>The xml2tex configuration vocabulary is specified by an RelaxNG schema<footnote xml:id="Fn20">
+               <para>
+                  Transpect (2023) xml2tex RelaxNG schema. Available at:  <link xlink:href="https://github.com/transpect/xml2tex/blob/master/schema/xml2tex.rng">https://github.com/transpect/xml2tex/blob/master/schema/xml2tex.rng</link> (Accessed: 30 May, 2023)</para>
+            </footnote>. Here is a minimal example configured for DocBook:</para>
+         <programlisting><![CDATA[
+&lt;?xml version="1.0" encoding="UTF‑8"?&gt;<br/>
+  &lt;set xmlns="<link xlink:href="http://transpect.io/xml2tex">http://transpect.io/xml2tex</link>" xmlns:xsl="<link xlink:href="http://www.w3.org/1999/XSL/Transform">http://www.w3.org/1999/XSL/Transform</link>"&gt;
+  &lt;import href="../docx2tex/conf/conf.xml"/&gt;
+  &lt;ns prefix="dbk" uri="<link xlink:href="http://docbook.org/ns/docbook">http://docbook.org/ns/docbook</link>"/&gt;
+  &lt;preamble&gt;
+    \documentclass{article}
+    \usepackage[utf8]{inputenc}
+    \usepackage[main=english,greek]{babel}
+  &lt;/preamble&gt;
+  &lt;front&gt;
+    \title{&lt;xsl:value‐of select="/dbk:article/dbk:info/dbk:title"/&gt;}
+    \maketitle
+  &lt;/front&gt;
+  &lt;back&gt;
+    \printindex
+  &lt;/back&gt;
+  &lt;template context="dbk:chapter"&gt;
+    &lt;rule name="chapter" type="env"&gt;
+      &lt;param select="dbk:title"/&gt;
+      &lt;text select="* except dbk:title"/&gt;
+    &lt;/rule&gt;
+  &lt;/template&gt;
+  &lt;regex regex="([&amp;#x370;-&amp;#x3ff;]{2,})+"&gt;
+    &lt;rule name="foreignlanguage" type="cmd"&gt;
+      &lt;param&gt;greek&lt;/param&gt;
+      &lt;param regex‐group="1"/&gt;
+    &lt;/rule&gt;
+  &lt;/regex&gt;
+  &lt;charmap&gt;
+    &lt;char character="&amp;#x3c9;" string="${\omega}$"
+          context="*[@css:font‐style eq 'italic']"/&gt;
+  &lt;/charmap&gt;
+&lt;/set&gt;
+]]></programlisting>
+         <para>The xml2tex configuration contains eight top‐level elements. The first five specify the basic document structure:</para>
+         <itemizedlist mark="bullet">
+            <listitem>
+               <para role="Listenabsatz">&lt; ns/&gt; works similar as it’s Schematron pendant and defines namespaces.</para>
+            </listitem>
+            <listitem>
+               <para role="Listenabsatz">&lt;import/&gt; can import other xml2tex configurations.</para>
+            </listitem>
+            <listitem>
+               <para role="Listenabsatz">&lt;preamble/&gt; is specifies TeX document class, packages and configuration options.</para>
+            </listitem>
+            <listitem>
+               <para role="Listenabsatz">The contents of &lt; front/&gt; are placed between \begin{document} and before the actual content.</para>
+            </listitem>
+            <listitem>
+               <para role="Listenabsatz">&lt;back/&gt; is a placeholder for anything that comes after the text body and before \begin{document}.</para>
+            </listitem>
+         </itemizedlist>
+         <para>The actual mapping between XML nodes and text is performed by these three templates:</para>
+         <itemizedlist mark="bullet">
+            <listitem>
+               <para role="Listenabsatz">&lt;template/&gt; associate XML nodes with TeX instructions.</para>
+            </listitem>
+            <listitem>
+               <para role="Listenabsatz">&lt;regex/&gt; strings matched by a regular expression are replaced with a TeX instruction.</para>
+            </listitem>
+            <listitem>
+               <para role="Listenabsatz">&lt;charmap/&gt; replaces Unicode characters in certain XML contexts with TeX instructions (or other strings).</para>
+            </listitem>
+         </itemizedlist>
+         <para>xml2tex cannot deny its XSLT origins, so let us take a closer look at the anatomy of the chapter template. Internally, it will be converted to an XSLT template matching on “dbk:chapter”. But in contrast to XSLT templates, its contents are more restricted. Based on is @type attribute, the &lt;rule/&gt; element inserts either a TeX command (\chapter) or environment (\begin{chapter}…\end{chapter}). Then you can specify whether the TeX instruction is followed by a number of arguments (&lt;param/&gt;). options (&lt;option/&gt;) or regular text (&lt;text/&gt;). You can insert static text or specify an XPath with the @select attribute.</para>
+         <programlisting><![CDATA[&lt;template context="dbk:chapter"&gt;
+  &lt;rule name="chapter" type="env"&gt;
+    &lt;param select="dbk:title"/&gt;
+    &lt;text select="* except dbk:title"/&gt;
+  &lt;/rule&gt;
+&lt;/template&gt;
+]]></programlisting>
+         <para>With this mechanism, you can take arbitrary XML and configure your preferred TeX output. Compared to pure XSLT, this is a more declarative approach which resembles the structure of a TeX document. In contrast to xmltex, you have more flexible configuration options and XPath as a powerful query language. Furthermore, it’s also possible to insert XSLT code within the xml2tex configuration, for example if you want to encapsulate the evaluation of the TeX list type.</para>
+         <para>xml2tex has proven itself at le‑tex in productive use for different customers with different XML vocabularies and TeX requirements. Even though le‑tex is also using xmltex for some workflows, our TeX developers are more convinced of the xml2tex approach, in particular because it relieves them of configuring xmltex.</para>
+      </section>
+      <section xml:id="Sec7">
+         <title role="Heading2">Issues</title>
+         <para>None, of course (except the ones listed below):</para>
+         <itemizedlist mark="bullet">
+            <listitem>
+               <para role="Listenabsatz">To prevent the user from fixing ambiguous template matches (they are not presented to the user by the XProc processor), the templates automatically got a priority assigned, meaning templates placed below are more important than those placed above. This can be cumbersome and I think I’ll drop this with the switch to XProc 3.0.</para>
+            </listitem>
+            <listitem>
+               <para role="Listenabsatz">When other configurations are imported, they are merged together into one XSLT stylesheet and the templates of the importing configuration are assigned with a higher priority than the imported ones. This makes it harder to selectively override imported templates. But it’s currently not possible with XProc to reference within a dynamically generated XSLT other generated XSLTs as imports (except when written to disk, which is too “antsy” for an XProc guy).</para>
+            </listitem>
+         </itemizedlist>
+      </section>
+   </section>
+   <section xml:id="Chap6">
+      <title role="Heading1">Conclusion</title>
+      <para>This paper presented the challenges of converting from XML to TeX. Even if the general structure of XML and TeX seem simple at first glance, math, tables, different TeX engines and packages make configuring a converter very complex. Speedata, ConTeXt<footnote xml:id="Fn21">
+            <para>Hans Hagen (2001) context – The ConTeXt macro package. Available at <link xlink:href="https://ctan.org/pkg/context">https://ctan.org/pkg/context</link> (Accessed: May 30, 2023)</para>
+         </footnote> and other approaches could also have been presented, but that would no longer have been within the scope of this paper.</para>
+      <para>
+         <phrase>There exist various methods </phrase>
+         <phrase>for the task, ranging from lightweight converters to powerful programming languages. However, many of the solutions are experimental, immature and/or require additional programming work. Besides, the versatility of XML on the one hand and TeX on the other hand makes it difficult to find a universal approach.</phrase>
+      </para>
+     <para>The presented xml2tex<footnote><para>A TeX version of this paper converted with xml2tex can be downloaded here: <link xlink:href="https://xporc.net/wp-content/uploads/2023/05/MarkupUK/Martin_Kraetke_Bridging-the-Gaps-Between-TeX-and-XML.tex">https://xporc.net/wp-content/uploads/2023/05/MarkupUK/Martin_Kraetke_Bridging-the-Gaps-Between-TeX-and-XML.tex</link></para></footnote> library addresses the problem by providing ready‐to‐use conversions for specific problems and, on the other hand, introducing an XML‐based, declarative configuration vocabulary that can be used to create a common interface between XML and TeX.</para>
+   </section>
+</article>

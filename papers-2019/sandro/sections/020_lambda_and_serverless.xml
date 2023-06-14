@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+	version="5.0">
+	<title>AWS Lambda and Serverless Architecture</title>
+
+	<para>Lambda is a compute service provided by Amazon Web Services (AWS) allowing to run code without provisioning or managing servers <xref xlink:href="#lambda"/>. AWS Lambda claims to scale applications and workloads automatically from few requests per day to thousands per second and charges only for the compute time used.</para>
+
+	<para>AWS Lambda can be used in conjunction with other services to build a serverless architecture. This is a cloud architecture typically running a function inside a stateless computing environment triggered by an event <xref xlink:href="#fowler"/>. Serverless architectures enable to run applications and workloads without managing server infrastructure and with reduced operational costs and flexible scaling <xref xlink:href="#cncf"/>.</para>
+
+	<para>In the next section I am going to explain how to build a serverless architecture for running XSpec test suites triggered by an event such as pushing new code to a version control system. </para>
+
+</section>

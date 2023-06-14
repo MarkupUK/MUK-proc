@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="../../../../../../Applications/Oxygen%20XML%20Editor%20-%20v23/frameworks/docbook/css/print.css"?>
+<article xmlns="http://docbook.org/ns/docbook" version="5.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+<title>Encouraging Tag Set Branching without Creating a Briar Patch</title>
+<info>
+<confgroup>
+<conftitle>Markup UK 2021</conftitle>
+<confdates>21–22 May 2021</confdates>
+</confgroup>
+<abstract>
+<para>Customizing a tag set can be an easy way to get the vocabulary you need. It can also be a a journey filled with dead ends, trap doors, and slowly-revealed and difficult to identify problems. Like many public tag sets, JATS (the Journal Article Tag Suite) was designed to be customized. Our original expectation was that individual users would customize it, and while a few have done that to good effect, we have found that the major customizations have been by groups of users. BITS (the Book Interchange Tag Suite), NISO STS (Standards Tag Suite), and Manuscript Exchange Common Approach (MECA) are widely adopted customizations of JATS.</para> 
+<para>When users customize a tag set they expect to be able to use the existing infrastructure associated with that tag set, making changes to accommodate the changes they made. They often expect to intermingle their new documents with documents tagged to the original tag set and perhaps with documents tagged to other customizations of the source tag set. They expect this to work gracefully, easily, seamlessly. Sometimes it does, but sometimes it does not!</para> 
+<para>The <quote>JATS Compatibility Meta-Model Description</quote> was developed to help people who customize JATS create tag sets to create models that will coexist peacefully with existing JATS documents and with documents tagged to other JATS customizations.</para> 
+<para>It seems unlikely that the particulars of the JATS Compatibility Model will apply to other tag sets, but the principles behind the Meta-Model might be useful to other groups thinking about ways to make their families of tag sets flexible and compatible.</para> 
+</abstract>
+<author>
+<personname><firstname>B. Tommie</firstname>
+<surname>Usdin</surname></personname>
+<!-- xyxy 20210518 trg:  don't know if MarkupUK permits bio in 
+paper or just on website, but figured if it does allow bio in 
+paper, you would use the same bio as on MarkupUK website -->
+<personblurb><para>B. Tommie Usdin is President of Mulberry Technologies, Inc., a consultancy specializing in XML for prose documents. Ms. Usdin has been working with generic markup since 1985 and has been a supporter of XML since 1996. She chairs <quote>Balisage: The Markup Conference</quote> and is a frequent speaker at JATS-Con, MarkupUK, and other conferences. Ms. Usdin has developed DTDs, Schemas, and XML/SGML application frameworks for applications in academia, government, and industry. Projects include reference materials in medicine, science, engineering, and law; semiconductor documentation; historical and archival materials, and text books. Distribution formats have included print books, magazines, and journals, and both web- and media-based electronic publications. She is co-chair of the NISO Z39-96, JATS: Journal Article Tag Suite Working Group, and member of the NISO STS Standing Committee and of the BITS Committee. You can read more about her at <link xlink:href="http://www.mulberrytech.com/people/usdin/index.html">http://www.mulberrytech.com/people/usdin/index.html</link></para></personblurb>
+<affiliation><orgname>Mulberry Technologies, Inc.</orgname></affiliation>
+<!-- 
+17 West Jefferson St.
+Suite 207
+Rockville MD 20850
+USA
+Phone:  301/315-9631
+-->
+<email>btusdin@mulberrytech.com</email>
+<uri xlink:href="http://www.mulberrytech.com">http://www.mulberrytech.com</uri></author>
+<legalnotice>
+<para>&#169;2021 Mulberry Technologies, Inc.</para></legalnotice>
+</info>
+<section>
+<title>Customizing Tag Sets</title>
+<itemizedlist>
+<listitem><para>Not new</para></listitem>
+<listitem><para>A good idea (usually)</para></listitem>
+<listitem><para>Saves work, time, money</para></listitem>
+<listitem><para>Promotes document interchange</para></listitem>
+<listitem><para>Can go horribly wrong</para></listitem>
+</itemizedlist>
+</section>
+
+<section>
+<title>A Little History (over simplified)</title>
+<section>
+<title>Generic Markup</title>
+<itemizedlist>
+<listitem><para>Tag what it is not what it should look like</para></listitem>
+<listitem><para>Province of system (e.g., IBM Starter Set was tag set for IBM Script)</para></listitem>
+<listitem><para>Didn&#8217;t meet all needs</para></listitem>
+<listitem><para>Attempt to make <quote>universal</quote> list of tags</para></listitem>
+<listitem><para>Impossible</para></listitem>
+<listitem><para>Developed <quote>name your own tag</quote> systems</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Bespoke Vocabularies</title>
+<itemizedlist>
+<listitem><para>Markup projects started with  <quote>Task 1 - Create the Tag Set</quote></para></listitem>
+<listitem><para>Expensive and time consuming</para></listitem>
+<listitem><para>Some considered trade secrets</para></listitem>
+<listitem><para>Required custom infrastructure
+<itemizedlist>
+<listitem><para>Formatter customization cost as much as (or more than) vocabulary</para></listitem> 
+<listitem><para>Interchange required custom transform for each destination</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Constant expert maintenance</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Public Vocabularies</title>
+<itemizedlist>
+<listitem><para>Developed to
+<itemizedlist>
+<listitem><para>Promote interchange</para></listitem>
+<listitem><para>Lower barrier to entry</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Enabled
+<itemizedlist>
+<listitem><para>Shared tools</para></listitem>
+<listitem><para>Lower cost services</para></listitem>
+<listitem><para>Shared expertise, software</para></listitem>
+</itemizedlist>  
+</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Need for Customization Soon Obvious</title>
+<itemizedlist>
+<listitem><para>Vocabulary maintainers flooded with requests</para></listitem>
+<listitem><para>Tag sets began to grow</para></listitem>
+<listitem><para>Tag abuse grew</para></listitem>
+<listitem><para>Local customizations were clever but often hacks</para></listitem>
+</itemizedlist>
+</section>
+</section>
+
+<section>
+<title>Vocabularies Build In Customization Tools</title>
+<section>
+<title><quote>Symposium on Markup Vocabulary Customization</quote></title>
+<para>Proceedings at: <link xlink:href="https://www.balisage.net/Proceedings/vol24/cover.html">https://www.balisage.net/Proceedings/vol24/cover.html</link></para>
+<itemizedlist>
+<listitem><para>Akoma Ntoso</para></listitem>
+<listitem><para>DITA</para></listitem>
+<listitem><para>DocBook</para></listitem>
+<listitem><para>JATS</para></listitem>
+<listitem><para>TEI</para></listitem> 
+</itemizedlist>
+</section>
+<section>
+<title>Debates about Value of Customization</title>
+<para>A few examples from JATS:</para>
+<itemizedlist>
+<listitem><para><quote>Superset Me—Not: Why the Journal Publishing Tag Set Is Sufficient if You Use Appropriate Layer Validation</quote>,    
+Alexander B. Schwarzman. (2010) <link xlink:href="https://www.ncbi.nlm.nih.gov/books/n/jatscon10/schwarzman/">https://www.ncbi.nlm.nih.gov/books/n/jatscon10/schwarzman/</link></para></listitem>
+<listitem><para><quote>Why Create a Subset of a Public Tag Set</quote>, Deborah Aleyne Lapeyre. (2010) <link xlink:href="https://www.ncbi.nlm.nih.gov/books/n/jatscon10/lapeyre/">https://www.ncbi.nlm.nih.gov/books/n/jatscon10/lapeyre/</link></para></listitem>
+    <listitem><para><quote>When the &#8216;One Size Fits Most&#8217; tagset doesn&#8217;t fit you</quote>, Tommie Usdin. (2013) <link xlink:href="https://www.ncbi.nlm.nih.gov/books/n/jatscon13/usdin/">https://www.ncbi.nlm.nih.gov/books/n/jatscon13/usdin/</link>
+</para></listitem>
+<listitem><para><quote>JATS Subset and Schematron: Achieving the Right Balance</quote>, Alexander B. Schwarzman. (2017) <link xlink:href="https://www.ncbi.nlm.nih.gov/books/n/jatscon17/schwarzman/">https://www.ncbi.nlm.nih.gov/books/n/jatscon17/schwarzman/</link>
+</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Customization Mechanisms Vary</title>
+<itemizedlist>
+<listitem><para>DITA protects content from uncustomized tools</para></listitem>
+<listitem><para>TEI provides a web-based customization tool (Roma)</para></listitem>
+<listitem><para>Akoma Ntosa assumes users familiar with HTML</para></listitem>
+<listitem><para>JATS assumes customization by XMLers</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Customizations</title>
+<itemizedlist>
+<listitem><para>Useful</para></listitem>
+<listitem><para>Convenient</para></listitem>
+<listitem><para>Appropriate</para></listitem>
+<listitem><para>Can go wrong</para></listitem>
+</itemizedlist>
+</section>
+</section>
+
+<section>
+<title>Experience with JATS Customizations</title>
+<itemizedlist>
+<listitem><para>JATS designed to be customized from beginning</para></listitem>
+<listitem><para>Provided <quote>Modifying This Tag Set</quote> in documentation: <link xlink:href="https://jats.nlm.nih.gov/archiving/tag-library/1.2/chapter/implementor.html">https://jats.nlm.nih.gov/archiving/tag-library/1.2/chapter/implementor.html</link></para></listitem>
+<listitem><para>Expected individual users to customize</para></listitem>
+</itemizedlist>
+<section>
+<title>Many Customizations by Groups of Users</title>
+<para>Standards committees wrote:</para>
+<itemizedlist> 
+<listitem><para>BITS (the Book Interchange Tag Suite)</para></listitem>
+<listitem><para>NISO STS (Standards Tag Suite)</para></listitem>
+<listitem><para>Manuscript Exchange Common Approach (MECA)</para></listitem>
+</itemizedlist>
+</section>
+<!-- When users customize a tag set they expect to be able to use the existing infrastructure associated with that tag set, making changes to accommodate the changes they made. They often expect to intermingle their new documents with documents tagged to the original tag set and perhaps with documents tagged to other customizations of the source tag set. They expect this to work gracefully, easily, seamlessly. Sometimes it does, but sometimes it does not! -->
+<section>
+<title>User Expectations for a Customization</title>
+<itemizedlist>
+<listitem><para>Existing infrastructure will work</para></listitem>
+<listitem><para>Only change parts directly related to new content</para></listitem>
+<listitem><para>Only modify to accommodate new requirements</para></listitem>
+<listitem><para>Intermix old and new documents</para></listitem>
+<listitem><para>Easy, graceful, seamless integration</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>User Experience</title>
+<itemizedlist>
+<listitem><para>Sometimes it <quote>just works</quote> as expected</para></listitem>
+<listitem><para>Sometimes problems appear on initial testing</para></listitem>
+<listitem><para>Sometimes problems pop up later</para></listitem>
+<listitem><para>Some problems easy to identify &amp; fix</para></listitem>
+<listitem><para>Some problems very difficult to identify</para></listitem>
+<listitem><para>Some problems found too late to fix</para></listitem>
+</itemizedlist>
+</section>
+</section>
+<!-- The "JATS Compatibility Meta-Model Description" was developed to help people who customize JATS create tag sets to create models that will coexist peacefully with existing JATS documents and with documents tagged to other JATS customizations.
+
+It seems unlikely that the particulars of the JATS Compatibility Model will apply to other tag sets, but the principles behind the Meta-Model might be useful to other groups thinking about ways to make their families of tag sets flexible and compatible. -->
+<section>
+<title>JATS Compatibility Model</title>
+<para><quote>Building JATS-Compatible Vocabularies Draft 0.10</quote>  &#8212;<!--<lb/>--> formerly called <quote>JATS Compatibility Meta-Model</quote></para>
+<itemizedlist>
+<listitem><para>Developed to help people who customize JATS create tag sets to create models that will coexist peacefully with existing JATS documents and with documents tagged to other JATS customizations</para></listitem>
+<listitem><para>Particulars unlikely to apply to other tag sets</para></listitem>
+<listitem><para>Principles probably do apply to others</para></listitem>  
+</itemizedlist>
+<para>Current version at: <link xlink:href="https://www.niso.org/publications/jats-compatibility-model">https://www.niso.org/publications/jats-compatibility-model</link></para>
+<section>
+<title>JATS Compatibility Model in 2 Parts</title>
+<itemizedlist>
+<listitem><para>Design Principles
+<itemizedlist><listitem><para>about models as a whole</para></listitem>
+<listitem><para>philosophical more than technical</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Compatibility Properties
+<itemizedlist><listitem><para>about individual structures</para></listitem>
+<listitem><para>some highly technical</para></listitem>
+<listitem><para>some automatically check-able</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Design Principles</title>
+<section>
+<title>Respect the Semantics</title>
+<itemizedlist>
+<listitem><para>The <emphasis>most important</emphasis> rule</para></listitem>
+<listitem><para>Use named structures to mean the same thing as source vocabulary</para></listitem>
+<listitem><para>Do not <quote>reuse</quote> structures</para></listitem>
+</itemizedlist>
+<para>This applies to <emphasis>ALL</emphasis> vocabularies!</para>
+</section>
+<section>
+<title>Prevent Semantic Mismatch</title>
+<subtitle>Homonyms are <emphasis>destructive</emphasis> in tag sets</subtitle>
+<para>For example, in a collection of city regulations:</para>
+<itemizedlist>
+<listitem><para>you may not need the JATS &lt;license> element (Set of conditions under which the content may be used, accessed, and distributed.)</para></listitem>
+<listitem><para>you may need to know if a dog, bicycle, or bar needs a license to operate</para></listitem>
+<listitem><para>Create a NEW structure, perhaps &lt;city-license> or &lt;permit-license> or &lt;MyCity:license></para></listitem>
+<listitem><para>DO NOT repurpose &lt;license></para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Linking Direction</title>
+<itemizedlist>
+<listitem><para>Links may go in either direction, or both</para></listitem>
+<listitem><para>Match the link philosophy of the source vocabulary</para></listitem>
+<listitem><para>In JATS:
+<itemizedlist>
+<listitem><para>links go from many to one</para></listitem>
+<listitem><para>citations point to references, because a reference may be cited multiple times</para></listitem>
+<listitem><para>cross-references point to the table, figure, box, etc.</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Hint: link <emphasis>display</emphasis> can go in either or both directions from one-way ID/IDREF in XML source</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Section Model</title>
+<itemizedlist>
+<listitem><para>Headed sections are the defining structure of textual documents</para></listitem>
+<listitem><para>Section tagging is fundamental to prose markup</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Common Section Models</title>
+<itemizedlist>
+<listitem><para>Mix of paragraphs and styles/levels of headings (H1, H2, ..) &#8212;<!--<lb/>--> (HTML, most word processors)</para></listitem>
+<listitem><para>Explicit section levels, with level-designated headings &#8212;<!--<lb/>--> (sec1 contains head1, paras;  sec2 contains head2, paras;  sec3 contains head3, paras)</para></listitem>
+<listitem><para>Nested explicit section levels, with level-designated headings &#8212;<!--<lb/>--> (sec1 contains head1, paras, &amp; sec2; sec2 contains head2, paras, &amp; sec3 ...)</para></listitem>
+<listitem><para>Recursive sections with undesignated headings &#8212;<!--<lb/>--> (sec contains head, paras, &amp; sec; sec contains head, paras, &amp; sec ...)</para></listitem>
+</itemizedlist>
+<para>(IMO: the only wrong/bad choice on section model is to allow more than one of these in a document set.)</para>
+<para>Use the section model of your source vocabulary &#8212;<!--<lb/>--> JATS and JATS-compatible models use recursive sections</para>
+</section>
+<section>
+<title>Subsetting</title>
+<para>How much and what may be removed is not obvious</para>
+<itemizedlist>
+<listitem><para>Applications may depend on presence of some content
+<itemizedlist>
+<listitem><para>Removing structures may break applications</para></listitem>
+<listitem><para>Electronic display may rely on section titles; making them optional may kill navigation</para></listitem>
+<listitem><para>Display of figures may rely on reference to them</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Subsetting is Desirable
+<itemizedlist>
+<listitem><para>Requiring unavailable content leads to tag abuse</para></listitem>
+<listitem><para>Presence of unused structures 
+<itemizedlist>
+<listitem><para>increases learning curve, cost for tools and customizations</para></listitem>
+<listitem><para>reduces tagging consistency and interchange</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>JATS: Subsetting Always Allowed</title>
+<itemizedlist>
+<listitem><para>Most controversial of guidelines</para></listitem>
+<listitem><para>We are already there: in JATS Archiving everything is optional except one ID</para></listitem>
+<listitem><para>In JATS compatible models it is OK to:
+<itemizedlist>
+<listitem><para>Remove elements from an <quote>or</quote> group or sequence</para></listitem>
+<listitem><para>Make required elements optional (or remove entirely)</para></listitem>
+<listitem><para>Remove values from an attribute value list</para></listitem>
+<listitem><para>Remove attribute from element</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</section>
+</section>
+<section>
+<title>Compatibility Properties in JATS Guidelines</title>
+<itemizedlist>
+<listitem><para>Each element/attribute must match on all (relevant) properties</para></listitem>
+<listitem><para>Note: JATS developed before these guidelines; JATS itself does not follow all recommendations</para></listitem>
+</itemizedlist>
+<section>
+<title>Don&#8217;t Munge Elements and Attributes</title>
+<itemizedlist>
+<listitem><para>Some info could be element or attribute</para></listitem>
+<listitem><para>Some XMLers passionate about element/attribute choice</para></listitem>
+<listitem><para>XSLT makes converting elements <emphasis role="bold">↔</emphasis> attributes easy</para></listitem>
+<listitem><para>JATS-Compatible tag set should:
+<itemizedlist>
+<listitem><para>follow JATS use for element or attribute content, or</para></listitem>
+<listitem><para>create a new name for new element or attribute</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>JATS has &lt;phone> element. If want phone number as an attribute value, call it something OTHER than @phone</para></listitem>
+<listitem><para>JATS has @rationale attribute. If want an element for rationale, call it something OTHER than &lt;rationale></para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Section-like</title>
+<itemizedlist>
+<listitem><para>JATS sections have specified structure
+<itemizedlist>
+<listitem><para>Section-Head (labels, titles, licensing, section-metadata)</para></listitem>
+<listitem><para>Section-Blocks (paragraphs, tables, figures, etc.)</para></listitem>
+<listitem><para>Sections (sections may contain sections, AFTER section-blocks)</para></listitem>
+<listitem><para>Section-Tail (typically notes, footnotes, ref-list)</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Some section-like structures have full section model &#8212;<!--<lb/>--> (section, abstract, boxed-text, appendix)</para></listitem>
+<listitem><para>Some section-like structures have partial section model &#8212;<!--<lb/>--> (statement)</para></listitem>
+<listitem><para>Compatible models for these structures must have section structure or subset of it</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Tagset-Specific Constructs</title>
+<itemizedlist>
+<listitem><para>Many tagset have characteristic/special constructs</para></listitem>
+<listitem><para>Use them as defined or don&#8217;t use them at all</para></listitem>
+<listitem><para>DITA has maps, keys, and conref</para></listitem>
+<listitem><para>JATS has alternatives</para></listitem>       
+</itemizedlist>
+</section>
+<section>
+<title>Alternatives</title>
+<itemizedlist>
+<listitem><para>Used in JATS to wrap several equivalent structures</para></listitem>
+<listitem><para>Typically, only one is counted or displayed</para></listitem>
+<listitem><para>One may be preferred</para></listitem>
+<listitem><para>May be alternatives for different media, languages, resolutions, formats</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Display Alternatives Example</title>
+<itemizedlist>
+<listitem><para>A display formula might contain an alternatives that contains:
+<itemizedlist>
+<listitem><para>a graphic</para></listitem>
+<listitem><para>a MathML expression</para></listitem>
+<listitem><para>the textual form of the expression</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>3 ways to express the same information</para></listitem>
+<listitem><para>MathML may be used for print</para></listitem>
+<listitem><para>Screen display may use graphic</para></listitem>
+<listitem><para>Textual form used as alt-text for non-visual users</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Whitespace Handling in XML Documents</title>
+<itemizedlist>
+<listitem><para>Whitespace is spaces, line breaks, carriage returns, tabs</para></listitem>
+<listitem><para>How XML handles whitespace seems obscure</para></listitem>
+<listitem><para>Very important
+<itemizedlist>
+<listitem><para>Sometimes whitespace is <quote>significant</quote>, sometimes not</para></listitem>
+<listitem><para>Many XML processors behave differently when whitespace is/isn&#8217;t significant</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Maintain Whitespace Type of Source Vocabulary</title>
+<para><!--<unimp>-->(a short dive into XML esoterica)<!--</unimp>--></para>
+<itemizedlist>
+<listitem><para>3 whitespace types in XML
+<itemizedlist>
+<listitem><para>Not significant (element-only contexts)</para></listitem>
+<listitem><para>Collapse to 1 space (most text, including mixed content)</para></listitem>
+<listitem><para>Preserve (pass exactly; only when so specified)</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para><emphasis role="bold">Compatible tag set must not change whitespace type for any element</emphasis></para></listitem>
+<listitem><para>Can be source of much mysterious weirdnesses &#8212;<!--<lb/>--> and very hard to find. </para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>ID IDREF</title>
+<para>Identifier pattern should follow source vocabulary</para>
+<itemizedlist>
+<listitem><para>Attributes that are typed as ID must remain ID</para></listitem>
+<listitem><para>Attributes that are typed as IDREF must remain IDREF (or IDREFS)</para></listitem>
+</itemizedlist>
+<para>Remember, attributes that contain IDs or IDREFs can have any name &#8212;<!--<lb/>--> JATS @continued-from is an IDREF attribute</para>
+</section>
+<section>
+<title>Property Catalog in JATS Guidelines</title>
+<itemizedlist>
+<listitem><para>Checklist</para></listitem>
+<listitem><para>Catalog lists elements, attributes, all properties</para></listitem>
+<listitem><para>Shows several JATS-related tag sets</para></listitem>
+</itemizedlist>
+<informalfigure>
+<mediaobject>
+<imageobject>
+<imagedata fileref="Meta-model-app-B.png" width="60%"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</section>
+</section>
+<section>
+<title>Properties not Relevant to Compatibility (as defined)</title>
+<itemizedlist>
+<listitem><para>Some properties considered and declared irrelevant for compatibility &#8212;<!--<lb/>--> [<quote>Circling in on the JATS Compatibility Meta-Model</quote>, Laura Randall, B. Tommie Usdin, Deborah A. Lapeyre, and Jeffrey Beck. <link xlink:href="https://www.ncbi.nlm.nih.gov/books/n/jatscon17/randall/">https://www.ncbi.nlm.nih.gov/books/n/jatscon17/randall/</link>]</para></listitem>
+</itemizedlist>
+<section>
+<title>Social Behaviour</title>
+<itemizedlist>
+<listitem><para>Role in document (e.g., block, inline, metadata)</para></listitem>
+<listitem><para>Content (e.g., text, mixed content, toggle/flags)</para></listitem>        
+</itemizedlist>
+</section>
+<section>
+<title>Metadata vs Data</title>
+<itemizedlist>
+<listitem><para>Distinction is problematic</para></listitem>
+<listitem><para>Metadata now, data later, or &#8212;<!--<lb/>--> metadata to me, data to you</para></listitem>
+<listitem><para>Book title
+<itemizedlist>
+<listitem><para>title of <emphasis>this</emphasis> book is metadata</para></listitem>
+<listitem><para>title of another book, e.g., in reference, is data</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Framework or superstructure</title>
+<itemizedlist>
+<listitem><para>Big parts of a document 
+<itemizedlist>
+<listitem><para>root or top level wrapper</para></listitem>
+<listitem><para>large divisions of document, e.g., front, body, back</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Framework in one context becomes body structure in another
+<itemizedlist>
+<listitem><para>article is top level structure in JATS</para></listitem>
+<listitem><para>BITS is designed so that articles can become book chapters will few changes</para></listitem>
+<listitem><para>Standards can be adopted. The adoption document wraps entire standard, with content before and after</para></listitem>
+</itemizedlist>
+</para></listitem>  
+</itemizedlist>
+</section>
+<section>
+<title>Recursion</title>
+<itemizedlist>
+<listitem><para>In JATS:
+<itemizedlist>
+<listitem><para>sections may contain sections</para></listitem>
+<listitem><para>paragraphs may not contain paragraphs</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Disallowing recursion (not allowing sections to contain sections) does no harm</para></listitem>
+<listitem><para>Enabling recursion may require changes to display styles but is not destructive</para></listitem>
+</itemizedlist>
+</section>
+</section>
+
+<section>
+<title>These Guidelines <emphasis>are not</emphasis> Universal</title>
+<section>
+<title>JATS users can Ignore Guidelines</title>
+<para>JATS is convenient starting place, but that&#8217;s all, &#8212;<!--<lb/>--> Ignore guidelines <emphasis role="bold">IF AND ONLY IF</emphasis>:</para>
+<itemizedlist>
+<listitem><para>Documents will never interact with other JATS documents</para></listitem>
+<listitem><para>Users and suppliers do not know JATS</para></listitem>
+<listitem><para>Won&#8217;t adopt JATS tools</para></listitem>
+</itemizedlist>
+<!-- 
+<itemizedlist>
+<listitem><para>JATS is convenient starting place, but that&#8217;s all</para></listitem>
+<listitem><para>Your documents will never interact with other JATS documents</para></listitem>
+<listitem><para>Your users and suppliers do not know JATS</para></listitem>
+<listitem><para>You won&#8217;t adopt JATS tools</para></listitem>
+</itemizedlist>
+-->
+</section>
+<section>
+<title>Other Groups</title>
+<itemizedlist>
+<listitem><para>May want similar guidelines</para></listitem>
+<listitem><para>Some of these inapplicable</para></listitem>
+<listitem><para>Some we discarded may apply</para></listitem>
+</itemizedlist>
+</section>
+<section>
+<title>Ignore and Find Yourself in a Briar Patch</title>
+<itemizedlist>
+<listitem><para>If documents co-exist with documents from base tag set</para></listitem>
+<listitem><para>If users/vendors know base tag set</para></listitem>
+<listitem><para>And you ignore guidelines</para></listitem>
+<listitem><para>Expect slow-motion, difficult to diagnose, CHAOS
+<itemizedlist>
+<listitem><para>Surprising search results</para></listitem>
+<listitem><para>Incomprehensible error messages</para></listitem>
+<listitem><para>Formatting errors, especially vanishing or extra spaces and line breaks</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</section>
+</section>
+</section>
+
+<section>
+<title>Note: the Briar Patch in the Talk Title</title>
+<itemizedlist>
+<listitem><para>A briar patch is a nasty place
+<itemizedlist>
+<listitem><para>thorn-covered branches</para></listitem>
+<listitem><para>hostile creatures (snakes, porcupine, skunk)</para></listitem>
+</itemizedlist>
+</para></listitem>
+<listitem><para>Many associate <quote>briar patch</quote> with Uncle Remus and stories of Brer Rabit and Brer Fox  <!--<unimp>-->(think: racist Aesop&#8217; fables)<!--</unimp>-->
+</para></listitem> 
+<listitem><para>Plan was to associate:
+<itemizedlist>
+<listitem><para>incompatabilities with briar patch</para></listitem>
+<listitem><para>compatability with safe path to swimming beach</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+<para>Some metaphors deserve to die</para>
+<informalfigure>
+<mediaobject>
+<imageobject>
+<imagedata fileref="Briar-Patch.jpg" width="60%"/>
+</imageobject>
+</mediaobject>
+</informalfigure>
+</section>
+
+<section>
+<title>Questions? Comments? Suggestions?</title>
+<itemizedlist>
+<listitem><para>Now, in the Q&amp;A window</para></listitem>
+<listitem><para>On comments page for the <quote>JATS Compatibility Model</quote> see: <link xlink:href="https://www.niso.org/publications/jats-compatibility-model">https://www.niso.org/publications/jats-compatibility-model</link></para></listitem>
+<listitem><para>on JATS-List <link xlink:href="http://www​​.mulberrytech​​.com/JATS/JATS-List/">http://www​​.mulberrytech​​.com/JATS/JATS-List/</link></para></listitem>
+<listitem><para>or send email to me at <email>btusdin@mulberrytech.com</email></para></listitem>
+</itemizedlist>
+</section>
+
+</article>

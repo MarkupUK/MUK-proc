@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.1/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.1/sch/docbook.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook"
+    xmlns:xlink="http://www.w3.org/1999/xlink" version="5.1">
+    <info>
+        <title>CSS From XSLT</title>
+        <author>
+            <personname><firstname>Liam</firstname>
+                <surname>Quin</surname></personname>
+            <affiliation>
+                <orgname>Delightful Computing</orgname>
+            </affiliation>
+            <address><city>Milford</city>
+<city>Ontario</city>
+<country>Canada</country></address>
+            <email>liam@delightfulcomputing.com</email>
+        </author>
+        <abstract>
+            <para>CSS Within is a new way to integrate CSS generation with HTML
+                generation to help reduce or eliminate these problems.</para>
+            <para>The method used is to embed rule and media elements, in a CSS
+                Within namespace, inside XSLT templates. This puts the CSS
+                styles exactly where the XSLT developer needs them: right next
+                to the XSLT instructions producing the elements that they
+                style.</para>
+            <para>Limited usage experience suggests that CSS Within makes HTML
+                generation easier to maintain and more robust over time.</para>
+        </abstract>
+    </info>
+    <sect1>
+        <title>Introduction</title>
+        <para>A common problem when using XSLT to make HTML and CSS is keeping
+            the XSLT, HTML and CSS synchronized. Changes to the XSLT that affect
+            what HTML is generated necessitate corresponding changes to CSS;
+            changes to the CSS may necessitate changes to the XSLT. Over time
+            there will be some elements in the HTML for which there is no style
+            information in the CSS, or for which the style information is out of
+            date; there will be rules in the CSS that are no longer needed, or,
+            worse, that are out of date and are only sometimes triggered.</para>
+        <para>Generating CSS from within XSLT, perhaps with one large xsl:text
+            element, helps to reduce the divergence by making it easier to find
+            CSS rules that affect a given element. But it is still easy to
+            forget to update the CSS. A search for div.beer might not show up
+            anything, but the CSS might have a selector <code>fridge>*</code>
+            which matches beer (or any other element) when it's in the fridge.
+            So it is not always trivial to locate the appropriate CSS rule to
+            update.</para>
+        <para>With XSLT 3 also comes expand-text="yes" and curly braces being
+            potentially special inside text node constructors, conflicting with
+            CSS syntax.</para>
+        <para>CSS Within supports multiple stylesheets (for example for Web and
+            PDF), and can run in pure XSLT or with extension instructions
+            currently available for Saxon, in Java). Limited usage experience
+            suggests that CSS Within makes HTML generation easier to maintain
+            and more robust over time.  This paper describes how to use CSS
+            Within in your own projects and also discusses the current
+            implementations and their limitations.</para>
+    </sect1>
+    <sect1>
+        <title>Rules and Media</title>
+        <para>CSS Within introduces <code>css:rule</code> and
+                <code>css:media</code> elements into XSLT stylesheets. We will
+            begin by looking at <code>css:rule</code> since it is the
+            fundamental building block both of CSS Within and, indirectly, of
+            CSS itself.</para>
+        <para>Consider an XSLT template as follows:</para>
+        <programlisting language="xml">&lt;xsl:template match="products-found">
+    &lt;!--* match search results, if any *-->
+    &lt;div class="productlist">
+        &lt;xsl:on-non-empty>
+            &lt;h3>Products&lt;/h3>
+        &lt;/xsl:on-non-empty>
+        &lt;xsl:apply-templates/>
+        &lt;xsl:on-empty>
+            &lt;p class="no-products">
+               No products matched your irritating query. Go away.
+            &lt;/p>
+        &lt;/xsl:on-empty>
+    &lt;div>
+&lt;/xsl:template></programlisting>
+        <para>Styling the <emphasis>Products</emphasis> heading might require
+            CSS like the following:</para>
+        <programlisting language="css">div.productlist {
+    border: 1px solid grey;
+    padding: 1rem;
+}
+div.productlist>h3 {
+    font-family: "Bland Sans", sans;
+    border-top: 1px dotted grey;
+}</programlisting>
+        <para>This CSS fragment consists of two rules, each consisting of a
+                <emphasis>selector</emphasis> followed by a group of rules
+            contained within <code>{</code> curly brackets <code>}</code>.  The
+            first rule has a selector that says the rule applies  to any
+                <code>div</code>element whose <code>class</code> attribute
+            contains the token <code>productlist</code>. The second rule has a
+            selector that applies to every <code>h3</code> element whose
+            immediate parent is such a <code>div</code> element. Assuming no
+            other more specific or subsequent rule overrides these, the rules
+            assign values  to various CSS properties such as
+                <code>padding</code>  and <code>font-family</code>. Beyond this,
+            the details of CSS are not important to CSS  Within. However, it
+                <emphasis>is</emphasis> worth noting that CSS uses a text-based
+            non-XML syntax with which people who work with Web development are
+            very familiar.</para>
+        <para>It is clear from this example that the link between the
+            stylesheets and the HTML being constructed is fragile: if the
+            generated element structure is changed, or the class names are
+            updated, the original CSS selectors will no longer match. One way to
+            mitigate this is to put the CSS rules right next to the place where
+            the elements they govern are generated. To put the CSS
+                <emphasis>within</emphasis> the template, we might combine them
+            as follows:</para>
+        <programlisting language="xml">&lt;xsl:template match="products-found">
+    &lt;!--* match search results, if any *-->
+    &lt;div class="productlist">
+        &lt;css:rule match="div.productlist">
+            border: 1px solid grey;
+            padding: 1rem;
+        &lt;/css:rule>
+        &lt;xsl:on-non-empty>
+            &lt;css:rule match="div.productlist>h3">
+                font-family: "Bland Sans", sans;
+                border-top: 1px dotted grey;
+            &lt;/css:rule>
+            &lt;h3>Products&lt;/h3>
+        &lt;/xsl:on-non-empty>
+        &lt;xsl:apply-templates/>
+        &lt;xsl:on-empty>
+            &lt;p class="no-products">
+               No products matched your irritating query. Go away.
+            &lt;/p>
+        &lt;/xsl:on-empty>
+    &lt;div>
+&lt;/xsl:template></programlisting>
+        <para>The CSS Within tool set includes XSLT that will read the
+            stylesheet itself, extract all of the <code>css:rule</code> elements
+            and write a CSS stylesheet file. In this case the CSS will be
+            identical to that shown above.</para>
+        <para>What have we gained? First, we no longer have a conflict of
+            syntax:  there are no more curly braces and everything is in XML.
+            Second, the CSS definitions are right next to the elements they
+            style. It is easy to imagine changing the <code>h3</code> to an
+                <code>h4</code> but forgetting to change the CSS file; even if
+            we remember, we then have to open the CCSS file and
+                <emphasis>find</emphasis> the right rule to change. But now  the
+            styles and the markup are in the same place we are likely to
+            remember and, remembering, will of course find it easy to locate the
+            style rule to update.</para>
+        <para>Sometimes you may generate the same structure from multiple places
+            in your stylesheet, but of course you don't want to repeat the CSS
+            rules in the generated  stylesheet. In this case you can use an
+            empty <code>css:rule</code> element  and give it a <code>ref</code>
+            attribute whose value matches the <code>name</code> attribute of
+            another <code>css:rule</code> element. The <code>name</code>
+            attribute on the <code>css:rule</code> element also serves as a
+            reminder that the style might be used elsewhere, helping to avoid
+            the situation where you accidentally delete a rule you thought you
+            no longer needed.</para>
+        <para>If you are using CSS for both print and screen, or if you have
+            stylesheets loaded only conditionally based on a media query (for
+            example, containing extra rules for wide screens or overriding
+            defaults set for circular displays such as on some wristwatches),
+            you may well need to write out more than one CSS file with XSLT. In
+            this case you can give <code>css:rule</code> elements a
+                <code>stream</code> attribute, and the contents will only be
+            included in the CSS ruleset you name. That way all the styles to do
+            with a given output element are together and as easy as possible to
+            update together, even if they are written out separately.</para>
+        <para>The way the CSS is written to files is described in a subsequent
+            section in this paper.</para>
+        <para>If you have  media queries in your stylesheet, you can use
+                <code>css:media</code> elements to generate them; these elements
+            contain <code>css:rule</code> elements:</para>
+        <programlisting language="xml">&lt;css:media when="min-width: 600px">
+    &lt;css:rule match="ul.letterindex">
+        column-count: 2;
+    &lt;/css:rule>
+&lt;/css:media>
+&lt;css:media when="min-width: 800px">
+    &lt;css:rule match="ul.letterindex">
+        column-count: 3;
+    &lt;/css:rule>
+&lt;/css:media></programlisting>
+    </sect1>
+    <sect1>
+        <title>The CSS Output</title>
+        <para>Alongside the generated HTML one needs of course to produce CSS.
+            Current Web practice is to use a mixture of separately-served CSS
+            resources and CSS styles embedded within HTML itself. The primary
+            tradeoff between using separate files and embedding is in bandwidth
+            consumption when users visit multiple pages on the same site, or
+            even the same page multiple times: a separate CSS file can then
+            provide clear savings in bandwidth and in time to render the Web
+            page. For the first time that a client loads a page, however,
+            embedded styles for the first few elements that will be rendered on
+            the page can reduce the time before the user can use the Web page.
+            CSS styles embedded in HTML after the head, however, raise security
+            questions outside the scope of this paper; we shall focus only on a
+            separate CSS resource, created on the server as a standalone
+            file.</para>
+        <para>In an XSLT stylesheet using CSS Within, you can call the
+                <code>css:gather</code> template to produce the CSS; use this
+            within an <code>xsl:result-document</code> element  with
+                <code>method="text"</code>. In the future there may instead be a
+                <code>css:stream</code> element for this purpose.</para>
+        <sect2>
+            <title>The stream attribute</title>
+            <para>If you are writing to multiple CSS files, you can give each
+                    <code>css:rule</code> or <code>css:media</code> element a
+                    <code>stream</code> attribute; the value of this attribute
+                can be <code>#all</code> or a space-separated list of
+                identifiers (as for the HTML <code>class</code> attribute); the
+                corresponding CSS rules are generated to replace a
+                    <code>css:stream</code> element having a <code>name</code>
+                attribute with the same value; the stream name can also be
+                passed as a parameter to the <code>css:gather</code> template
+                which gathers the styles from where they occur in the stylesheet
+                into one place. This is not currently implemented, but is
+                planned.</para>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Phases of Operation</title>
+        <para>When you run an XSLT processor on a stylesheet using CSS Within,
+            the following operations must occur:</para>
+        <orderedlist>
+            <listitem>
+                <para>By default, <code>css:rule</code> elements are
+                        <emphasis>literal  element constructors</emphasis>,
+                    meaning that your output will be littered with CSS. So this
+                    must be prevented;</para>
+            </listitem>
+            <listitem>
+                <para>Your stylesheet must be analyzed and all of the CSS
+                    elements gathered up into one or more CSS files.</para>
+            </listitem>
+        </orderedlist>
+        <sect2>
+            <title>Phase One: De-cluttering the Output</title>
+            <para>The first of these two phases can happen in one of there
+                ways:</para>
+            <orderedlist>
+                <listitem>
+                    <para>By pre-processing the stylesheet to make a copy
+                        without any <code>css:rule</code> r other CSS Within
+                        elements that would cause problems;</para>
+                </listitem>
+                <listitem>
+                    <para>By post-processing the generated HTML to remove the
+                            <code>css:rule</code> elements that were spuriously
+                        generated;</para>
+                </listitem>
+                <listitem>
+                    <para>By modifying the XSLT processor so that it ignores the
+                        content of <code>css:rule</code> elements.</para>
+                </listitem>
+            </orderedlist>
+            <para>The first option is easily done using
+                    <code>fn:transform()</code> and wrapper XSLT, although care
+                must be taken to pass on any stylesheet parameters. However, it
+                is not possible in general, because of stylesheet imports that
+                might be conditional (depending on <code>use-when</code>
+                expressions or XSLT 3 shadow attributes, for example), and
+                because package import resolution happens dynamically.</para>
+            <para>The second option can however be done with
+                    <code>fn:transform()</code>, since the output  documents
+                generated by any <code>xsl:result-document</code> elements in
+                the transform are not written out but are included in the map
+                returned by  <code>fn:transform()</code> and can be
+                post-processed.</para>
+            <para>The author of this paper wrote both XSLT for option (2) and
+                also a Java class that implements XSLT extension elements for
+                Saxon which make <code>css:rule</code> and
+                    <code>css:media</code> simply return the empty sequence when
+                the stylesheet is executed.</para>
+        </sect2>
+        <sect2>
+            <title>Phase Two: Writing Out the CSS</title>
+            <para>Again there are multiple approaches to finding all of the CSS
+                elements and writing out the stylesheets. It is important that
+                    <emphasis>all</emphasis> of the styles are written, even if
+                they are inside templates that were not matched, as they might
+                be styles for dynamically generated content. However, because a
+                stylesheet can be compiled, saved in compiled form, and executed
+                at a later time, we cannot write a Java extension that saves all
+                of the <code>css:rule</code> and <code>css:media</code> at
+                compile-time in a singleton object that can then be returned by
+                a <code>css:stream</code> instruction.</para>
+            <para>Currently, extraction of CSS styles is done with XSLT, and
+                does not work with dynamic import or package selection. So far
+                this has not been a problem in practice, and ongoing experiments
+                with package conventions may in time provide a solution.</para>
+            <para>An approach using a template in each separate file or package
+                that matches <code>css:gather</code> elements and then calls
+                    <code>xsl:next-match</code> seems very promising.</para>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Pure XSLT Implementation</title>
+        <para>The pure XSLT implementation of CSS Within uses
+                <code>fn:transform</code> to run the original transformation and
+            post-processes the result to remove unwanted CSS Within elements. It
+            then processes the stylesheet files themselves as XML documents to
+            find all of the <code>css:rule</code> and <code>css:media</code>
+            elements and construct stylesheets.</para>
+        <para>This approach does not work with separate compilation, as in that
+            case the source code for the original transformation is no longer
+            available. It  also  does not  work with packages, since the package
+            location mechanism is not visible at the XSLT level. However, it is
+            still very useful.</para>
+    </sect1>
+    <sect1>
+        <title>Java Extension for Saxon</title>
+        <para>CSS Within currently  includes a Java definition of XSLT extension
+            elements for <code>css:rule</code> and <code>css:media</code> that
+            simply return an empty sequence at compile time. When the stylesheet
+            runs, the CSS Within elements are gone, so there is no need for a
+            clean-up phase.</para>
+        <para>In development is an extension element for <code>css:gather</code>
+            which at stylesheet compilation builds the CSS stylesheet so that
+            when run, the <code>css:gather</code> element is replaced by an
+                <code>xsl:text</code> element containing the text of the
+            stylesheet. In order that the CSS fragments are collected from
+            included and imported stylesheets and packages,
+                <code>apply-templates</code> must be called in
+                <code>css:gather</code> mode; the CSS Within stylesheet which
+            can be imported contains a template that uses
+                <code>xsl:next-match</code> to fetch the <code>css:gather</code>
+            fragments from every other stylesheet module. Since all of this is
+            arranged when the stylesheet is compiled, run-time support for the
+            extension elements is not required. Each module must either include
+            the CSS Within stylesheet, or must define a suitable
+                <code>css:gather</code> template.</para>
+        <para>This <code>css:gather</code> implementation is then used by the
+            public <code>css:stream</code> element to  produce the text of the
+            CSS stylesheet.</para>
+        <para>The complexities of configuring Saxon to run an extension, and of
+            supporting separate compilation where the runtime engine is not
+            necessarily in the same Java instance as the execution, or even in
+            Java at  all, mean that  at the time of writing this paper the
+            implementation is not stable enough to redistribute, but the author
+            expects that to change.</para>
+    </sect1>
+    <sect1>
+        <title>Discussion: Deployment</title>
+        <para>An unexpected benefit of having CSS inside XSLT templates is that
+            you can copy snippets of XSLT from one project to another, perhaps
+            to implement Web-page controls or other common functionality, and
+            the style is carried with them too. You could also do this if you
+            had the CSS <emphasis>before</emphasis> the individual XSLT
+            templates instead of inside them, but in that case you would have
+            the possibility of missing the styles for the first template, and
+            either the template would be separated from any <code>xd:doc</code>
+            elements preceding it, or the CSS would be before the
+                <code>xd:doc</code> elements and hence separated too far from
+            the body of the template to reap the benefits of CSS Within.</para>
+        <para>The CSS Within approach relies on the CSS cascade mechanism: it is
+            because of this that is not necessary to specify full styles for
+            each generated element. This also means that a generated element
+            that can appear in multiple contexts may need multiple
+                <code>css:rule</code>elements for the different contexts. As an
+            alternative, the base styles can be placed in the template
+            generating the ancestor element, and this relationship can be made
+            specific with a <code>ref=</code> attribute on the individual
+                <code>css:rule</code> elements to show the dependency. This
+            makes no difference to the generated CSS, but helps the human
+            maintainer of the stylesheet understand what has been done and keep
+            it up to date. The XSLT implementation does currently check the
+                <code>ref</code> attributes.</para>
+    </sect1>
+    <sect1>
+        <title>Limitations</title>
+        <para>Currently, the CSS Within implementations support neither separate
+            compilation nor packages. This work is in progress at the time of
+            writing this paper (April 2021).</para>
+        <para>Since there is no support yet for CSS at-rules such as
+                <code>@font</code>, all such constructs must be placed in the
+            header part of the CSS stylesheet. This precludes, for example,
+            having differing font-face rules based on media queries (or
+            complicates it). An alternative design was explored that involved
+            giving <code>css:rule</code> elements attributes with the same names
+            as CSS properties, such as <code>font-family='"Times Roman",
+                "times", serif'</code>; this took CSS  Within too far away from
+            CSS syntax.</para>
+        <para>The CSS stylesheet is constructed from all of the
+                <code>css:rule</code> and <code>css:media</code> elements in the
+            order in which they occur in the stylesheet; there is no control
+            over the ordering. It is not clear yet whether this is
+            needed.</para>
+        <para>Finally, it is worth noting that CSS Within has only been use in
+            single-person projects so far. Although the author took some trouble
+            to keep the body of <code>css:rule</code> and <code>css:media</code>
+            as plain text in CSS syntax, so that one can be in, so to speak, a
+            CSS state of mind when reviewing the styles, the method has not been
+            tested with different people working on CSS and on XSLT.</para>
+    </sect1>
+    <sect1>
+        <title>Future Work</title>
+        <para>Future work for CSS Within includes supporting more of CSS; today
+            you can have a header, individual rules, and a footer; the header
+            might for example define Web font rules. Adding more elements to
+            support font and other at-rules directly might help maintenance of
+            stylesheets.</para>
+        <para>You can reuse fragments of stylesheets with a name/ref mechanism,
+            but this has not been explored extensively.</para>
+        <para>CSS Within could also do minification of CSS, and possibly
+            automatic prefixing.</para>
+        <para>The most likely short-term enhancement is automatic generation of
+            match patterns. Future work on enhancing the Java plugin to support
+            automatically generating CSS files even in the presence of separate
+            compilation is also planned.</para>
+    </sect1>
+    <sect1>
+        <title>Availability</title>
+        <para>CSS Within is (or will be) freely available on gitlab, and can be
+            used professionally if desired. Comments and patches are of course
+            welcome.</para>
+        <para><link xlink:href="https://gitlab.com/barefootliam/css-within"
+            /></para>
+    </sect1>
+    <sect1>
+        <title>Conclusions</title>
+        <para>The author has been using CSS Within for some time. The result is
+            that going back to a stylesheet after some months to make a minor
+            adjustment is now significantly easier, and even larger refactoring
+            keeps the CSS and the HTML working together.</para>
+        <para>The work involved in refactoring an existing stylesheet into CSS
+            Within should not be underestimated, although even in small projects
+            bugs and  inefficiencies are very likely  to be found and eliminated
+            as part of this process.</para>
+        <para>CSS Within is a useful way to manage CSS styling of XSLT-generated
+            HTML or XML in small projects; whether it scales up to larger
+            multi-person projects remains to be seen.</para>
+    </sect1>
+</article>

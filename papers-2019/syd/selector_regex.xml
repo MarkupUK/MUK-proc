@@ -1,0 +1,895 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="resources/css/paper.css"?>
+<!-- $Id: selector_regex.xml 3185 2019-06-03 02:43:13Z syd $ -->
+<article xml:id="Syd_selector_regex" xmlns="http://docbook.org/ns/docbook"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xl="http://www.w3.org/1999/xlink" version="5.0">
+  <info>
+    <title>Validating <tag class="attribute">selector</tag></title>
+    <subtitle>a regular expression adventure</subtitle>
+    <author>
+      <personname>
+        <surname>Bauman</surname>
+        <firstname>Syd</firstname>
+      </personname>
+      <email>s.bauman@northeastern.edu</email>
+      <personblurb>
+        <para>Syd Bauman became a hard-core computer user in 1982, and
+        a devotee of descriptive markup two years later. He learned
+        about OHCO and SGML in 1985 (yes, before it was published). He
+        began using SGML and the TEI when he came to the Women Writers
+        Project (then at Brown University) in 1990. He is now a member
+        of the <link xlink:href="https://dsg.northeastern.edu/">Digital
+        Scholarship Group</link> in the <link
+        xlink:href="https://www.northeastern.edu/">Northeastern
+        University</link> <link
+        xlink:href="https://library.northeastern.edu/">Library</link>,
+        where he serves as the Senior XML Programmer/Analyst for the
+        <link xlink:href="https://wwp.northeastern.edu/">Women Writers
+        Project</link>, one of the oldest <link
+        xlink:href="https://tei-c.org/">TEI</link> projects in
+        existence. Although his title would have you believe that he
+        is a computer programmer, Syd is fond of pointing out that he
+        doesn’t write that much actual code; when he does it is
+        usually in XSLT, and his programs are always copylefted. Syd
+        has served as the co-editor of the TEI Guidelines, and on the
+        TEI Technical Council. He occasionally provides XML, TEI, and
+        XSLT consulting for digital humanities projects, and often
+        teaches workshops on XML, TEI, and XSLT. </para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Senior XML Programmer/Analyst</jobtitle>
+        <orgname>Northeastern University Digital Scholarship Group</orgname>
+      </affiliation>
+    </author>
+    <keywordset role="author">
+      <keyword>CSS</keyword>
+      <keyword>TEI</keyword>
+      <keyword>validation</keyword>
+      <keyword>regular expression</keyword>
+      <keyword>RELAX NG</keyword>
+      <keyword>XSLT</keyword>
+      <keyword>Perl</keyword>
+    </keywordset>
+    <abstract>
+      <para>I needed a way to validate that the value of <code>tei:rendition/@selector</code>
+      was a proper CSS3 <firstterm>selector</firstterm>. So I wrote a regular expression
+      to do so. An 18,385-character-long regular expression. And it seems to work.</para>
+    </abstract>
+  </info>
+
+  <section>
+    <title>Introduction</title>
+    <para>Starting with P3 in 1994  (i.e., over two years before CSS1
+    was released), the <orgname class="consortium">Text Encoding
+    Initiative</orgname> <citetitle pubwork="book">Guidelines for Text
+    Encoding and Interchange</citetitle> supported a mechanism to
+    indicate a default rendition, a way of saying <quote>all <tag
+    class="element">emph</tag> elements were in bold italics in the
+    original.</quote> The method used to indicate with which element type a
+    <!-- SC: Or change "associated" to a verb that would match with "to" -->
+    particular default rendition was associated was to give the
+    element type as the value of the <tag class="attribute">gi</tag> attribute of the
+    <tag class="element">tagUsage</tag> element. The value of this attribute
+    could be validated in broad strokes by giving it a datatype of
+    <symbol>teidata.xmlName</symbol> (which boils down to xsd:NCName).
+    Furthermore, it could be checked to be of an element type that
+    occurs in the document using some simple Schematron:
+
+      <programlisting>&lt;sch:let name="instanceTypes"
+         value="distinct-values( //tei:TEI/tei:text//tei:*/local-name() )"/>
+  
+&lt;sch:pattern>
+  &lt;sch:rule context="tei:tagUsage[@gi]">
+    &lt;sch:assert test="@gi = $instanceTypes">
+      @gi should contain the name of an element that is within the
+      &amp;lt;text> of the document.
+    &lt;/sch:assert>
+  &lt;/sch:rule>
+&lt;/sch:pattern></programlisting>
+    </para>
+    <para>Starting in 2015-10 with <citation>P5</citation>
+    <citation>2.9.0</citation>, TEI introduced a new method for the
+    same purpose (and then phased out the original method). In this
+    new method, rather than simply giving the element type to which a
+    default rendition applied, a user specifies to which elements a
+    default rendition applies using the <acronym>CSS<alt>Cascading
+    Style Sheets</alt></acronym> selection mechanism. This allows far
+    greater flexibility and precision in expressing to which instance
+    elements a default rendition applies, at very little to no cost in
+    processing when using CSS to directly render TEI. For example, it
+    is quite common in early modern printed books to have the <link
+    xlink:href="https://en.wikipedia.org/wiki/Signature_mark">signatures</link>
+    centered on the bottom of certain pages, and the <link
+    xlink:href="https://en.wikipedia.org/wiki/Catchword">catchwords</link>
+    on the bottom right of each page. Each of these phenomena is
+    encoded in TEI using the <link
+    xlink:href="https://tei-c.org/Vault/P5/3.5.0/doc/tei-p5-doc/en/html/ref-fw.html"><tag
+    class="element">fw</tag></link> element, but with different values
+    of its <tag class="attribute">type</tag> attribute. Thus it would
+    not be surprising to find the declarations in <xref
+    linkend="fwrends"/> in a <tag class="element">teiHeader</tag>.
+
+    <example xml:id="fwrends">
+      <title>Sample <tag class="element">rendition</tag>s</title>
+      <programlisting>&lt;rendition selector="fw[type='sig']">text-align: center;&lt;/rendition>
+&lt;rendition selector="fw[type='catch']">text-align: right;&lt;/rendition></programlisting>
+    </example>
+      
+      However, there is a significant cost to this improvement in the
+      system with respect to our ability to
+      validate.<footnote><para>It is also costly to use this system
+      when one wishes to convey the indicated renditions when
+      converting the TEI to some other markup language, e.g. XHTML or
+      ePUB. That is a topic for another paper,
+      though.</para></footnote> The TEI only defines <tag
+      class="attribute">selector</tag> as <type>teidata.text</type>
+      (which boils down to the RELAX NG <type>string</type>
+      datatype).</para>
+    <para>This struck me as insufficient, and when I found a simple
+    syntactic error in a <tag class="attribute">selector</tag> in one
+    of our textbase files, I decided to try to improve on the
+    situation. The TEI does not say from which version of CSS the
+    selector syntax should be taken, so I chose level 3 (<citation>sel3</citation><footnote><para>Since I did this work, a
+    newer version, <citation>sel3N</citation>, has been released.
+    The new version seems at first blush to be substantially the same
+    as the one I was using; section 4 <citetitle
+    pubwork="section">Selector syntax</citetitle> is word for word
+    identical.</para></footnote>).<footnote><para> I was at the time
+    blissfully ignorant of <citation>sel4</citation>, which is still
+    in Working Draft.</para></footnote> The only formal constraint
+    system available in the TEI schema language<footnote><para>Pure ODD. See various discussions
+    including <link
+    xlink:href="https://wiki.tei-c.org/index.php?title=ODD#.22Pure_ODD.22">a
+    brief overview</link>, <link
+    xlink:href="http://www.tei-c.org/Support/Learn/odds.xml">the TEI
+    introduction</link>, <link
+    xlink:href="http://conferences.idealliance.org/extreme/html/2004/Burnard01/EML2004Burnard01.html">an
+    <emphasis>Extreme Markup Languages</emphasis> paper on ODD</link>,
+    <link xlink:href="http://jtei.revues.org/842">a <emphasis>Journal
+    of the TEI</emphasis> paper on Pure ODD</link>, <link
+    xlink:href="http://www.tei-c.org/release/doc/tei-p5-doc/en/html/TD.html">the
+    specification</link>, or <link
+    xlink:href="http://www.tei-c.org/release/doc/tei-p5-doc/en/html/USE.html#IM">the
+    description of ODD processing</link>.</para></footnote> above and
+    beyond enumerated lists of values and XSD datatypes is the W3C
+    regular expression language. Thus I set about writing a regular
+    expression to validate CSS3 selectors.</para>
+  </section>
+
+  <section>
+    <title>Against all odds</title>
+    <para>According to several sites and Stack Overflow answers,<footnote>
+    <para>For example, <link xl:href="https://stackoverflow.com/a/12575871/9741160">https://stackoverflow.com/a/12575871/9741160</link>, <link xl:href="https://stackoverflow.com/a/12126644/9741160">https://stackoverflow.com/a/12126644/9741160</link>, and of course
+    section 10.1 of <citation>CSS3</citation>.</para></footnote> the
+    CSS3 language is not regular, and <emphasis>cannot</emphasis> be
+    parsed with a regular expression. So how was I able to do this? I
+    think there are three contributing factors.</para>
+    <formalpara>
+      <title>subset of strings</title>
+      <para>First, I was not dealing with the entire CSS3 language,
+      but with only a distinct subset, selectors. That said, section
+      10.1 of <citation>CSS3</citation> asserts that even the selector
+      syntax alone is an LL grammar, which implies it is not
+      regular.</para>
+    </formalpara>
+    <formalpara>
+      <title>subset of task</title>
+      <para>I did not need to actually process the selector — I did
+      not need to determine to which instance elements in the document
+      the specified default rendition should apply — I merely needed
+      to know whether a CSS3 processor <emphasis>could</emphasis>
+      process the selector. Thus I had no need to parse selectors into
+      their component segments, but rather had only the somewhat
+      simpler task of ascertaining if a given string is a proper CSS3
+      selector or not.</para>
+    </formalpara>
+    <formalpara>
+      <title>subset of knowledge</title>
+      <para>Perhaps most importantly, I did not know it was impossible
+      until after I’d done it. If I had read that CSS3 could not be
+      matched by a regular expression before I had tried this, I may
+      not have been smart enough to think <quote>well, I only need the
+      selector bit; and I don’t need to parse it, only to validate, so
+      maybe a regular expression will do.</quote> Quite likely I just
+      would not have tried.
+      <blockquote>
+    <attribution>Doug Larson</attribution>
+    <para>Some of the world’s greatest feats were accomplished by
+    people not smart enough to know they were impossible.</para>
+    </blockquote>
+  </para>
+    </formalpara>
+  </section>
+  <!-- In order to attain the impossible, one must attempt the absurd.
+       —Miguel de Cervantes-->
+  <!-- Some of the world's greatest feats were accomplished by people
+       not smart enough to know they were impossible. —Doug Larson -->
+  <!-- Nothing is impossible. Some things are just less likely than
+       others. —Jonathan Winters -->
+  <!-- Only he who attempts the absurd is capable of achieving the
+       impossible. —Miguel De Unamuno -->
+  <!-- Impossible is a word to be found only in the dictionary of
+       fools. —Napoleon Bonaparte -->
+  <!-- Dream the impossible dream. —Joe Darion -->
+  <!-- To believe a thing impossible is to make it so. —French proverb -->
+  <!-- We would accomplish many more things if we did not think of
+       them as impossible. —Vince Lombardi -->
+  <!-- When a distinguished but elderly scientist states that
+       something is possible, he is almost certainly right. When he
+       states that something is impossible, he is very probably wrong.
+       —Arthur C. Clarke -->
+  <!-- It always seems impossible until its done. —Nelson Mandela -->
+  <!-- In order to attain the impossible one must attempt the absurd.
+       —Miguel de Cervantes -->
+  <section>
+    <title>Writing the Regexp</title>
+    <para>CSS3 selectors are complex. For example,
+    <code>blockquote &gt; div p</code><footnote><para><link xl:href="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/xml/full/flat/css3-modsel-86.xml">Nondeterministic matching of descendant and child combinators</link></para></footnote>,
+    <code>div.stub *:not(:lang(fr))</code><footnote><para><link xl:href="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/xml/full/flat/css3-modsel-67.xml">NEGATED :lang() pseudo-class</link></para></footnote>,
+    <code>*|*[a|foo~=&quot;bar&quot;], *|*[|class~=&quot;bar&quot;]</code><footnote><para><link xl:href="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/xml/full/flat/css3-modsel-99.xml">Attribute space-separated value selector with declared namespace</link></para></footnote>, and
+    <code>stub ~ [|attribute^=start]:not([|attribute~=mid])[|attribute*=dle][|attribute$=end] ~ t</code><footnote><para><link xl:href="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/xml/full/flat/css3-modsel-d3.xml">Dynamic handling of attribute selectors</link></para></footnote>
+    are all valid CSS3 selectors. And while these are probably somewhat complicated for
+    real-life applications, they are simple compared to what a CSS3 selector <emphasis>could</emphasis> be.</para>
+    <!-- tests 86 & 99 chosen as a tiny homage to Anne Hathaway, who, in addition to the apropos Selina Kyle role, played agent 86 in _Get_Smart_ -->
+    <para>So how does one write a regular expression for something
+    this complex? The answer, of course, is rather than trying to
+    write the regular expression directly, you write a program to
+    generate the regular expression. I have used this approach in the
+    past, finding that it is generally not too difficult to manually
+    convert a small <acronym>EBNF<alt>extended Backus–Naur
+    form</alt></acronym> grammar or other set of formal rules into a
+    small program to generate a corresponding regular
+    expression.<footnote><para>Of course, since an EBNF grammar can
+    represent any context-free language (Chomsky Type 2), there are
+    some EBNFs that cannot be represented by a regular language
+    (Chomsky Type 3), although some regular expression languages
+    (e.g., PCRE) have extensions that allow them to represent any
+    context-free grammar.</para></footnote> Typically each
+    non-terminal becomes a variable, defined in terms of constants
+    (for the terminals) and the variables that have been defined so
+    far (for the non-terminals).</para>
+    <para>As a trivial example, <xref linkend="PerlGenIntRE"/> is a
+    small Perl program that generates a POSIX extended regular
+    expression that matches an integer, as defined by the EBNF
+    provided in the <link
+    xl:href="https://en.wikipedia.org/wiki/Ebnf">Wikipedia page on
+    EBNF</link>.<footnote>
+    <para>Readers who are well versed in PCRE will know that the EBNF
+    can be represented directly in the regular expression, e.g.:
+    <programlisting>(?(DEFINE)
+          (?&lt;digit_sans_zero> (1|2|3|4|5|6|7|8|9)           )
+          (?&lt;digit>           (0|(?&amp;digit_sans_zero))       )
+          (?&lt;natural_number>  (?&amp;digit_sans_zero)(?&amp;digit)* )
+          (?&lt;integer>         (0|(-?(?&amp;natural_number)))    )
+          )^(?&amp;integer)$</programlisting>
+    While this is impressive, and very useful in its own right, it is
+    not helpful to me here as I am interested in generating a W3C 
+    regular expression, not in using PCRE.</para></footnote>
+    <example xml:id="PerlGenIntRE">
+      <title>A Perl program that generates a regular expression</title>
+      <programlisting>#!/usr/bin/env perl
+#
+# Copyleft 2019 Syd Bauman and Northeastern University Digital
+# Scholarship Group.
+# 
+# No parameters; reads no input. Writes out a regular expression
+# that matches an integer, where integer is defined by the EBNF
+# in https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form:
+# | digit excluding zero = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+# | digit                = "0" | digit excluding zero ;
+# | natural number = digit excluding zero, { digit } ;
+# | integer = "0" | [ "-" ], natural number ;
+# The resulting regexp is intended to be a POSIX ERE, but would
+# also work as a PCRE or a W3C regular expression, and probably
+# lots of others. (But not a POSIX BRE or an Emacs LISP regexp.)
+
+$digit_sans_zero = "(1|2|3|4|5|6|7|8|9)"; # could be just "[1-9]" :-)
+$digit = "(0|$digit_sans_zero)";
+$natural_number = "($digit_sans_zero($digit)*)";
+$integer = "(0|(-?$natural_number))";
+
+print STDOUT "$integer\n";
+exit 0;</programlisting></example></para>
+    <para>While I am sure there has been much
+    written on this general approach,<footnote>
+      <para>A quick web search demonstrates that discussions of this
+      topic come in all flavors, from <orgname>stackoverflow</orgname>
+      posts to class slides, to full academic papers. See, e.g.
+        <citation>FA2RE</citation>,
+        <citation>TPoRE</citation>, <citation>REBNF</citation>
+        <citation>NFA2RE</citation>, <citation>DFA2RE</citation>, and
+        <citation>REGGE</citation>.
+      </para>
+    </footnote> I was not looking for general-purpose (regular)
+    grammar to regular expression conversion, I was just looking to
+    convert a particular grammar to a regular expression.</para>
+    <section>
+      <title>Generating the generator</title>
+      <para>Thus I fell back on old habits, and began writing what I
+      thought would be a short routine to write a moderately long
+      regular expression. Because I had used Perl for this in the past,
+      and because Perl is interpreted (and thus an easy language with
+      which to perform rapid cycles of tweak-and-test), I wrote this
+      program in Perl. This, I now believe, was a mistake.</para>
+      <para>The immediate output of the program was to be a regular
+      expression — that is, a string — which I imagined I would
+      generate once (after building and debugging the generation
+      routine) and copy into an appropriate schema. Thus a string
+      manipulation language like Perl seemed appropriate. However, in
+      my zeal I forgot a universal truth about writing programs, even
+      simple ones: they need to be <emphasis>tested</emphasis> and
+      <emphasis>debugged</emphasis>, <emphasis>repeatedly</emphasis>
+      and <emphasis>thoroughly</emphasis>. In this case each round of
+      testing required that the string be copied from standard output
+      into a schema against which some test data could be validated.
+      (Remember that I could not use Perl to directly test the regular
+      expression against test data, because I was not generating a
+      Perl-flavored regular expression, but rather an W3C-flavored
+      regular expression.) Thus in order to save time, it made sense
+      for the program to either insert the regular expression into the
+      test schema for me, or to write a complete test schema (that
+      includes the regular expression) anew each time it was run.
+      While the former technique is perhaps more desirable from a
+      point of view of separation of concerns, the latter is much
+      easier to write and is preferable insofar as it keeps all the
+      concerns (as it were) in one file.</para>
+      <para>My preferred schema languages are RELAX NG and ISO
+      Schematron,<footnote><para>That is, my preferred schema languages
+      other than TEI PureODD.</para></footnote> either of which can be
+      used to test the value of <code>tei:rendition/@selector</code>
+      against a W3C-flavored regular expression. Thus I soon modified
+      the generation program so that instead of writing just a regular
+      expression to standard output, it wrote a small, but complete
+      RELAX NG schema or a small, but complete, XSLT program, either of
+      which was designed to test only the value of <tag
+      class="attribute">selector</tag> against the (current version of)
+      the generated regular expression.</para>
+      <para>The reason for generating XSLT output instead of ISO
+      Schematron output was purely pragmatic. The Schematron processor I
+      use works by converting the Schematron to an XSLT intermediate
+      (using XSLT), and then transforming the test document using the
+      intermediate XSLT. By writing XSLT directly from the generation
+      program, I could save a conversion step during each test and still
+      use the same engine to execute the regular expression.</para>
+      <para>Details about the design of the output RELAX NG schema and
+      XSLT program follow. But their mere existence explains why my
+      use of Perl was a mistake. Both of the desired output formats
+      were XML, and for me XSLT is the best language to use for
+      generating XML as output.<footnote><para>I believe it is very
+      advantageous to use a language, like XSLT, that outputs a
+      <emphasis>tree</emphasis> in serial format as XML — rather than
+      as a sequence of characters, some of which are pointy brackets —
+      and thus <emphasis>cannot</emphasis> make most well-formedness
+      errors. Without such a language, simple well-formedness errors
+      creep in constantly. Even in the 297 XML files that make up the
+      XML version of the <link
+      xl:href="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/">W3C
+      CSS3 Selectors Test Suite Index</link>, which look to me like
+      they are generated by a program, I found four files with one
+      well-formedness error each. (<quote><code>&lt;br></code></quote>
+      without an end-tag in all four cases).</para></footnote> (Even
+      those who do not think of XSLT as the <emphasis>best</emphasis>
+      language for writing XML will admit that it is far better than
+      Perl.)</para>
+    </section>
+    <section>
+      <title>Case</title>
+      <para>If there is a method of asking a RELAX NG validator to use
+      a regular expression case insensitively, I do not know it. Thus
+      the regular expression is written case sensitively. E.g., the
+      sub-pattern <code>[A-Za-z]</code> occurs frequently where
+      <code>[A-Z]</code> would be acceptable if the pattern could be
+      applied after case folding.</para>
+      <para>It is slightly advantageous to be absolutely explicit
+      about which characters are allowed, so in one sense this
+      verbosity is an advantage. On the other hand, there are two significant
+      disadvantages:<orderedlist>
+      <listitem><para>It adds verbosity. The generated regular
+      expression is more than 1000 characters longer than it would be if case
+      insensitivity could be assumed.</para></listitem>
+      <listitem><para>It means that the generated regular expression
+      is in some cases technically incorrect. For example,
+      <citation>CSS3</citation> defines a pseudo-class
+      <classname>:link</classname>. It never mentions a pseudo-class
+      <classname>:LINK</classname>, and I have never seen it used in
+      uppercase in the real world or in a test suite. However, section
+      3 says quite clearly <quote>All Selectors syntax is
+      case-insensitive within the ASCII range (i.e. [a-z] and [A-Z]
+      are equivalent)</quote>. Thus either matching should take place
+      case insensitively, or wherever the regular expression says
+      <code>link</code> it should really say
+      <code>[Ll][Ii][Nn][Kk]</code>.</para></listitem></orderedlist></para>
+    </section>
+    <section>
+      <title>Language</title>
+      <para>The first and only parameter accepted by the CSS3
+      <classname>:lang()</classname> pseudo-class <emphasis>does
+      not</emphasis> need to be a valid language tag per
+      <citation>BCP47</citation>; it only needs to be a valid CSS 2.1
+      identifier. However, because BCP 47 is the system used by TEI to
+      indicate language (on <tag class="attribute">xml:lang</tag>),
+      use of other language identifiers in this context does not make
+      sense. Thus the generated regular expression requires a BCP 47
+      language tag as the parameter to
+      <classname>:lang()</classname>.</para>
+      <para>Rather than re-invent this particular wheel, I guessed
+      that others had already written a regular expression that would
+      match a BCP 47 tag. Indeed I found more than one readily
+      available on the web. The program currently uses a regular
+      expression adapted from one made publicly available by its
+      author, Seb Insua, a consultant software engineer based in
+      London.</para>
+    </section>
+    <section>
+      <title>What the generator generated</title>
+      <para>The Perl generation program is called, somewhat
+      unimaginatively,
+      <application>CSS3_selector_regex_generator.perl</application>.
+      As mentioned above, while its primary output is conceptually a
+      long regular expression, in practice the primary output is that
+      regular expression in the context of either a RELAX NG schema
+      (XML syntax) or an XSLT program designed just to test the
+      regular expression. In both cases, the schema could have been
+      designed to test only that which was the target of this entire
+      endeavor: the <code>tei:rendition/@selector</code> attribute.
+      But I chose instead to have the output schemas test
+      <emphasis>any</emphasis> <tag class="attribute">selector</tag>
+      attribute, for reasons explained in <xref linkend="dbg"/>,
+      below.</para>
+      <section>
+        <title>RELAX NG schema</title>
+        <para>The output RELAX NG schema is designed to constrain only
+        the value of <tag class="attribute">selector</tag>, nothing
+        else. Thus it allows any outermost (<quote>root</quote>)
+        element from any namespace (including the null namespace),
+        which is allowed to have any attributes from any namespace
+        (including the null namespace) and any children including text
+        intermingled with any number of any element from any namespace
+        (including the null namespace); each child element in turn is
+        also allowed to have any attributes from any namespace
+        (including the null namespace) and any children including text
+        intermingled with any number of any element from any namespace
+        (including the null namespace), <emphasis>except</emphasis>
+        that any <tag class="attribute">selector</tag> attribute on
+        any element must match the generated regular expression. Thus
+        the only error messages generated by validation against the
+        schema assert that the value of a <tag
+        class="attribute">selector</tag> attribute is not a CSS3
+        selector.<footnote>
+        <para>Or, of course, messages indicating that the input
+        document is not well-formed XML, but for our purposes here
+        those are messages from a pre-validation XML parser, not from
+        the validator itself.</para></footnote></para>
+        <para>The main declaration of the RELAX NG schema is shown in
+        <xref linkend="rnc"/>; the placeholder
+        <replaceable>GENERATED_REGEXP_HERE</replaceable> indicates
+        where in the schema the generated regular expression is
+        placed. The schema is shown in the compact syntax although it
+        is generated in the XML syntax.</para>
+        <figure xml:id="rnc">
+          <title>RELAX NG schema constraint</title>
+          <programlisting>start = ANY
+ANY =
+  element * {
+    attribute * - selector { text }*,
+    attribute selector {
+      xsd:string {
+        pattern = "GENERATED_REGEXP_HERE"
+      }
+    }?,
+    (text | ANY)*
+  }
+          </programlisting>
+        </figure>
+      </section>
+      <section>
+        <title>XSLT <quote>schema</quote></title>
+        <para>The generated XSLT stylesheet used as a schema is
+        deliberately more verbose. It generates a single line of text
+        output for each occurrence of <tag
+        class="attribute">selector</tag> in the input which indicates
+        whether or not the value of said <tag
+        class="attribute">selector</tag> matches the generated regular
+        expression or not. <xref linkend="xslv"/> shows a pared-down
+        version of the generated XSLT stylesheet. Again,
+        <replaceable>GENERATED_REGEXP_HERE</replaceable> indicates
+        where in the output the generation routine places the regular
+        expression.</para>
+        <figure xml:id="xslv">
+          <title>XSLT <quote>schema</quote>, validation</title>
+          <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;xsl:stylesheet 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+  version="3.0">
+
+  &lt;xsl:variable name="selector_regex">
+    &lt;xsl:text>GENERATED_REGEXP_HERE&lt;/xsl:text>
+  &lt;/xsl:variable>
+  &lt;xsl:variable 
+    name="anchored_selector_regex" 
+    select="'^'||$selector_regex"/>
+    
+  &lt;xsl:output method="text"/>
+
+  &lt;xsl:template match="/">
+    &lt;xsl:text>&amp;#x0A;&lt;/xsl:text>
+    &lt;xsl:apply-templates select="//*[@selector]"/>
+  &lt;/xsl:template>
+  
+  &lt;xsl:template match="*">
+    &lt;xsl:value-of select="'selector “'
+                          ||@selector
+                          ||'” is&amp;#x09;&amp;#x09;'"/>
+    &lt;xsl:if 
+      test="not( matches( @selector, $anchored_selector_regex ) )">NOT &lt;/xsl:if>
+    &lt;xsl:value-of select="'valid.&amp;#x0A;'"/>
+  &lt;/xsl:template>
+
+&lt;/xsl:stylesheet></programlisting>
+        </figure>
+      </section>
+    </section>
+
+    <section xml:id="dbg">
+      <title>Rapid cyclic debugging</title>
+      <para>With the generation of a complete RELAX NG schema or XSLT
+      program instead of just a string, I could quickly and easily
+      test that the regular expression generated was at least a valid
+      regular expression just by validating an XML document (any XML
+      document) against the generated RELAX NG schema or transforming
+      an XML document (any XML document) with the generated XSLT
+      stylesheet. In either case, the processor (for me that generally
+      means <application>jing</application> or
+      <application>Saxon</application>) will generate an error message
+      if the string being used as a regular expression is not in fact
+      parsable as a W3C regular expression. For example, for the
+      string <quote>This is )bad(</quote>
+      <application>jing</application> will generate an
+      <errortext>invalid parameter: invalid regular expression:
+      character is not allowed in this context: This is
+      >>>>)bad(</errortext> message, and
+      <application>Saxon</application> a <errortext>Syntax error at
+      char 8 in regular expression: Unmatched close paren</errortext>
+      message.</para>
+      <para>Testing that a valid regular expression works as desired
+      is the next step. In a practical sense, this is quite easy: just
+      take an XML file that has a test selector on a
+      <code>tei:rendition/@selector</code>, and validate it against
+      the generated RELAX NG schema or transform it with the generated
+      XSLT stylesheet. But, in a logical sense, this is quite difficult:
+      what selectors get tested? What strings that are not selectors
+      get tested?</para>
+      <section xml:id="pdbg">
+        <title>Practical</title>
+        <para>As mentioned above, rapid cyclic testing is not
+        particularly difficult: just take an XML file that has a test
+        selector on a <code>tei:rendition/@selector</code>, and
+        validate it against the generated RELAX NG schema or transform
+        it with the generated XSLT stylesheet. But I am personally
+        fond of creating self-testing systems, in part because it
+        takes literate programming to a next step, keeping the test
+        cases in with the original documentation and program, thus
+        keeping all the concerns (as it were) in one file; and in part
+        just because it’s cool.</para>
+        <para>Observing that
+        <itemizedlist>
+          <listitem><para>RELAX NG permits elements from namespaces
+          other than the RELAX NG namespace to occur in a grammar
+          (even as a direct child of <tag
+          class="element">rng:grammar</tag>), and</para></listitem>
+          <listitem><para>XSLT permits elements from namespaces other
+          than the XSLT namespace to occur in a stylesheet (even as a
+          direct child of <tag class="element">xsl:stylesheet</tag> or
+          <tag class="element">xsl:transform</tag>),</para></listitem>
+        </itemizedlist>
+        I could insert the desired tests directly into the
+        <filename>CSS3_selector_regex_generator.perl</filename>
+        program such that they would be inserted into the output RELAX
+        NG schema or XSLT program as the value of a
+        <code>tei:rendition/@selector</code>. The regular expression <!-- SC: Sometimes you use the passive voice to describe what you did, and sometimes the active; is this usual for this context/is there a pattern in how you're selecting these? -->
+        could then be tested against the test CSS selectors by
+        validating the output RELAX NG grammar <emphasis>against
+        itself</emphasis> (that is, use the generated RELAX NG schema
+        as both the grammar and the document instance), or by
+        transforming the XSLT stylesheet <emphasis>with
+        itself</emphasis> (that is, use the generated XSLT program as
+        both the stylesheet and the input document).</para>
+      </section>
+      <section xml:id="ldbg">
+        <title>Logical</title>
+        <para>This self-testing system worked quite well while I was
+        in initial development of the regular expression and various
+        sub-portions thereof, but pretty quickly (well, not that
+        quickly — it took longer than I care to admit to move from
+        initial development to refinement) it became necessary to test
+        the regular expression against an array of possible selectors.
+        Luckily
+        <itemizedlist>
+          <listitem><para>lots of CSS files, using a variety of
+          selectors of varying complexity, are readily available both
+          at my own project and on the web, and</para></listitem>
+          <listitem><para>there are several CSS test suites, including
+          one from the W3C, available on the web.</para></listitem>
+        </itemizedlist>
+        So, in addition to the few dozen scenarios I had dreamt up, I
+        incorporated thousands of selectors from real CSS files and
+        test suites. Since my tests would (deliberately) examine any
+        <tag class="attribute">selector</tag> attribute, not just one
+        on a <tag class="element">tei:rendition</tag> element, I was
+        even able to make test cases consistent (each test on an <tag
+        class="attribute">selector</tag> of a <tag
+        class="element">rendition</tag>) and simultaneously retain the
+        provenance of each test by using an appropriate namespace for
+        the <tag class="element">rendition</tag>.</para>
+        <para><xref linkend="xsld"/> is an extract of the generated
+        XSLT showing a few of the namespaces used, and three test <tag
+        class="attribute">selector</tag>s for each of those
+        namespaces. The actual generated XSLT includes the validation
+        portions discussed above, and tens to hundreds of test <tag
+        class="attribute">selector</tag>s for each of over a half
+        dozen namespaces.</para>
+        <example xml:id="xsld">
+          <title>XSLT <quote>schema</quote>, debugging</title>
+          <programlisting>&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+  xmlns:sb="http://bauman.zapto.org/ns-for-testing-CSS"
+  xmlns:wpt="https://github.com/web-platform-tests/wpt"
+  xmlns:w3c="https://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/"
+  xmlns:wo="http://wwo.wwp-test.northeastern.edu/WWO/css/wwo/wwo.css"
+  xmlns:pt="https://github.com/benfrain/css-performance-tests"    
+  version="3.0">
+
+  &lt;!-- This pgm written 2019-06-02T09:57:25 by
+       ./CSS3_selector_regex_generator.perl -->
+
+  &lt;!-- ========= debugging ========= -->
+  &lt;!--
+  legend:
+    pt = performance test suite
+    wpt = W3C web platform tests for CSS
+    w3c = W3C test suite, last retrieved 2019-06-01
+    wo = WWO CSS stylesheet, i.e. for Women Writers Online textbase viewing site
+    sb = dreamt up by yours truly
+  -->
+  &lt;!--
+  Note: the wpt and w3c sets are very very similar, but not quite
+    identical; it is not clear to me there is any real advantage in
+    running both, but I am interested in having a lot of test cases
+    too see how fast this is, too. Thus both are included.
+    -->
+  &lt;!-- ********* -->
+  &lt;wpt:rendition selector="li,p "/>
+  &lt;wpt:rendition selector="p "/>
+  &lt;wpt:rendition selector="p[title$='bar'] "/>
+  &lt;!-- ********* -->
+  &lt;w3c:rendition selector='   stub ~ [|attribute^=start]:not([|attribute~=mid])
+                           [|attribute*=dle][|attribute$=end] ~ t '/>
+  &lt;w3c:rendition selector='   #two:first-child '/>
+  &lt;w3c:rendition selector='   #three:last-child '/>
+  &lt;!-- ********* -->
+  &lt;pt:rendition selector='[data-select]'/>
+  &lt;pt:rendition selector='a[data-select]'/>
+  &lt;pt:rendition selector='[data-select="link"]'/>
+  &lt;!-- ********* -->
+  &lt;sb:rendition selector=":not(:lang(en))"/>
+  &lt;sb:rendition selector=":not( :lang(   en-GB ))"/>
+  &lt;sb:rendition selector="    :lang(en-GB-x-HPf)"/>
+  &lt;!-- ********* -->
+  &lt;wo:rendition selector="#popup > div.note.content .bibl-sref "/>
+  &lt;wo:rendition selector='#popup > div.note.content .bibl-sref span[class~="moo"],
+#popup > div.note.content .bibl-sref-parenless span[class~="moo"] '/>
+  &lt;wo:rendition selector=""/>
+  &lt;!-- ========= end debugging ========= -->
+
+&lt;/xsl:stylesheet></programlisting></example>
+      </section>
+    </section>
+  </section>
+  <section>
+    <title>Resources</title>
+    <section>
+      <title>Time</title>
+      <para>I was quite worried that this regular expression would
+      take a long time, perhaps even forever, to run. I was pleasantly
+      surprised to find it could be quite speedy. In a test run using
+      the RELAX NG grammar, <application>jing</application> tested
+      over 5900 <tag class="attribute">selector</tag> attributes in
+      under ½ second; well under 0.1 ms each. The typical TEI file
+      will only have a half dozen.</para>
+      <para>XSLT was impressive, but in the other direction. In one
+      typical test of transforming the generated XSLT with itself,
+      with only 40 <tag class="attribute">selector</tag> attributes in
+      it, <application>saxon9he</application> took almost 03:49, or
+      over 175 ms each.</para>
+      <para>At the Women Writers Project we currently have 1,685 <tag
+      class="attribute">selector</tag> attributes in 449 files, with a
+      range of 0 to 13 <tag class="attribute">selector</tag>s per
+      file. Our encoders have been using a schema which incorporates
+      this regular expression for the past 9 months, and no one has
+      complained about speed. Note that our encoders use oXygen with
+      <guilabel>Enable automatic validation</guilabel> on and set to a
+      delay of 1 s.</para>
+    </section>
+    <section>
+      <title>Memory</title>
+      <para>Whether using <application>jing</application> to validate
+      the RELAX NG schema against itself, or
+      <application>Saxon</application> to transform the XSLT
+      stylesheet with itself, the java virtual machine required more
+      RAM than the defaults set on my machine. At 4 MiB of stack space
+      (<code>-Xss4m</code>) <application>jing</application> ran out;
+      at 8 MiB it did not. <application>Saxon</application> did not
+      need extra stack space, but craved an extraordinary quantity of
+      heap space. Astoundingly (at least to me), at 5 GiB of heap
+      space (<code>-Xmx5g</code>) it bombed; with 6 GiB it ran.</para>
+    </section>
+    <section>
+      <title>Storage</title>
+      <para>The regular expression itself is very large in terms of a
+      string (18,385 characters as of this writing). Thus it is quite
+      cumbersome and somewhat annoying to manage in almost any file,
+      be it schema, XSLT, or the list of error messages that helpfully
+      say <errortext>must match …</errortext>.</para>
+      <para>However, in terms of actual storage space, the
+      <filename>CSS3_selector_regex_generator.perl</filename> program,
+      its RELAX NG output, and its XSLT output all together take up
+      less than 1.7 MiB on my filesystem. That is, they could
+      <emphasis>almost</emphasis> fit on a 1980s 3½ inch floppy
+      disk.</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Future work</title>
+    <itemizedlist>
+      <listitem><para>I plan to convert the generation program to XSLT
+      in August and early September of 2019.</para></listitem>
+      <listitem><para>Right now testing is not performed rigorously
+      enough — while the regular expression is tested against thousands
+      of selectors including the entire W3C test suite, the results
+      are simply checked by human eye. This should be automated. My
+      current thought is to add a <tag
+      class="attribute">selector_is_valid</tag> attribute whose value
+      is one of <tag class="attvalue">true</tag>, <tag
+      class="attvalue">false</tag>, or (before being verified, or
+      perhaps in some bizarre cases) <tag
+      class="attvalue">unknown</tag>.<footnote><para>That is, a
+      <symbol>teidata.xTruthValue</symbol>.</para></footnote></para></listitem>
+      <listitem><para>I plan to present the regular expression itself
+      and the XSLT generation program for it at the TEI Members’
+      Meeting and Conference in Graz, 2019-09, with the aim of
+      convincing the TEI Consortium to use the regular expression in
+      the TEI schema.</para></listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title>Availability</title>
+    <para>The current Perl program is available under the GPL in the
+    <link
+    xl:href="https://github.com/NEU-DSG/wwp-public-code-share/">WWP
+    public code share repository</link>. I expect (or at least hope)
+    to replace it with an XSLT version in August or September of
+    2019.</para>
+  </section>
+
+  <!-- https://www.starwars.com/video/never-tell-me-the-odds 3,720:1 -->
+  <!-- https://ruclip.com/video/GYDDBV-Cego/catwoman-oooops-scene-hd-the-dark-knight-rises.html -->
+  
+  <bibliography xml:id="syd-references">
+    <bibliomixed>
+      <abbrev>P5</abbrev>
+      <author><orgname class="consortium">The TEI Consortium</orgname></author>,
+      <title>TEI P5: Guidelines for Electronic Text Encoding and Interchange</title>.
+      <link xl:href="https://tei-c.org/guidelines/p5/">https://tei-c.org/guidelines/p5/</link>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>2.9.0</abbrev>
+      <author><orgname class="consortium">The TEI Consortium</orgname></author>,
+      <title>TEI P5: Guidelines for Electronic Text Encoding and Interchange</title>,
+      <edition>
+        <link
+            xlink:href="https://tei-c.org/Vault/P5/current/doc/tei-p5-doc/readme-2.9.1.html">Release 2.9.0</link>
+        </edition>.
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>FA2RE</abbrev>
+      <author>
+        <personname>Alexander Meduna</personname>
+      </author>,
+      <author>
+        <personname>Lukáš Vrábel</personname>
+      </author>, and
+      <author>
+        <personname>Petr Zemek</personname>
+      </author>
+      <title>Converting Finite Automata to Regular Expressions</title>
+      <link xl:href="http://www.fit.vutbr.cz/~izemek/grants.php.cs?file=%2Fproj%2F589%2FPresentations%2FPB05-Converting-FAs-To-REs.pdf&amp;id=589">http://www.fit.vutbr.cz/~izemek/grants.php.cs?file=%2Fproj%2F589%2FPresentations%2FPB05-Converting-FAs-To-REs.pdf&amp;id=589</link>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>TPoRE</abbrev>
+      <author>
+        <personname>Nikita Popov</personname>
+      </author>
+      <title>The true power of regular expressions</title>
+      <link xl:href="https://nikic.github.io/2012/06/15/The-true-power-of-regular-expressions.html">https://nikic.github.io/2012/06/15/The-true-power-of-regular-expressions.html</link>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>REBNF</abbrev>
+      <author>
+        <personname>Michael Wollowski</personname>
+      </author>
+      <title>Regular ExpressionsBackus-Naur Form (BNF)</title>
+      <link xl:href="https://www.rose-hulman.edu/class/se/csse404/schedule/day2/02-REBNF.pdf">https://www.rose-hulman.edu/class/se/csse404/schedule/day2/02-REBNF.pdf</link>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>NFA2RE</abbrev>
+      <title>Convert NFA to regular expression</title>
+      <link xl:href="https://girdhargopalbansal.blogspot.com/2013/06/convert-nfa-to-regular-expression.html">https://girdhargopalbansal.blogspot.com/2013/06/convert-nfa-to-regular-expression.html</link>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>DFA2RE</abbrev>
+      <title>DFA to Regular Expression | Examples</title>
+      <author>
+        <personname>Akshay Singhal</personname>
+      </author>
+      <link xl:href="https://www.gatevidyalay.com/dfa-to-regular-expression-examples-automata/">https://www.gatevidyalay.com/dfa-to-regular-expression-examples-automata/</link>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>REGGE</abbrev>
+      <title>Regular expression generation through grammatical evolution</title>
+      <author>
+        <personname>Ahmet Cetinkaya</personname>
+      </author>
+      <link xl:href="https://dl.acm.org/citation.cfm?id=1274089">https://dl.acm.org/citation.cfm?id=1274089</link>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>CSS3</abbrev>
+      <title>Selectors Level 3</title>
+      <subtitle>W3C Recommendation 29 September 2011</subtitle>
+      <publisher>
+        <publishername><acronym>W3C<alt>World Wide Web Consortium</alt></acronym></publishername>
+      </publisher>
+      <link xl:href="http://www.w3.org/TR/2011/REC-css3-selectors-20110929/">http://www.w3.org/TR/2011/REC-css3-selectors-20110929/</link>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>CSS3new</abbrev>
+      <title>Selectors Level 3</title>
+      <subtitle>W3C Recommendation 06 November 2018</subtitle>
+      <publisher>
+        <publishername><acronym>W3C<alt>World Wide Web Consortium</alt></acronym></publishername>
+      </publisher>
+      <link xl:href="https://www.w3.org/TR/2018/REC-selectors-3-20181106/">https://www.w3.org/TR/2018/REC-selectors-3-20181106/</link>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>sel4</abbrev>
+      <title>Selectors Level 4</title>
+      <subtitle>W3C Working Draft, 21 November 2018</subtitle>
+      <publisher>
+        <publishername><acronym>W3C<alt>World Wide Web Consortium</alt></acronym></publishername>
+      </publisher>
+      <link xl:href="https://www.w3.org/TR/2018/WD-selectors-4-20181121/">https://www.w3.org/TR/2018/WD-selectors-4-20181121/</link>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>BCP47</abbrev>
+      <title>Tags for Identifying Languages</title>
+      <publisher>
+        <publishername><acronym>IETF<alt>Internet Engineering Task Force</alt></acronym></publishername>
+      </publisher>
+      <link xl:href="https://tools.ietf.org/html/bcp47">https://tools.ietf.org/html/bcp47</link>
+    </bibliomixed>
+  </bibliography>
+  
+</article>

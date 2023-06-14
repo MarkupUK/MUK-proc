@@ -1,0 +1,1088 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" 
+href="../../../../../../Applications/Oxygen%20XML%20Editor%20-%20v23/frameworks/docbook/css/print.css"?>
+<article xmlns="http://docbook.org/ns/docbook" version="5.0">
+<title>How Much Tag Set Documentation is Needed?</title>
+<subtitle>How much is too much?</subtitle>
+<info>
+<abstract><para>The more documentation the better. Documentation is expensive, stick to the basics. If it isn't well documented people won't use it or, worse, won't use it consistently. We can't afford better documentation. We've all heard the cliches.</para>
+<para>JATS (The Journal Article Tag Suite) has documentation &#x2014; A  LOT of documentation. Documentation designed to introduce new users to the tag set. Documentation designed to support experienced users. Documentation to support people who are customizing JATS, including advice on both the mechanics and the logic of making customizations. There are definitions, helpful remarks, tagged examples, extended essays. There is an International Standard that meets political needs and a site with non-normative documentation that meets practical needs. There are third party sites advising users on how to use the tag sets for best interoperability, and many organizations that ingest JATS provide (and may insist on) site-specific local rules.</para>
+<para>It is entirely possible that JATS is the most heavily documented XML tag set of all time. Do other tag sets need this much documentation? Are there techniques other  tag sets would find useful? After a guided tour of the JATS documentation, the audience can chime in: How much documentation does a tag set need? Do any tag sets need this much documentation? How much documentation does YOUR tag set need? What is useful? IS any of this overkill? What audience most needs to be served? What parts of the Tag Library you like? What parts not so much? How can we improve the JATS documentation?</para></abstract>
+<author>
+<personname><firstname>Debbie</firstname><surname>Lapeyre</surname></personname>
+<personblurb>
+<para>Deborah Aleyne Lapeyre (Debbie) is a Senior Consultant for Mulberry Technologies, Inc., a consulting firm specializing in helping their clients toward publishing and documentation solutions through XML, XSLT, and Schematron. She works with Tommie Usdin as Secretariat and architects for JATS (ANSI NISO Z39.96-2019 Journal Article Tag Suite), BITS (Book Interchange Tag Suite), and NISO STS (ANSI/NISO Z39.102-2017 Standards Tag Suite). She is on the organizing Committee for Balisage: The Markup Conference. Debbie has taught hands-on XML, XSLT, DTD and schema construction, and Schematron courses as well as numerous technical and business-level introductions to XML and JATS. She has been working with XML and XSLT since their inception and with SGML since 1984 (before SGML was finalized as an ISO standard). In a previous life, she wrote code for systems that put ink on paper and used, taught, and documented an early 1980's proprietary generic markup system named “SAMANTHA”. Hobbies include pumpkin carving parties and many too many books.</para>
+</personblurb>
+<affiliation>
+<jobtitle>Senior XML/XSLT Consultant</jobtitle>
+<orgname>Mulberry Technologies, Inc.</orgname>
+</affiliation>
+<email>dalapeyre@mulberrytech.com</email>
+<!--<uri type="orcid">xxx go get yyy</uri>-->
+</author>
+<keywordset role="author">
+<keyword>JATS</keyword>
+<keyword>BITS</keyword>
+<keyword>STS</keyword>
+<keyword>Tag Library</keyword>
+<keyword>documentation</keyword>
+<keyword>NAVBAR</keyword>
+</keywordset>
+</info>
+
+<section>
+<title>Introduction</title>
+
+<section>
+<title>What is an XML <quote>Tag Set</quote>?</title>
+<para>I define <quote>XML Tag Set</quote> as an XML vocabulary or a domain-specific set of elements; such a tag set is a named collection of XML elements and attributes 
+that describe at least one document type.</para>
+<para>Some popular examples include:</para>
+<itemizedlist>
+<listitem><para>DocBook</para></listitem>
+<listitem><para>JATS (Journal Article Tag Suite)</para></listitem>
+<listitem><para>TEI (Text Encoding Initiative)</para></listitem>
+<listitem><para>STS (Standards Tag Suite)</para></listitem>
+<listitem><para>BITS (Book Interchange Tag Suite)</para></listitem>
+<listitem><para>DITA (Darwin Information Typing Architecture, which includes a tag set and a lot more)</para></listitem>
+<listitem><para>Akoma Ntoso (an expandable tagset)</para></listitem>
+<listitem><para>NIEM (National Information Exchange Model)</para></listitem>
+</itemizedlist>
+<para>Notice that I have defined this as a <quote>vocabulary</quote> not as a <quote>language</quote>. Vocabularies are descriptive rather than operational. XML vocabularies (tag sets) identify document components and data structurally and semantically. By this definition HTML is a tag set, but XSLT (which is also a set of tags) is not.</para>
+<para>Further, when I talk about documentation, I mean textual and graphic material for reading by human agents. Machines, programming languages, and artificial intelligent agents need very different documentation.</para>
+</section>
+
+<section>
+<title>The Documentation Cliches</title>
+<para>Nothing has been as written about and over-cliched as documentation. We&#x2018;ve all heard the positive cliches:</para>
+<itemizedlist>
+<listitem><para>More documentation the better.</para></listitem>
+<listitem><para>If a tag set isn't well documented, people won't use it.</para></listitem>
+<listitem><para>If a tag set isn't documented, people will not use it  consistently.</para></listitem>
+<listitem><para>Interchange requires documentation.</para></listitem>
+<listitem><para>Databases require documentation of ingest format.</para></listitem>
+</itemizedlist>
+<para>There are negative documentation cliches too:</para>
+<itemizedlist>
+<listitem><para>XML is self-describing. (HA!)</para></listitem>
+<listitem><para>Documentation is too expensive.</para></listitem>
+<listitem><para>We can&#x2018;t afford <emphasis role="ital">better</emphasis> documentation.</para></listitem>
+<listitem><para>We are agile, moving too fast to document.</para></listitem>
+<listitem><para>It&#x2018;s just a frill, stick to the basics.</para></listitem>
+<listitem><para>Takes too long; we&#x2018;ll make it better in Phase II.</para></listitem>
+<listitem><para>We don&#x2018;t need no stinking documentation!</para></listitem>
+</itemizedlist>
+<para>There are also cliches  that I believe in, because documentation is, in my opinion critically important.</para>
+<itemizedlist>
+<listitem><para>Tagging systems need consistency, for both downstream processing and interchange.</para></listitem>
+<listitem><para>We are told that XML will live a long time,
+and so it will, and usefully, if we understand what it means.</para></listitem>
+<listitem><para>If there is not fundamental agreement on how something should be tagged, we are sunk.</para></listitem>
+</itemizedlist>
+
+<para>This is <emphasis role="ital">why</emphasis> we document tag sets — for people, for instruction in tagging, for tagging consistency.</para>
+</section>
+</section>
+
+
+<section>
+<title>Planning Considerations for documenting tag sets</title>
+<para>Many considerations/vectors/parameters must be taken into consideration in documenting a tag set. Among the most important are the typical who, what, and why:</para>
+<itemizedlist>
+<listitem><para>Scope of the tag set (what documents it covers);</para></listitem>
+<listitem><para>Scope of the documentation (may be far less);</para></listitem>
+<listitem><para>Purpose of the documentation; and the</para></listitem>
+<listitem><para>Management, governance and support;</para></listitem>
+<listitem><para>Audience for the documentation.</para></listitem>
+</itemizedlist>
+
+<section>
+<title>Scope of the documentation</title>
+<para>Exactly how much of a tag set are you documenting? Minimally, this means deciding:</para>
+<itemizedlist>
+<listitem><para>What document type(s) does this documentation cover? (For example, JATS provides a vocabulary for describing the textual and graphical content as well as the bibliographic metadata of journal articles, including research articles; subject-review articles; non-research articles; letters; editorials; book, software, and product reviews; peer reviews, and author responses included with an article. The Tag Set allows for descriptions of the full article content or just the article header metadata.</para></listitem>
+<listitem><para>What document type(s) does this documentation not cover (by design)? JATS does not provide the elements to describe an issue of a journal, a book, a report, or a standard.</para></listitem>
+<listitem><para>Do you define included vocabularies? Is that tag set using namespace metadata from TEI or Dublin core? Does the tag set include MathML? Do you write explanations for these external vocabularies? JATS tag sets may include MathML, XHTML tables, OASIS tables, SVG graphics, etc. JATS does no document MathML, CML (Chemical Markup Language), or SVG. JATS Tag Libraries do provide element and attribute documentation for the XHTML table model, and a separate library for the OASIS CALS Table model.</para></listitem>
+<listitem><para>Do you define all of your tag set or just a portion? Particularly if the tag set you are documenting is drawn from a larger set of elements, it is vital to draw your boundaries.</para></listitem>
+</itemizedlist>
+</section>
+
+<section>
+<title>Purpose</title>
+<para>Purpose encompasses both the purpose of your tag set and the specific uses envisioned for your documentation.</para>
+<para><emphasis role="bold">Purpose of tagset</emphasis> &#x2014; For example, the purpose of the JATS Publishing Tag Set (Blue) is <quote>to provide a standardized format for users to regularize and optimize journal article data for exchange with publishing, hosting, or archiving partners. The JATS model works as a conversion target for article content provided both in XML and non-XML formats.</quote> The purpose of the JATS Archiving and Interchange Tag Set (Green) is <quote>to provide a standardized format in which to preserve the intellectual content of previously-published journal articles, capture structural and semantic components, and provide a single format into which content from many providers can be translated easily, with minimal loss.</quote></para>
+<para>Both of these are descriptive not a prescriptive missions, therefore, 
+JATS is an enabling tag set, it does not enforce!</para>
+<para><emphasis role="bold">Purpose of documentation</emphasis> &#x2014; Documentation also has a purpose, which should be decided <emphasis role="ital">before</emphasis> work begins. The primary purpose of tag set documentation might be:</para>
+<itemizedlist>
+<listitem><para>Reference (like a programming manpage)</para></listitem>
+<listitem><para>Tutorial (starting, getting your head around the tag set)</para></listitem>
+<listitem><para>Tagged samples to copy (no text at all)</para></listitem>
+<listitem><para>Conference introduction or sales pitch</para></listitem>
+<listitem><para>Omnibus (all things to all people)</para></listitem>
+</itemizedlist>
+<para>The worst purpose is the last: one omnibus documentation set to rule them all. JATS Tag Libraries are mostly intended for reference, but contain some tutorial aspects.</para>
+</section>
+
+<section>
+<title>Management, Governance and Support</title>
+<para>For any tag set, it is critically important who makes the decisions and where the money comes from. Anybody cannot just modify a tag set at any time. There needs to be a process for requesting changes and a process of approving changes and Quality Assurance. Somebody has to pay (this stuff ain&#x2018;t free!) for both creating and maintaining a tag set. Maintenance costs can be very long term (JATS is nearly 20 years old). Documentation needs to be a line item (explicitly) in someone&#x2018;s budget.</para>
+<para>There are also budget implications for who writes the documentation. Technical writers are cheaper than vocabulary developers (on the whole) but may need more management and guidance. Technical people such as programmers will know all the answers, but may not be as articulate as Tech writers. Using one group to rework the prose or check the other can be a useful strategy.</para>
+
+<para>JATS employs a hybrid model, with volunteers at NISO controlling the technical content of JATS and with the non-normative supporting materials, (schemas, samples, and Tag Libraries) funded and hosted by the United States National Library of Medicine (NLM). In practice, JATS users request tag set changes on a comment form on the NISO site. The JATS Standing Committee, chaired by Jeff Beck of NLM and Tommie Usdin of Mulberry Technologies, meets regularly by Zoom to determine solutions to technical issues. The schemas (DTD, XSD, and RNG) and the Tag Library documentation are maintained by the JATS Secretariat (Mulberry Technologies, Inc.).</para>
+</section>
+
+
+
+<section>
+<title>Audience</title>
+<para>The nature of the intended audience can change dramatically the vocabulary, coverage, tone, and even the layout of documentation. Considerations include:</para>
+<para><emphasis role="bold">Level of audience experience</emphasis>  &#x2014; Documentation must walk a fine line between being easy enough for a complete novice or an irregular user (once or twice a year) to use, while not annoying your every-day-like-clockwork user. The important user categories are divided by amount of documentation use not by the amount of tag set experience or technical expertise of the user:</para> 
+<itemizedlist>
+<listitem><para>first time user</para></listitem>
+<listitem><para>casual user</para></listitem>
+<listitem><para>frequent user</para></listitem>
+</itemizedlist>
+<para>I do not mean that it is irrelevant what kind of technical experience the users have. XML, tag set, and programming experience will all determine the approach and vocabulary used in the documentation. The documentation users, who are they:</para> 
+<itemizedlist>
+<listitem><para>Document people (editors, authors)</para></listitem>
+<listitem><para>XMLers (technical, but know documents)</para></listitem>
+<listitem><para>Script writers, developers, general programmers (who might be quite technical but not know documents or XML)</para></listitem>
+</itemizedlist>
+</section>
+</section>
+
+<section>
+<title>JATS Documentation</title>
+<para>The Journal Article Tag Suite (ANSI/NISO standard [<emphasis role="ital">ANSI/NISO JATS Version 1.2 (Z39.96-2019)</emphasis>]
+establishes elements and attributes from which tag sets for multiple document types can be built. There are three official tag sets in JATS family:</para>  
+<itemizedlist>
+<listitem><para>JATS: THE standard for tagging journal articles (worldwide). JATS Article Tag Suite has been developed in three <quote>flavors</quote>: Archiving, Publishing, and Authoring.</para></listitem>
+<listitem><para>STS: Tag set for standards (Standards Tag Suite). STS has been developed in two <quote>flavors</quote>: Interchange and Extended. </para></listitem>
+<listitem><para>BITS: Tag set for books (Book interchange Tag Suite)</para></listitem>
+</itemizedlist>
+<para>Each tag set has its own documentation, sharing software and editorial style, but not content.</para>
+<para>JATS has two <quote>official</quote> sets of documentation:</para>
+<itemizedlist>
+<listitem><para>The ANSI/NISO standard [<emphasis role="ital">ANSI/NISO JATS Version 1.2 (Z39.96-2019)]</emphasis></para></listitem>
+<listitem><para>The <quote>non-normative</quote> documentation, which consists of:
+<itemizedlist>
+<listitem><para>XSDs, DTDs, RNGs</para></listitem>
+<listitem><para>Tag Libraries (documentation)</para></listitem>
+<listitem><para>Sample tagged documents</para></listitem>
+</itemizedlist></para></listitem>
+</itemizedlist>
+<para>It is very important that the ANSI NISO standard exists, since many organizations can only use tag sets that are national or international standards. That said, not many people read the text of the standard, as it contains only a subset of the information in the Tag Libraries, and is not as well linked or indexed. People read about and find references for JATS through the non-normative documentation. The ANSI/NISO standard and the Tag Libraries are produced from the same XML source, so the information they have in common really is common.</para>
+<para>In addition to the official documentation (described in this paper), there is an even greater volume of user-built documentation, guidance, and Best Practice recommendations. Third party user groups and organizations that ingest or process JATS have also produced frameworks, stylecheckers, output transformations, and other automated tools. See the <emphasis role="ital">Other Resources to Support JATS Users</emphasis> Section for a very partial list.</para>
+
+
+<section>
+<title>Why talk JATS documentation?</title>
+<para>To be honest, I am talking about JATS because it is the documentation I know best for the tag set I know well. But there are good reasons to examine what has been done with JATS. People have stated (in public at conferences) that the reason JATS has been so successful is its documentation. The documentation far exceeds that of the immediate predecessors to JATS; AAP DTD and ISO-12083.</para>
+<para>My other rationale for this paper is that I would like feedback from this community, concerning how the JATS documentation can be improved. Most conference attendees have worked with many tag sets, most of them non-JATS. What can these communities learn form each other?</para>
+</section>
+</section>
+
+<section>
+<title>Diving into the JATS Documentation</title>
+<para>Separate Tag Libraries for JATS Archiving, Publishing, and Authoring   (the three flavors of JATS) are available at [<biblioref linkend="JATS-Homepage"/>] to use interactively or for download for local interactive use. JATS Tag Libraries are large numbers of linked HTML files. Unlike the old days of tag set documentation, nobody prints this material and nobody writes books interpreting this material. JATS reference happens online through browsers. [Note: If, however a JATS user chooses to print one of the HTML pages (all about one element or an essay), some very nice CSS turns the HTML the user is viewing into better-looking pages for print. All part of the service.]</para>
+<para>JATS Tag Libraries are listed by name and color-coded to make it easy for users to know which Tag Library they are viewing.</para>
+ <figure xml:id="jats-main-green">
+    <title>Archiving and Interchange (Green) Tag Library</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata format="png" fileref="images/MainPageGreen.png" />
+      </imageobject>
+    </mediaobject>
+  </figure>
+<figure xml:id="jats-main-blue">
+    <title>Journal Publishing (Blue) Tag Library</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata format="png" fileref="images/MainPageBlue.png" />
+      </imageobject>
+    </mediaobject>
+  </figure>
+<figure xml:id="jats-main-pumpkin">
+    <title>Article Authoring (Pumpkin) Tag Library</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata format="png" fileref="images/MainPagePumpkin.png" />
+      </imageobject>
+    </mediaobject>
+  </figure>
+
+<section>
+<title>Navigation</title>
+<section><title>The NAVBAR</title>
+<para>On the left side of each HTML page is the Navigation Bar (NAVBAR). The NAVBAR shows an outline of the main parts of the Tag Library. Items prefaced by a right-facing arrow may be expanded (like an outline). Click either on the right-facing arrow or on the title of the section to both expand that portion of the navigation bar and open the introduction to that section. Similarly, click on a subsection heading to open that subsection in the main panel.</para>
+    <mediaobject>
+      <imageobject>
+        <imagedata format="png" fileref="images/NavBar.png" width="20%"/>
+      </imageobject>
+    </mediaobject>
+
+</section>
+
+<section>
+<title>Opening and closing subsections on a page</title>
+<para>Small diamonds on the top right of each page provide accordion folding inside the body of most pages:</para>
+<itemizedlist>
+<listitem><para>The hollow diamond  (<inlinemediaobject>
+<imageobject>
+ 
+<imagedata fileref="images/HollowDiamond.png"  format="png"/>
+</imageobject>
+</inlinemediaobject>) opens all subheadings on the page.</para></listitem>
+<listitem><para>The solid diamond (<inlinemediaobject>
+<imageobject>
+<imagedata fileref="images/SolidDiamond.png"   format="png"/>
+</imageobject>
+</inlinemediaobject>) closes all  subheadings <emphasis role="ital">that can be closed</emphasis>. Best Practice sections are left open and do not close.</para></listitem>
+<listitem><para>The diamonds are <quote>sticky</quote>, meaning that the next page you open will come up with the last setting you used. This is viewed as an accessibility feature, set it and forget it.</para></listitem>
+</itemizedlist>
+</section>
+
+
+<section>
+<title>Cross references</title>
+<para>Throughout the text, live internal cross references (such as element and attribute names) appear in color. Hovering over a cross reference to an element or attribute will show the narrative name of the element or attribute
+<mediaobject>
+<imageobject> 
+<imagedata fileref="images/ElemHover.png" format="png" width="40%" />
+</imageobject>
+</mediaobject></para>
+<itemizedlist>
+<listitem><para>Cross references to elements are the element tag name (generic identifier), surrounded by delimiters (&lt;abstract>). Almost all element names, including those in the Context and natural language Content Model Descriptions are live links to the specific element  page. </para></listitem>
+<listitem><para>Attribute references appear as the attribute name, prefaced with an at sign (@specific-use). These link directly to the specific attribute page.</para></listitem>
+<listitem><para>Parameter Entity (PE)  references are the name of the PE, prefaced by a percent sign and closed with a semicolon (%list.class;). These link directly to the parameter entity page.</para></listitem>
+<listitem><para>References to narrative sections of the Tag Library are preceded by the word <quote>See</quote>, and link to sections in the narrative text. <mediaobject>
+<imageobject>
+<imagedata fileref="images/reference-text-section.png" format="png" width="60%" />
+</imageobject>
+</mediaobject></para></listitem>
+</itemizedlist>
+</section>
+</section>
+
+<section>
+<title>Top-level element in the Schema</title>
+<para>The Getting Started section at the top of the NAVBAR holds a very important piece of information, not just for beginning users but for all taggers, namely, what is the root element of this schema?</para>
+<figure xml:id="jats-root" xreflabel="JATS root element">
+<title>JATS root element</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/jats-root-element.png" format="png"  width='70%' />
+</imageobject>
+</mediaobject>
+</figure>
+<para>Here is the similar root element section for the STS (ANSI/NISO Z39.102-2017, STS: Standards Tag Suite;) Tag Library, showing multiple root elements possible:
+<figure xml:id="sts-root" xreflabel="STS root elements">
+<title>STS has two possible root elements</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/sts-root-elements.png"  width='60%'  format="png"/>
+</imageobject>
+</mediaobject>
+</figure></para>
+</section>
+
+<section>
+<title>Elements Pages</title>
+<para>There is one element page for each element in the Tag Set. Each element page begins the tag name (Generic Identifier), a descriptive natural-language name, and a description, all information that is shared with the JATS Standard. Descriptions are <emphasis role="ital">not</emphasis> dictionary definitions, but narrative text describing the element, as the name implies.</para>
+<para>The identification information may be followed by sections such as Usage/Remarks and Related Elements, which are not part of the JATS Standard.</para>
+
+<section>
+<title>Usage/Remarks</title>
+<para>This section provides additional information about the element, explanations of similar or contrasting elements, or instructions for element usage. (See also Related Elements described below.)</para>
+<figure>
+<title>Usage/Remarks for &lt;abstract></title><mediaobject>
+<imageobject>
+<imagedata fileref="images/ElemRemarks.png" width='40%' format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<para>This section also contains notes, such as Historical Notes on earlier JATS versions; Conversion Notes and Technical Notes to people who are mapping between documents tagged according to this Tag Set and those tagged according to other tag sets; and Implementor&#x2018;s Notes, which are directed to  people building custom tag sets.</para> 
+<figure>
+<title>Usage Remarks for &lt;year></title><mediaobject>
+<imageobject>
+<imagedata fileref="images/ElemBestPractice.png"  width='40%' format="png" />
+</imageobject>
+</mediaobject></figure>
+<para>Some “Usage/Remarks” sections are very complex, containing folded (collapsed) subsections, which the user will need to open to read. The “Best Practice” sections are highlighted with a light colored background, and such sections  will be open (not collapsed) on opening.</para>
+<figure>
+<title>Usage Remarks for &lt;article-id></title><mediaobject>
+<imageobject>
+<imagedata fileref="images/article-id-remarks.png"  width='30%' format="png" />
+</imageobject>
+</mediaobject></figure>
+</section>
+<section>
+<title>Attributes on an element page</title>
+<para>All of the attributes available on an element are listed under the “Attributes” heading. For each attribute, the XML name of the attribute is shown, with the textual name of the attribute available as hover text. If the attribute is required, has a default value, or has a fixed value, then that is noted after the name. Each attribute is linked to its description in the Attribute Section of the Tag Library.</para>
+<para>Attributes are grouped so that those most likely to be of interest are shown first, followed by groupings of:</para>
+<itemizedlist>
+<listitem><para>“Base Attributes” (common to all JATS elements),</para></listitem>
+<listitem><para>“Linking Attributes” (used to make an element into a live link),</para></listitem>
+<listitem><para>“Namespaces” (which are technically pseudo-attributes rather than attributes but which look and act a lot like attributes), and</para></listitem>
+<listitem><para>“Miscellaneous non-JATS-specific Attributes” (which are also technically pseudo-attributes rather than attributes but which look and act a lot like attributes).</para></listitem>
+</itemizedlist> 
+<figure>
+<title>Attributes (and pseudo-attributes) for the &lt;article> element</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/ElemAttlist.png" format="png"  width='60%'/>
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>Attributes for the &lt;supplementary-material> element</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/supp-mat-atts.png" format="png" width="40%"/>
+</imageobject>
+</mediaobject>
+</figure>
+</section>
+
+<section>
+<title>Models and Context</title>
+<para>The <quote>Models and Context</quote> section contains two very different type of information: where an element may be used (context) and what an element may contain (what may be inside the element). Under the heading <quote>May be contained in</quote>, there is a list of all of the JATS elements that may include the given element as a direct child.</para>
+<figure>
+<title>Where may &lt;abstract> be used?</title><mediaobject>
+<imageobject>
+<imagedata fileref="images/abstract-contained-in.png" format="png" width="60%"/>
+</imageobject>
+</mediaobject>
+</figure>
+<para>The second kind of information is the content model of the element, that is, what an element may contain. Content model information is available in 3 formats: hierarchy written as a bulleted list in natural language, the content model as given in the DTD for that element (typically useless because it is only parameter entities), and the DTD model after all the parameter entities have been expanded.</para>
+<figure>
+<title>Content model of &lt;answer-set></title><mediaobject>
+<imageobject>
+<imagedata fileref="images/ElemModelsFormats.png"  width='50%' format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+</section>
+
+<section>
+<title>Tagged Samples</title>
+<para>Almost all the elements and some of the attributes have sample document fragments, tagged in XML. Some elements have multiple samples, showing the element used in a variety of circumstances. Each sample is described with a title (and some with captions as well) to direct the user  to the sample(s) which meet their needs.</para>
+<figure>
+<title>Tagged samples for &lt;article></title><mediaobject>
+<imageobject>
+<imagedata fileref="images/article-samples.png" format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>Tagged samples for &lt;affiliation></title><mediaobject>
+<imageobject>
+<imagedata fileref="images/affiliation-samples.png" format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+</section>
+
+<section>
+<title>Other sections on the Element Pages</title>
+<para>There are other optional sections that may appear on an Element Page:</para>
+<variablelist>
+<varlistentry>
+<term>Related Elements</term>
+<listitem><para>Contains information about elements associated with or confused with the current element. For some complex structures, such as two-part definition lists (&lt;def-list>), this section names all the elements that may make up such a list (title, headings, terms, definitions, etc.) and describes the structure.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>Related Resources</term>
+<listitem><para>Provides pointers both to external information sources and to other parts of the Tag Library (such as Hierarchy Diagrams and Essays) that contain information relevant to this element.</para></listitem>
+</varlistentry>
+</variablelist>
+
+</section>
+</section>
+
+<section>
+<title>Attribute Pages</title>
+<para>There is one element page for each element in the Tag Set. Each attribute page begins with the attribute name used in the XML files, a longer descriptive name, and a description, all information that is shared with the JATS Standard. Descriptions are <emphasis role="ital">not</emphasis> dictionary definitions, but narrative text describing the attribute, as the name implies.</para>   
+<para>A “Usage and Remarks” section often provides additional information on how to use the attribute, sometimes including “Best Practice” suggestions.</para>
+<figure>
+<title>Attribute page for @object-id</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/AttrRemarks.png" format="png" width="50%"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+<figure>
+<title>Attribute values for @assigning-authority</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/attr-assigning-authority.png"  width='60%' format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+
+<figure>
+<title>@toggle is an attribute with some #FIXED values:</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/AttrOptReq.png"  width='50%' format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<para>Some attributes are allowed on more than one element, and may have different meanings, default values, and suggested values depending on the element on which they are used. When an attribute is used in more than one element, there is a separate section for each group of elements that share the same usage. The section head identifies whether the attribute is optional, is required, has a default value (if any), and then names the other elements to which this attribute applies. If there are too many applicable elements to list in the heading, a message says <quote>click for list and usage</quote></para>
+<figure>
+<title>Other variations in attribute values (@rid)</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/attr-rid.png"  width='50%' format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<para>Tagged Samples are provided for some attributes, though not all.</para>
+<figure>
+<title>Tagged sample for @journal-id</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/attr-journal-id.png" format="png" width='50%' />
+</imageobject>
+</mediaobject>
+</figure>
+</section>
+
+<section>
+<title>Finding Information Pages</title>
+<para>There are two subsections within this section:</para>
+<variablelist>
+<varlistentry>
+<term>Index</term>
+<listitem><para>Provides pointers from both preferred terms (such as element and attribute names)  and non-preferred terms (such as synonyms of common JATS elements, such as <quote>author</quote>  <quote>See &lt;contrib></quote> for terms used throughout the Tag Library.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>Element Context Table</term>
+<listitem><para>A consolidated alphabetical of the context information that appears on each element page. The table provides a listing of where each element may be used, that is, all the contexts in which this element may occur.</para></listitem>
+</varlistentry>
+</variablelist>
+<para><emphasis role="bold">Index</emphasis> &#x2014; The index includes tag names, element names, attribute names, parameter entity names, elements from other vocabularies that may be familiar to JATS users, and synonyms to many JATS element name.</para>
+<figure>
+<title>How do I tag the article author in JATS?</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/index-author.png" format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>Why doesn&#x2018;t JATS have a <quote>quote</quote> element?</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/index-quote.png" format="png" />
+</imageobject>
+</mediaobject>
+</figure> 
+<para><emphasis role="bold">Element Context Table</emphasis> &#x2014; The Context Table describes where each JATS element may be used. The table is formatted in two columns:
+<variablelist>
+<varlistentry>
+<term>The first column</term>
+<listitem><para>(“This Element”) names an element</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>The second column</term>
+<listitem><para>(“May Be Contained In”) contains an alphabetical list of all the elements in which the element named in the first column element may occur.</para></listitem>
+</varlistentry>
+</variablelist></para>
+<para>The letters of the alphabet in the NAVBAR and at the top of each page are links directly to the elements which start with that letter.</para>
+<figure>
+<title>Context Table entry for &lt;disp-quote></title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/context-disp-quote.png" format="png" width="60%"/>
+</imageobject>
+</mediaobject></figure>
+<figure>
+<title>Context Table entry for &lt;boxed-text> and &lt;break></title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/context-boxed-text-break.png" format="png" width="60%"/>
+</imageobject>
+</mediaobject></figure>
+<para>Now that seems odd, why is &lt;break> allowed in so few places? If we look at the element page for &lt;break> we find out, as part of the Best Practice information:</para>
+<figure>
+<title>Element Page entry for &lt;break></title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/element-break.png" format="png"  width='50%' />
+</imageobject>
+</mediaobject></figure>
+</section>
+
+<section>
+<title>Stupid navigation tricks</title>
+<para>This sections collects odd information about navigation that every user ought to know about:
+<itemizedlist spacing="compact">
+<listitem><para>Question Mark</para></listitem>
+<listitem><para>Hiding the NAVBAR</para></listitem>
+<listitem><para>Bringing back the NAVBAR</para></listitem>
+<listitem><para>Closing open sections</para></listitem>
+<listitem><para>The Search Bar</para></listitem>
+</itemizedlist></para>
+<para><emphasis role="bold">Question mark (?)</emphasis>  &#x2014; Shows the help for the NAVBAR</para>
+<programlisting>  ?
+Use ◂ to hide the navigation sidebar.
+Use ⇜ to unexpand headings in the sidebar.
+
+Search box instructions:
+Use &lt; to search for an element.
+Use &amp; to search for an attribute.
+Use % to search for a parameter entity.
+Or just type for a substring search.</programlisting>
+
+<para><emphasis role="bold">Hide NAVBAR</emphasis> &#x2014; The solid right-facing arrow hides the NAVBAR.</para>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/NavBarCollapse.png" format="png" width="30%" />
+</imageobject>
+</mediaobject>
+<para><emphasis role="bold">Bring back NAVBAR</emphasis> &#x2014; While (once the NAVBAR is hidden), the solid left-facing arrow will bring it back.</para>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/NavBarExpand.png" format="png" width="10%"/>
+</imageobject>
+</mediaobject>
+
+<para><emphasis role="bold">Closing all open sections</emphasis> &#x2014; When there are a lot of open sections on your screen (element sections, attribute sections, essays), it can be painful to scroll to each open section and collapse it. The JATS Tag Libraries <emphasis role="ital">almost</emphasis> have a solution for that. The small squiggley arrow to the right of the search box is a collapse function. Click it to collapse all open sections, <emphasis role="bold">except the one you are inside</emphasis>. So, if you have all the elements open, and several essays open, and all the attributes open, and you are looking at an attribute page, when you click the squiggle the elements and essays will close and the attribute section will stay expanded. This is a known bug, that will one day be fixed. Until the bug is gone, the hack is to click on <quote>Getting Started</quote> section, then click the squiggle arrow, which closes all but <quote>Getting Started</quote>, which is very short and can be manually closed.
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/SquiglyArrow.png" format="png" width="30%"/>
+</imageobject>
+</mediaobject></para>
+
+<para><emphasis role="bold">Search Bar</emphasis>  &#x2014; If 1) you are reading the Tag Library over the web (not a local copy) and 2) your browser and system support this feature, you can search within the Tag Library using the Search bar, found at the very top left of the screen.</para>
+<para>There are five types of searches:</para>
+<variablelist>
+<varlistentry>
+<term>&lt;tag-name></term>
+<listitem><para>Enter a less-than-sign (<quote>&lt;</quote>) followed by the element name to search for an element</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>&amp;attribute-name</term>
+<listitem><para>Enter an AT-sign (<quote>@</quote>) followed by the name of an attribute
+to search for an attribute</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>%pe-name</term>
+<listitem><para>Enter a percent-sign (<quote>%</quote>) followed by the name of a parameter entity
+to search for a parameter entity</para></listitem>
+</varlistentry></variablelist>
+<para>As you type in the Search Bar, possibilities will appear in a list below, and you can choose one.</para>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/SearchBar.png" format="png" width="30%"/>
+</imageobject>
+</mediaobject>
+<para>Remember, click the Question Mark (“?”) for hints on using the search bar.</para>
+</section>
+</section>
+
+
+<section>
+<title>The rest of the Tag Library</title>
+<section>
+<title>Getting Started (for the casual user and newbies)</title>
+<para>The US National Library of Medicine conducted some usability studies on the JATS homepages and the Tag Library documentation. Users had a lot of good suggested, many of which the latest Tag Libraries implement. But the only users interviewed were experienced ones, and they were unanimous on the recommendation to remove "all that material junking up the NAVBAR", that is, the material now (hidden) under the section "Getting Started".</para>
+<para>The Getting Started section is just one of the features aimed at the casual or beginning user, which include:</para>
+<itemizedlist>
+<listitem><para>Getting Started section</para></listitem>
+<listitem><para>Introductions (everything has one)</para></listitem>
+<listitem><para>Index with lots of <emphasis role="ital">use</emphasis> and <emphasis role="ital">see</emphasis> entries</para></listitem>
+<listitem><para>Hierarchy diagrams</para></listitem>
+<listitem><para>Content models written in natural language with words like <quote>followed by</quote> and <quote>optional</quote>.</para></listitem>
+</itemizedlist>
+<figure>
+<title>Getting Started Section</title>
+<mediaobject> 
+<imageobject>
+<imagedata fileref="images/Getting-Started.png" width="50%" format="png"/>
+</imageobject>
+</mediaobject></figure>
+
+<section>
+<title>Introductions</title>
+<para>Almost all sections in the Tag Library have Introductions. To find the introduction to a section, click on the <emphasis role="ital">name of the section</emphasis> rather than the arrow before the section name. The subsections will open up, but if there is an Introduction it will fill the main panel. At one of the JATS Standing Committee meetings it was revealed that the majority of members had no idea the introductions were there, or how to find them, why they sometimes suddenly appeared, or why you would want to find them.</para>
+<figure>
+<title>Introduction to the Elements Pages</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/intro-elements.png" format="png"  width="50%"/>
+</imageobject>
+</mediaobject></figure>
+</section>
+
+<section>
+<title>Hierarchy Diagrams</title>
+<para>Hierarchy diagrams are graphical representations of the structure of elements, for elements that have complex structure. An element with a simple model, such as an “or” list (that is, where any of a number of elements may occur inside it in any order), for example Paragraph (&lt;p>), is not illustrated with a hierarchy diagram. An element that must have one of these, followed by any of this list of things, followed be either this or that, will be illustrated with a hierarchy diagram.</para>
+<para>All of the Hierarchy diagrams may be reached through the Getting Started Section. An individual diagram for a specific element can be reached through the Related Resources subsection on the element page:</para>
+<figure>
+<title>Finding the hierarchy diagrams</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/finding-hier-diagrams.png" format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<para>The first page of the Hierarchy Diagrams section describes the symbols used in the diagrams</para>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/NearFarSymbols.png" width="60%" format="png" />
+</imageobject>
+</mediaobject>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/NearFarKey.png" width="60%" format="png" />
+</imageobject>
+</mediaobject>
+<figure>
+<title>The hierarchy diagram for Article (&lt;article>)</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/article.png"  format="png"  />
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>The hierarchy diagram for Back Matter (&lt;back>)</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/back.png"  format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>The hierarchy diagram for Definition List (&lt;def-list>)</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/def-list.png"  format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+</section>
+</section>
+
+
+<section>
+<title>For the Frequent user</title>
+<para>Many Tag Library features are aimed directly at the more frequent user:</para>
+<itemizedlist>
+<listitem><para>Search box (why scroll?)</para></listitem>
+<listitem><para>Collapse, open all (diamonds are your friend)</para></listitem>
+<listitem><para>Content models in DTD syntax (more compact)</para></listitem>
+<listitem><para>Best Practice remarks open with colored background</para></listitem>
+<listitem><para>Multiple labeled tagged samples for most elements</para></listitem>
+<listitem><para>Full Article Samples</para></listitem>
+<listitem><para>Common Tagging Practice essays</para></listitem>
+</itemizedlist>
+
+
+<section>
+<title>Multiple labeled samples per element</title>
+<para>Most elements and some attributes are given more than one tagged sample (some have over a dozen). To differentiate the samples and lead a user more directly to the one that matches their situation, each sample has a heading that <emphasis role="ital">tries</emphasis> to explain why the sample was included, what it is trying to illustrate. One of the more common complaints of JATS users is that the sample they want or need is nor present.</para>
+<figure>
+<title>Samples for &lt;institution-id></title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/samples-institution-wrap.png" format="png" width="60%"/>
+</imageobject>
+</mediaobject></figure>
+<para>Samples are maintained as valid XML fragments that are parsed for validity each time the DTD changes. Processing instructions inside the fragments are used to create the bold focus. Some samples are nearly full documents, others are as small as possible:</para>
+<programlisting language="xml">&lt;!DOCTYPE body PUBLIC 
+"-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.3d2 20201130//EN" "JATS-journalpublishing1-3d2.dtd">
+&lt;?mtl hellip?>
+&lt;body>&lt;?mtl /hellip?>
+&lt;p>And I can say without fear of contradiction
+ &lt;abbrev alt="Wink smile">;)&lt;/abbrev> that this
+ political process is without flaw.&lt;/p>
+&lt;?mtl hellip?>&lt;/body>&lt;?mtl /hellip?></programlisting>
+</section>
+
+<section>
+<title>Full article samples</title>
+<para>The completely tagged article sample is also aimed at the more frequent user. It illustrates one way an entire JATS document can be put together. Full samples are not available for the Archiving Tag Set (Green) because, as an archival format that must accept whatever is sent to the archive by publishers, there is no such thing as a typical Archiving sample.</para>
+<figure>
+<title>The Full Article Sample section</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/full-sample-page.png" width="100%" scalefit="1" contentdepth="100%" format="png"/>
+</imageobject>
+</mediaobject></figure>
+<figure>
+<title>Document shown as PDF</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/full-sample-pdf.png" width="50%" format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>Document shown as XML</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/full-sample-xml.png"  format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>Document shown as syntax-colored and indented XML</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/full-sample-color-xml.png"  format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+</section>
+
+<section>
+<title>Common Tagging Practice essays (<emphasis role="ital">almost</emphasis> tutorials)</title>
+<para>The Tag Library has numerous short essays on how to tag various structures and use various attributes, mostly aimed at the experienced user, but suitable for the casual user. These essays are the closest JATS comes to tutorial material in the Tag Library, and, if the were read, they would probably prove helpful.</para>
+<para>JATS is a descriptive not a prescriptive tag set, so the Tag Library does not include long essays on best practice or any Best Practice Recommendations. That type of guidance is provided by outside groups such as JATS4R [<biblioref linkend="JATS4R"/>]. The “Common Tagging Practice” section describes ways (sometimes many alternatives) that JATS <emphasis role="ital">might be used</emphasis> to tag documents and information on JATS and accessibility.</para>
+<figure>
+<title>Subjects covered in Common Tagging Practice</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/common-tag.png"   format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<section>
+<title>Tagging keywords</title>
+<para>Keywords are words and phrases used to name an article’s or section’s key concepts for search and retrieval purposes. Typically an author, publisher, or indexing service will assign a small number of key terms to expand lookup beyond full text, to point up the most important topics described in an article, or to map an article to a taxonomy.</para>
+<para>JATS can describe simple keywords, compound keywords (code and text, abbreviations and expansions, etc.), nested keywords, and more. This essay describes how to tag them all, with samples for each type.</para>
+<para>The last section of Tagging Keywords describes how to use the vocabulary attributes to encode that a keyword or group of keywords contains terms from a thesaurus (ontology, taxonomy, term-list, vocabulary, industry glossary, thesaurus, or other known term source), providing additional semantics for the term.</para>
+<figure>
+<title>Selections from Tagging Keywords essay</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/common-tagging-keywords.png" width="60%" format="png"/>
+</imageobject>
+</mediaobject>
+</figure>
+</section>
+
+<section>
+<title>Tagging references</title>
+<para>A lot of real estate has been spent on the many different kinds of bibliographic references and how they might be tagged. Tagging References includes short essays on different types of references, such as journal article references, data citations, and citations to conferences, as well as extensive examples.</para>
+<figure>
+<title>Essays included in Tagging References</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/common-tag-references.png"  format="png" />
+</imageobject>
+</mediaobject></figure>
+</section>
+
+<section>
+<title>Citing data as a reference</title>
+<para>Current publishing practice is to cite data sources in much the same manner that articles and books are cited. Such citations may be part of a regular Reference List or listed separately in their own list, either at the back of the article or inside a Data Availability Statement. One of the reference sections discusses data citations.</para>
+<figure>
+<title>Citing Data section overview</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/common-citing-data.png" width="50%" format="png" />
+</imageobject>
+</mediaobject></figure>
+</section>
+
+</section>
+
+
+</section>
+
+<section>
+<title>Technical Details</title>
+<para>This is the section where the really geeky material is kept. This material is aimed at the software developer, the XMLer who need to make a JATS subset or superset, or the poor maintenance programmer who needs to keep a subset created (to fanfare) in 2001 fresh and running.</para>
+<figure>
+<title>Content of the Technical Details Section</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/technical-details.png" format="png" />
+</imageobject>
+</mediaobject></figure>
+
+<para><emphasis role="bold">Parameter Entity section</emphasis>  &#x2014; '
+Parameter Entities, like elements and attributes, get a page apiece. There are many parameter entities, since JATS is maintained as a DTD and customized using Parameter entities. Each content model, each attribute list, each set of attribute values, and many grouping of elements are represented by a parameter entity.</para>
+<figure>
+<title>Portion of the Parameter Entity section</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/parameter-entity-section.png" format="png" />
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>A Parameter Entity Page</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/abstract-model-pe.png" width="100%" format="png" scalefit="1" contentdepth="100%"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+
+<para><emphasis role="bold">Change History sections</emphasis>  &#x2014; Describes the ways in which each version of JATS is different from a previous version.</para><figure>
+<title>Citing Data section overview</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/change-history-sec.png" width="40%" format="png" />
+</imageobject>
+</mediaobject></figure>  
+
+<para><emphasis role="bold">Modifying This Tag Set</emphasis>   &#x2014;  Provide information to developers who subset or superset JATS, by using the published JATS modules (unchanged!) to create JATS-based tag sets. Sections in this section describe the architecture and structure of a JATS tag set as well as the naming conventions used by JATS. By example, this section leads a developer through best practice in developing a new tag set based on JATS.
+<figure>
+<title>Subsections within Modifying This Tag Set</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="images/modifying-tagset.png" width="30%" format="png" />
+</imageobject>
+</mediaobject>
+</figure></para>
+</section>
+</section>
+
+<section>
+<title>Inconvenient truths and lessons learned</title>
+<subtitle>(in 40 years of documentation frustration)</subtitle>
+
+<para><emphasis role="bold">First Lesson:</emphasis> Nobody reads the documentation! It&#x2018;s true, everyone praises the documentation, but almost no one reads it.</para>
+<itemizedlist>
+<listitem><para>Many people read only the examples (which they expect to be very specific to their situation!).</para></listitem>
+<listitem><para>Others complain about missing components that are present: <quote>Why doesn&#x2018;t the JATS Tag Library have an index?</quote> (Answer: It does.)</para></listitem>
+<listitem><para>Other read deep meaning into the simplest phrases.</para></listitem>
+</itemizedlist>
+
+<para><emphasis role="bold">Second Lesson: XML is <emphasis role="bold">not</emphasis> self-documenting</emphasis>, or <quote>Why the Apple technique of no documentation does not work</quote></para>
+
+<itemizedlist><listitem><para>Nobody uses the Index</para></listitem>
+<listitem><para>Assumptions are made based on element/attribute names</para></listitem>
+<listitem><para>To find the structure/semantics you want<itemizedlist>
+<listitem><para>scan the list of elements</para></listitem>
+<listitem><para>pick one that sounds like what you need</para></listitem>
+<listitem><para>if element allowed in your context, you&#x2018;re golden</para></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+
+<para>There are many and varied reasons why semantic <emphasis role="ital">guessing</emphasis> might not work</para>
+<itemizedlist>
+<listitem><para>Names obscure (&lt;csd> - as part of an address)</para></listitem>
+<listitem><para>Definitions do not adequately disambiguate
+(&lt;pub-no> and &lt;doc-no>)</para></listitem>
+<listitem><para>There is no match, you are looking for best approximation(&lt;surname> and &lt;given-names>)</para></listitem>
+</itemizedlist>
+
+<para> To misquote Liam Quin only slightly: <quote>
+Documentation failures have been attributed to users
+assuming that they understood the content of an element
+when (perhaps) it had a misleading name.</quote></para>
+<itemizedlist>
+<listitem><para>Nobody reads the definitions
+<itemizedlist><listitem><para>&lt;on-behalf-of></para></listitem>
+<listitem><para>JATS &lt;supplementary-material></para></listitem>
+</itemizedlist></para></listitem></itemizedlist>
+
+<para><emphasis role="bold">Inconvenient Truth #3</emphasis>: &#x2014;  Creation, maintenance and governance are heavy loads. We all realize that it has to be <emphasis role="ital">somebody&#x2018;s</emphasis> responsibility to write and maintain documentation. But I have a day job, don&#x2018;t you?</para>
+
+<para><emphasis role="bold">Inconvenient Truth #4:</emphasis> &#x2014;   Documentation costs money</para>
+<itemizedlist>
+<listitem><para>If a schema takes 2 weeks to write and test
+the documentation/samples will take 3-5 months to write and proof</para></listitem>
+<listitem><para>Tag sets change over time, <emphasis role="ital">if they are being used</emphasis></para></listitem>
+<listitem><para>Documentation is harder to keep in sync than to create</para></listitem>
+</itemizedlist>
+<para>Did anybody budget for maintaining this?</para>
+
+<para><emphasis role="bold">When should documentation be performed?</emphasis> &#x2014;  The only wrong answer: After everyone who created the document grammar has gone</para>
+
+<para><emphasis role="bold">Inconvenient Truth #5: How do you measure quality?</emphasis>  &#x2014; or, to put it another way: 
+<quote>What is good documentation?</quote></para>
+<para>There are some vague general rules that apply to documenting a tag set:</para>
+<itemizedlist>
+<listitem><para>Don&#x2018;t describe processing, nothing is as ephemeral
+But that is the first thing people ask, &#x201C;what does it do?&#x201D;</para></listitem>
+<listitem><para>Don&#x2018;t describe format, unless that is the point (tables)</para></listitem>
+</itemizedlist>
+<para>But that does not really answer the question. How do you measure good documentation? Good documentation may expose vocabulary flaws, but... the reverse does not hold. Programs can be tested, documentation not so much. Usability testing can help, with real users in real situations. So get your users involved!</para>
+
+</section>
+
+<section>
+<title>Aside: Rome was not built in a day</title>
+<para>JATS/NLM DTD has been around since ?1998? Documentation similar to what I have described today has been in use, by Mulberry, since the  mid-80s. [Note: Only the automation is new.</para>
+</section>
+
+<section>
+<title>Discussion Topics</title>
+<para>This section of the paper is the conclusion of the presentation and will be revised after I present the talk, and listen to the feedback and questions at the end. These are some of my preliminary questions. I&#x2018;d like your feedback.</para>
+
+<section>
+<title>JATS-specific Questions</title>
+<itemizedlist>
+<listitem><para>What can JATS learn from the documentation for your tag set?</para></listitem>
+<listitem><para>What did you NOT like?</para></listitem>
+<listitem><para>Anything you've seen today where you said, <quote>that's genius</quote>?</para></listitem>
+<listitem><para>Anything you plan to copy?</para></listitem>
+<listitem><para>What is overkill?</para></listitem>
+<listitem><para>What would you change? Add?</para></listitem>
+<listitem><para>Is there anything in the documentation we could dump without loss? Introductions? Change Histories? Parameter Entity Section?</para></listitem>
+</itemizedlist>
+
+<para>Is JATS overkill? Can there be such a thing as too much documentation?</para>
+</section>
+
+<section>
+<title>Questions about samples</title>
+<itemizedlist>
+<listitem><para>What is the most important thing in a tagged sample?</para></listitem>
+<listitem><para>Should samples be large (showing context) or
+as small as possible?</para></listitem><listitem><para>Are cookbooks and recipes more useful than prose?</para></listitem>
+<listitem><para>How many samples does one element need?</para></listitem>
+</itemizedlist> 
+</section>
+
+<section>
+<title>General Documentation Questions</title>
+<itemizedlist>
+<listitem><para>You can't afford both: create a reference manual or a tutorial?</para></listitem>
+<listitem><para>What does a user like you need for documentation?</para></listitem>
+<listitem><para>How SHOULD Tag Set documentation differ from programming language or scripting language documentation?</para></listitem>
+<listitem><para>How do you live without a context table? How many of you do?</para></listitem>
+<listitem><para>Whose responsibility is it to document public vocabularies?</para></listitem>
+</itemizedlist> 
+</section>
+
+<section>
+<title>And in conclusion...</title>
+<itemizedlist>
+<listitem><para>Is documentation obsolete?</para></listitem>
+<listitem><para>How much user documentation can/should be crated automatically?</para></listitem>
+<listitem><para>Will AI (or smart-whatever) save us from the need for documentation? (smart systems that guide/lead/force users)</para></listitem>
+
+</itemizedlist> 
+
+</section>
+</section>
+
+
+
+<section>
+<title>Other Resources to Support JATS Users</title>
+<para>This paper only describes the non-normative Tag Library documentation made available for JATS by the United States National Library of Medicine (NLM), which also sponsors and hosts the DTDs, RNG, XSDs, and all the apparatus of publication and versioning. But there is much much more JATS documentation. This section lists but a few of the extensive JATS resources produced by organizations outside of NISO and not part of NLM.</para>
+
+<section>
+<title>JATS-List and the Archives of JATS-List</title>
+<para>JATS-List [<biblioref linkend="JATS-List"/>] is a public email discussion list devoted to JATS and JATS-related topics. JATS users can ask  questions, answer the questions of others, or start discussions on topics of interest. The archives of the JATS-List [<biblioref linkend="JATS-List-Archives"/>] are publicly available and include all postings to the list since it was started in 2010. (Note: This is an active <emphasis role="ital">friendly</emphasis> list and infinitely patient with newbies.)</para>
+</section>
+
+<section>
+<title>JATS4R (JATS for Reuse)</title>
+<para>JATS4R [<biblioref linkend="JATS4R"/>] is a NISO working group <quote>devoted to optimizing the reusability of scholarly content by developing best-practice recommendations for tagging content in JATS XML.</quote> - JATS4R website</para>
+<section>
+<title>JATS4R Recommendations</title>
+<para>JATS4R publishes recommendations on how to use the JATS Tag Set to optimize reuse and interoperability of JATS documents.</para>
+<para>Current recommendations include:</para>
+<variablelist>
+<varlistentry><term>Article publication and history dates</term>
+<listitem><para>How to capture publication dates associated with an article and indicate the version of the article being viewed</para></listitem></varlistentry>
+<varlistentry><term>Authors and affiliations</term>
+<listitem><para>How to capture authors and their affiliations in article metadata</para></listitem></varlistentry>
+<varlistentry><term>Citations (general)</term>
+<listitem><para>How to capture tagging citations in general</para></listitem></varlistentry>
+<varlistentry><term>Clinical trials</term>
+<listitem><para>How to capture clinical trial information in abstracts and other places in an article</para></listitem></varlistentry>
+<varlistentry><term>Conflict-of-interest (COI) statements</term>
+<listitem><para>How to capture conflict-of-interest (COI) statements within article metadata</para></listitem></varlistentry>
+<varlistentry><term>CRediT taxonomy</term>
+<listitem><para>Updated version of how to tag author contributions using the CRediT taxonomy</para></listitem></varlistentry>
+<varlistentry><term>Data availability statements</term>
+<listitem><para>How to capture data availability in a machine-readable section of your JATS XML</para></listitem></varlistentry>
+<varlistentry><term>Data citations</term>
+<listitem><para>Updated version of how to tag data citations as references</para></listitem></varlistentry>
+<varlistentry><term>Display objects (e.g. figures, tables, and boxed text)</term>
+<listitem><para>How to capture figures, tables and boxes in a standard format in your JATS XML</para></listitem></varlistentry>
+<varlistentry><term>Ethics statements</term>
+<listitem><para>How to capture ethics-related content within a specific section and within general content</para></listitem></varlistentry>
+<varlistentry><term>Funding</term>
+<listitem><para>How to capture funding information in a specific location so it can be mined for further use, with reference to the Open Funder Registry</para></listitem></varlistentry>
+<varlistentry><term>General XML recommendation</term>
+<listitem><para>How to capture general article’s XML as a whole</para></listitem></varlistentry>
+<varlistentry><term>Math</term>
+<listitem><para>How to capture mathematical content within an article</para></listitem></varlistentry>
+<varlistentry><term>Peer review materials</term>
+<listitem><para>How to tag peer review materials such as peer reviews, editor decision letters and author responses</para></listitem></varlistentry>
+<varlistentry><term>Permissions</term>
+<listitem><para>How to capture license and copyright information for the article as well as reproduced assets within it</para></listitem></varlistentry>
+<varlistentry><term>Preprint citations</term>
+<listitem><para>How to tag preprint citations as references</para></listitem></varlistentry>
+</variablelist>
+
+</section>
+
+<section>
+<title>JATS4R Validation Tool</title>
+<para>(From the JATS4R website)</para>
+<para>JATS4R produces and makes available an online tool to validate an XML document both against the appropriate JATS DTD (NISO JATS version 1.0, 1.1 or 1.2), as well as against the JATS4R published recommendations.</para>
+<para>The source code (MIT-licensed where applicable) is available for the JATS4R user interface, the validator web service, the Schematron rules, and the JATS DTDs.</para>
+<para>When a user&#x2018;s XML content is sent to the JATS4R web service for validation, the doctype is logged, for usage metrics, but the rest of the XML document is not stored.</para>
+</section>
+</section>
+
+<section>
+<title>JATS-Con and the JATS-Con Proceedings</title>
+<para>JATS-Con is a (mostly) annual user-level conference [<biblioref  linkend="JATS-Con-conf"/>] devoted to JATS and the JATS family of specifications (the three  JATS Tag Sets, BITS, NISO STS, etc.). The proceedings of JATS-Con are available in the NLM Bookshelf [<biblioref linkend="JATS-Con"/>] and include as many of the following as are available for each presentation: a formal paper, the  presentation slides, and video of the presentation.</para>
+</section>
+
+<section>
+<title>NISO site for comments/suggestions</title>
+<para>The NISO website is available for public comment [<biblioref linkend="JATS-Comments"/>]. All comments are reviewed by the JATS Standing Committee and answers posted on this site.</para>
+</section>
+
+<section>
+<title>Local Guidelines</title>
+<para>Many organizations and services that ingest JATS documents (including libraries, database services, service providers such as web hosts, and tool vendors) provide guidelines on how they want JATS to be structured for their ingest. Some require particular versions and/or impose business rules in addition to the validity to the JATS schemas, for example, that all tables and figures must be referenced from within the text.</para>
+<para>Guidelines can be quite elaborate. For example, the PubMed Central Tagging Guidelines [<biblioref linkend="PMC-Guidelines"/>], includes comprehensive text explanations, tagged examples, and an online style checker that confirms whether an XML file conforms to PMC Style as defined in the PMC XML Tagging Guidelines.</para>
+</section>
+</section>
+
+<bibliography>
+<title>References</title>
+<bibliomixed xml:id="ANSI-NISO-JATS" xreflabel="JATS 2019">
+American National Standards Institute/National Information Standards Organization (ANSI/NISO). ANSI/NISO Z39.96-2019, JATS: Journal Article Tag Suite, version 1.2. Baltimore: National Information Standards Organization; 2019. Available at: https://www​.niso.org​/publications/z3996-2019-jats</bibliomixed>
+
+<bibliomixed xml:id="JATS-Homepage" xreflabel="JATS Homepage">
+Journal Article Tag Suite Bethesda (MD):  National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM). Available at: https://jats.nlm.nih.gov/</bibliomixed>
+
+<bibliomixed xml:id="BITS" xreflabel="BITS 2.0">Book Interchange Tag Set: JATS Extension. Bethesda (MD): National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM). Available at: https://jats​.nlm.nih​.gov/extensions/bits/</bibliomixed>
+
+<bibliomixed xml:id="JATS4R" xreflabel="JATS4R">JATS4R (JATS for Reuse). Available at: https:​//jats4r​.org/</bibliomixed>
+
+<bibliomixed xml:id="JATS-Con" xreflabel="JATS-Con">Journal Article Tag Suite Conference (JATS-Con) Proceedings. Bethesda (MD): National Center for Biotechnology Information (NCBI); 2010-. Available at: https://www​.ncbi.nlm​.nih.gov/books/NBK65129/</bibliomixed>
+
+<bibliomixed xml:id="JATS-List" xreflabel="JATS Listserve">JATS-List — Open Forum on the Journal Article Tag Suite. Available at: http://www​​.mulberrytech​​.com/JATS/JATS-List/</bibliomixed>
+
+<bibliomixed xml:id="JATS-List-Archives" xreflabel="JATS List Archives">JATS-List Archives (jats-list /at/ lists.mulberrytech.com Mailing List Interface). Available at: https://www​.biglist.com​/lists/jats-list/archives/</bibliomixed>
+
+<bibliomixed xml:id="JATS-1.3d2" xreflabel="JATS 2021 1.3d2">Journal Archiving and Interchange Tag Library, NISO JATS Version 1.3d2 (ANSI/NISO Z39.96-2019). December 2020 (documentation updated April 2021). Bethesda (MD): National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM). Available at: https://jats​.nlm.nih​.gov/archiving/tag-library/1​.3d2/index.html.</bibliomixed>
+
+<bibliomixed xml:id="JATS-Home" xreflabel="JATS Home NLM">Journal Article Tag Suite. Bethesda (MD): National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM). Available at: https://jats​.nlm.nih.gov/</bibliomixed> 
+      
+<bibliomixed xml:id="ANSI-NISO-STS" xreflabel="STS 2017">NISO Standards Tag Suite (STS) Supporting Materials. (Schemas and Tag Library) Available at: https://www​.niso-sts.org/</bibliomixed>
+
+<bibliomixed xml:id="JATS-Con-conf" xreflabel="JATS-Con Conference">JATS-Con (Journal Article Tag Suite Conference) annual conference. Bethesda (MD): National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM).</bibliomixed>
+
+<bibliomixed xml:id="JATS-Comments" xreflabel="JATS-Comments">NISO JATS Comment Form. Standardized Markup for Journal Articles: Journal Article Tag Suite (JATS). Baltimore: National Information Standards Organization. Available at: http://www​.niso.org/standards-committees/jats.</bibliomixed>
+
+<bibliomixed xml:id="PMC-Guidelines" xreflabel="PMC Guidelines 2021">PubMed Central Tagging Guidelines. Accessed May 11, 2021. https://www.ncbi.nlm.nih.gov/pmc/pmcdoc/tagging-guidelines/article/style.html
+</bibliomixed>
+
+
+</bibliography>
+</article>

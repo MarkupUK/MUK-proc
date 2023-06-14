@@ -1,0 +1,1 @@
+Andreas Tai is project manager and engineer at the Institut for Rundfunktechnik in Munich. He works on the technical implementation of subtitles and captions. He also co-chairs the EBU Group of Subtitles in XML and is member of the W3C Timed Text Working Group.

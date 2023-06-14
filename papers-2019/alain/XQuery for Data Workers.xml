@@ -1,0 +1,947 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:ns5="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns4="http://www.w3.org/2000/svg"
+         xmlns:ns3="http://www.w3.org/1999/xhtml"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>XQuery for Data Workers</title>
+
+  <subtitle>Extending XQuery for building complex scripts</subtitle>
+
+  <info>
+    <abstract>
+      <para>With some extensions, XQuery can be used to program Data Workers
+      to manipulate data in various formats and in different
+      environments.</para>
+    </abstract>
+
+    <author>
+      <personname><firstname>Alain</firstname><surname>Couthures</surname></personname>
+
+      <personblurb>
+        <para>Alain Couthures is a non-conventional expert programmer finding
+        solutions to problems many would not even imagine being resolvable. He
+        has already implemented XForms at client-side (XSLTForms) and is now
+        implementing XQuery in Javascript. He is a member of the W3C XForms
+        Users Community Group.</para>
+      </personblurb>
+
+      <email>alain.couthures@agencexml.com</email>
+    </author>
+  </info>
+
+  <section>
+    <title>Introduction</title>
+
+    <para>It always starts with a simple task that one simple script will
+    surely satisfy easily. Depending on multiple environment constraints,
+    there are, then, more and more scripts, written in different and,
+    possibly, multiple programming languages, doing similar actions with more
+    and more instructions in them.</para>
+
+    <para>Procedural programming languages are quite verbose: step by step,
+    loops after loops, handlers and variables are necessarily created and
+    modified. This is still more or less how processors effectively
+    act.</para>
+
+    <para>Hopefully, there are much more concise programming languages where
+    developers just describe what they want to get. XQuery is one of them.
+    Benefits are readability and maintainability, even for non-programming
+    consultants or domain experts.</para>
+
+    <para>It is surely interesting to evaluate XQuery as a unique script
+    language and to identify required extensions for manipulating data. The
+    best way to do that is to implement an XQuery engine for that
+    purpose.</para>
+  </section>
+
+  <section>
+    <title>Requirements</title>
+
+    <para>A data worker is defined as a running program which manipulates
+    data. It can get data from various sources then, possibly, transform it
+    and save, or send, the resulting data. A common usage for data workers is
+    building interfaces between applications, as ETL systems do at a larger
+    scale.</para>
+
+    <para>Specifically, a data worker is to be a minimal program for a basic
+    operation while multiple data workers can be active at the same
+    time.</para>
+
+    <para>When data volume is not huge and processing time can be deferred,
+    for example not during active hours, performance is just to be considered
+    when execution is perceived to be far too slow. Input/output operations
+    are probably, anyway, the most time consuming ones.</para>
+
+    <para>Data workers should be deployable on different machines with
+    different operating systems, even small ones such as RaspBerry Pis.</para>
+  </section>
+
+  <section>
+    <title>Chosen environment</title>
+
+    <section>
+      <title>NodeJS</title>
+
+      <para>NodeJS is an application which can be compared to a Java Virtual
+      Machine but for Javascript instead. It is available for most operating
+      systems on a wide range of platforms and it is a stable product with
+      more and more features, versions after versions. It runs with just one
+      single thread, like in browsers, but, with heavy use of events and
+      callback functions, multitasking becomes possible.</para>
+
+      <para>There are various APIs to access resources such as "File System",
+      "Net", "HTTP",... so it can be used to build complex applications
+      without user interface, except in command line.</para>
+
+      <para>NodeJS also comes with its own native basic HTTP server: no
+      complex configuration for security or performance but an ideal approach
+      for small, dedicated, even not necessarily local, web servers listening
+      to one different port each.</para>
+
+      <para>NodeJS can easily be extended using a package manager such as
+      "npm". Unfortunately, using external packages creates multiple
+      dependencies with potential support issues. Using "famous" packages can
+      result as a lazy way to program basic operations with a lot of extra
+      useless features and can slow execution. A good portable solution has to
+      minimize external packages use.</para>
+    </section>
+
+    <section>
+      <title>Browsers</title>
+
+      <para>Browsers are a convenient solution to render data produced by Data
+      Workers. While data to be rendered could be too big to fit in a single
+      HTML page, XForms is the easiest framework to access it with
+      filters.</para>
+
+      <para>XForms can also be efficiently used to enter rich parameters for a
+      Data Worker when CLI is not enough or when users need access from
+      different machines.</para>
+    </section>
+
+    <section>
+      <title>XQuery</title>
+
+      <para>XQuery 3.1 can extract and transform data from XML documents but
+      also from any text files, including JSON ones. XQuery Update Facility
+      adds expressions for modifying data without having to build new
+      data.</para>
+
+      <para>Native XML database implementations come with many function
+      libraries to extend XQuery allowing to interact with operating systems
+      and to communicate with others.</para>
+
+      <para>XQuery can be defined as an extension of XPath allowing to
+      construct nodes and perform more complex operations. As a consequence,
+      XQuery can construct data as any Server Page solution (ASP, JSP): XML
+      documents, XHTML+SVG+XForms pages,...</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Fleur: an XQuery implementation in Javascript</title>
+
+    <para>Fleur is an XQuery 3.1+XQuery Update Facility 3.0 implementation. It
+    is written in vanilla Javascript allowing it to run, both, in browsers and
+    with NodeJS.</para>
+
+    <para>Fleur includes its own DOM3 engine. It can also use browsers DOM for
+    manipulating HTML pages, when used in "XQuery-in-the-browser" mode.</para>
+
+    <para>Fleur, primarily, was intended just to replace XSLTForms XPath 1.0
+    engine for XForms 2.0 support. It will do much more for XForms: no need
+    for XForms 2.0 specific functions to construct nodes and XQuery Update
+    Facility as a replacement for XForms actions XML notation.</para>
+
+    <para>Using the native HTTP server provided by NodeJS, Fleur can be used
+    to fully develop small XForms-REST-XQuery (XRX) applications.</para>
+
+    <para>Fleur compiles XQuery expressions into a Javascript array of arrays.
+    This Javascript array is an exact representation of the corresponding
+    XQueryX notation. Compiling expressions is interesting when an expression
+    is to be evaluated repeatedly (which is the case, for example, with
+    XForms).</para>
+
+    <para>Fleur always evaluates expressions asynchronously (Javascript
+    Promises) because it is a requirement for calls to functions such as doc()
+    which can be located deeply within the XQueryX tree. It is also necessary
+    not to use the single execution thread for too long time: periodically,
+    Fleur allows other treatments to get access to the thread. At client side,
+    a browser will not freeze and concurrent evaluations will terminate
+    independently. At server side, the native HTTP server, for example, will
+    start to treat another request when the current one is too time
+    consuming.</para>
+
+    <para>It is possible to call any Javascript function in expressions
+    prefixing with "js:".</para>
+
+    <para>Internally, Fleur is, by design, always manipulating nodes. Extra
+    node types are defined: MAP and ENTRY, ARRAY, SEQUENCE, FUNCTION. Atomic
+    values are stored in TEXT nodes with schemaTypeInfo associated.</para>
+
+    <para>Fleur can be launched from command line with usual parameters using
+    the node program.</para>
+
+    <programlisting>C:\Users\Alain Couthures&gt;node fleur --help
+Usage: node fleur ([-s:xmlfile] [-o:outfile] (-q:queryfile|-qs:querystring)
+                   [params]|[-p:port] [-f:folder])
+ -s:     XML input file (optional)
+ -o:     output file (optional)
+ -q:     query file
+ -qs:    query string
+ -p:     http server port
+ -f:     http server folder
+ params  name=value as externals</programlisting>
+  </section>
+
+  <section>
+    <title>Development and tests</title>
+
+    <para>As XSLTForms, Fleur is developed using Eclipse Orion which provides
+    automatic sources checking while typing. It prevents from syntax errors,
+    undeclared variables, unreached statements, unbalanced parentheses or
+    curly braces. It is an important feature because Javascript is an
+    interpreted programming language.</para>
+
+    <figure>
+      <title>Eclipse Orion</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="AlainCouthures-Orion.png" scale="50"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>There is a source file for each feature. The HTTP server is used to
+    collect and concat single files using virtual URLs.</para>
+
+    <para>XPath functions are written in vanilla Javascript instructions. This
+    is allowed by a convert mechanism for atomic values and sequences as
+    parameters or returned value.</para>
+
+    <programlisting>Fleur.XPathFunctions_prof["sleep#1"] = 
+    new Fleur.Function("http://basex.org/modules/proc", "prof:sleep",
+ function(ms, callback) {
+  if (ms &gt; 0) {
+   setTimeout(function() {
+    callback(null);
+   }, ms);
+   return;
+  }
+  callback(null);
+ },
+ null, [{type: Fleur.Type_integer}], false, true, {type: Fleur.EmptySequence});</programlisting>
+
+    <para>Tests are mainly performed with a browser. Thanks to virtual URLs,
+    the file fleur.js is automatically refreshed from last edited source
+    files. XForms, with XSLTForms, is used to run the official XQuery Test
+    Suite, category per category then to allow unit test for debugging. Even
+    if XSLTForms is not yet using Fleur for itself, because of events support
+    in XForms, it can evaluate XQuery expressions asynchronously: in the same
+    category page, tests are evaluated in parallel and the corresponding
+    results are provided depending on the evaluation time.</para>
+
+    <figure>
+      <title>XQuery Test Suite</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="AlainCouthures-TestSuite.png" scale="50"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+
+    <para>Serialization for tests is specific: resulting values are serialized
+    as an equivalent XQuery expression instead of just as string values. It
+    guarantees no ambiguity about sequences, types and allows to check node
+    types.</para>
+
+    <figure>
+      <title>Fleur Sandbox</title>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="AlainCouthures-RunTest.png" scale="50"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+
+  <section>
+    <title>Extensions</title>
+
+    <section>
+      <title>The generalized doc() and serialize() functions</title>
+
+      <para>The doc() function is to be used to get any document of any type
+      from any source.</para>
+
+      <para>The default scheme is, at browser-side, "http" and, at
+      server-side, "file". A scheme "cmd" is to be added to also get data from
+      local process execution.</para>
+
+      <para>An optional second parameter, similar to serialization options,
+      allows to specify non-XML media-type and format specific parameters such
+      as field separator for CSV data. When not present, the file extension,
+      if there is one, is used to get an implicit media-type.</para>
+
+      <para>An optional third parameter will be added to specify a node
+      containing the grammar to be considered for Invisible XML
+      processing.</para>
+
+      <para>Non-XML data is automatically parsed by the doc() function. The
+      resulting document can be navigated with the corresponding node types
+      mapping. There is not necessarily an XML tree for non-XML data. For
+      example, a .xlsx file, when parsed, is proposed as a map with, as
+      entries, all the files within the ZIP format while Markdown text is
+      proposed as the corresponding XHTML node tree.</para>
+
+      <para>The serialize() function has a similar optional second parameter
+      to, possibly, serialize from one notation to another.</para>
+    </section>
+
+    <section>
+      <title>Two-dimensional sequences for tabular data</title>
+
+      <para>Tabular data from CSV or spreadsheets is treated a sequence of
+      raws, each line being also a sequence. This implied yet another node
+      type to distinguish from one-dimensional sequences. The separator ';' is
+      defined to separate raws within a two-dimensional sequence.</para>
+
+      <para>When data comes from a .xlsx file, the excel:values function can
+      extract a two-dimensional sequence from a sheet specifying the desired
+      range.</para>
+
+      <para>The !! operator has been added to get raws one after one as the !
+      operator is to be used to get items one after one.</para>
+
+      <para>Headers can be associated to columns in a two-dimensional
+      sequence.</para>
+
+      <para>It is convenient to be able transpose a two-dimensional sequence
+      with the matrix:transpose() function. For example, a list of items, one
+      per line, can be loaded in CSV format to obtain a vertical sequence of
+      items then transpose it into a one-dimensional sequence.</para>
+
+      <para>Arithmetics could be added in the future.</para>
+    </section>
+
+    <section>
+      <title>Function Modules</title>
+
+      <para>XPath 3.1 specifications do not include functions, for example, to
+      manipulate files and folders or send an HTTP request.</para>
+
+      <para>Native XML database solutions provide many modules for various
+      purposes. Because of the variety of them. BaseX has been considered as a
+      reference for implementing function modules in Fleur.</para>
+    </section>
+
+    <section>
+      <title>Server-side evaluation</title>
+
+      <para>Fleur can be asked to listen to a port number. It will then act as
+      a basic HTTP server which will also execute .xqy pages and send back the
+      result. Of course, XForms pages for XSLTForms can be generated by Fleur
+      when executing a .xqy request. It can be used to, for example, provide
+      inline minimal XForms instances which can be interesting for better
+      performance.</para>
+
+      <para>This server can process simultaneous requests because of the
+      asynchronous evaluations.</para>
+    </section>
+
+    <section>
+      <title>Client-side evaluation</title>
+
+      <para>Because it is contained in just one .js file, Fleur can easily be
+      used at client-side. Even if NodeJS is supporting some of latest
+      ECMAScript syntax and new features, Fleur source is written for recent
+      browsers.</para>
+
+      <para>Of course, client-side evaluation is also limited by security:
+      accessing folders and files is restricted, cross-domain may not be
+      allowed and it is not possible to run external processes.</para>
+
+      <para>Nevertheless, it is always a convenient way to try and debug more
+      or less complex expressions, especially with result being serialized in
+      XQuery notation. The browser debugger can help too but a good knowledge
+      of Fleur sources and XQueryX is required to place breakpoints in
+      instructions.</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Examples of Data Workers with Fleur</title>
+
+    <section>
+      <title>Bank statements converted into CSV files</title>
+
+      <para>Some bank statements are transmitted using old OXF notation, which
+      is a pre-XML notation while others are transmitted as .xlsx
+      files.</para>
+
+      <para>To allow an accounting solution to import those statements, the
+      Data Worker has to navigate an input folder and, for each bank file,
+      convert its content. Each entry in a bank statement should become,
+      because of double-entry bookkeeping system, two raws into the
+      corresponding generated CSV file.</para>
+
+      <para>Because FLWOR expressions results can be seen as sequences of
+      columns, each transaction is, first, transformed into 2 columns then,
+      before serialization, the resulting matrix has to be transposed.</para>
+
+      <programlisting>let $d := doc('ofxexample.ofx')
+let $matr := matrix:transpose(
+  for $s in $d//STMTTRN
+  let $amount := $s/TRNAMT
+  let $nmin := fn:abs(fn:min((xs:decimal($amount), 0)))
+  let $nmax := fn:abs(fn:max((xs:decimal($amount), 0)))
+  let $date := $s/DTPOSTED
+  let $year := fn:substring($date, 1, 4)
+  let $month := fn:substring($date, 5, 2)
+  let $day := fn:substring($date, 7, 2)
+  let $name := $s/NAME
+  let $sdat := concat($day, '/', $month, '/', $year)
+  return
+    matrix:transpose(
+      $sdate, '471000', $name, $nmin, $nmax, 'E';
+      $sdate, '512100', $name, $nmax, $nmin, 'E')
+    )
+)
+return file:write('ofxexample.csv',
+  matrix:labels(('Date', 'Num cpte', 'Libelle', 'Debit', 'Credit', 'E'), $matr),
+  map {'header': 'present', 'media-type': 'text/csv', 'separator': ';'})</programlisting>
+    </section>
+
+    <section>
+      <title>IT Inventory dashboards</title>
+
+      <para>There are many computers in an IT inventory. Each one has a name
+      and textual properties with limited possible values (OS version, disk
+      type,...).</para>
+
+      <para>The Data Worker is an HTTP server which receives properties from
+      each computer and generates dashboards for the IT manager. There is a
+      dashboard for each property. A dashboard is rendered as an HTML table
+      where computer names are grouped per values for the corresponding
+      property. While, for example, migrating for one OS version to another,
+      the OS dashboard explicitly lists which computers are still to be
+      migrated.</para>
+
+      <programlisting>declare namespace output="http://www.w3.org/2010/xslt-xquery-serialization";
+declare option output:indent "yes";
+processing-instruction xml-stylesheet {'href="xsl/xsltforms.xsl" type="text/xsl"'},
+let $doc := fn:doc('../private/inventory.xml')/inventory
+let $m := $doc/computers/computer
+let $nicm := map {
+  for $n in $doc/nics/nic
+  return entry {fn:data($n/@idref-to-nic-owner)} {fn:data($n/timestamp)}
+}
+let $m2 := (
+  for $s in $m
+  order by $s/name
+  return $s
+)
+let $totalPC := fn:count($m)
+return
+  &lt;html xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:xf="http://www.w3.org/2002/xforms"&gt;
+    &lt;head&gt;
+      &lt;title&gt;R&amp;eacute;partition Postes&lt;/title&gt;
+      &lt;style&gt;
+        body {{
+          font-family: arial,sans-serif;
+          font-size: 80%;
+        }}
+        table {{
+          border-collapse: collapse;
+        }}
+        table, th, td {{
+          border: 1px solid black;
+        }}
+      &lt;/style&gt;
+      &lt;xf:model&gt;
+        &lt;xf:instance&gt;
+          &lt;inventory xmlns="" total="{$totalPC}" selected="version"&gt;{
+            ('version', 'architecture', 'model', 'disktype', 'office') ! 
+              &lt;group name="{.}"&gt;
+              {
+                let $n := .
+                for $s in $m2
+                group by $v := (if ($s/*[name() eq $n])
+                               then $s/*[name() eq $n]
+                               else ' ')
+                order by $v
+                return
+                  &lt;item name="{if ($v eq ' ') then 'unknown' else $v}"
+                        total="{fn:count($s)}"&gt;{
+                    $s ! name ! xs:string(.)
+                  }&lt;/item&gt;
+              }
+            &lt;/group&gt;
+          }&lt;/inventory&gt;
+        &lt;/xf:instance&gt;
+      &lt;/xf:model&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;p&gt;{
+        fn:format-dateTime(file:last-modified('../private/inventory.xml'),
+          '[h01]:[m01]:[s01] [D]/[M]/[Y,2-2]') || ' - ' || $totalPC ||
+          ' ordinateurs dans l''inventaire'
+      }&lt;/p&gt;
+      &lt;xf:select1 ref="@selected"&gt;
+        &lt;xf:itemset ref="../group"&gt;
+          &lt;xf:label ref="@name"/&gt;
+          &lt;xf:value ref="@name"/&gt;
+        &lt;/xf:itemset&gt;
+      &lt;/xf:select1&gt;
+      &lt;table&gt;
+        &lt;tbody&gt;
+          &lt;xf:repeat ref="group[@name = /inventory/@selected]/item"&gt;
+            &lt;tr&gt;
+              &lt;td&gt;&lt;xf:output value="if(@name = 'unknown', 'inconnu', @name)"/&gt;&lt;/td&gt;
+              &lt;td&gt;&lt;xf:output value="@total"/&gt;&lt;/td&gt;
+              &lt;td&gt;&lt;xf:output value="."/&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+          &lt;/xf:repeat&gt;
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;</programlisting>
+    </section>
+
+    <section>
+      <title>XLSForm to XSLTForms</title>
+
+      <para>When it comes to write plenty of similar simple forms, it might be
+      easier for authors to list items to be edited in a spreadsheet. It is
+      possible to write .xlsx files in XLSForm format to obtain XForms pages
+      for ODK. ODK is not a fully compliant XForms implementation.</para>
+
+      <para>The Data Worker has to read content from a .xlsx then generate the
+      corresponding XForms page for XSLTForms. This can be done dynamically at
+      server-side.</para>
+
+      <programlisting>declare function local:setattr($name, $value) {
+  let $esc := replace(
+    replace(
+      replace(
+        replace(
+          replace($value, '&amp;amp;', '&amp;amp;amp;'),
+        '&amp;lt;', '&amp;amp;lt;'),
+      '&amp;gt;', '&amp;amp;gt;'),
+    '&amp;quot;', '&amp;amp;quot;'),
+   "&amp;apos;", '&amp;amp;apos;')
+  return if ($value ne '') then
+   (if (contains($esc, '&amp;amp;quot;')) then
+     (' ' + $name + "='" + $esc + "'") 
+    else (' ' + $name + '="' + $esc + '"')) else ''
+};
+declare function local:attrs() {
+  local:setattr("name", ?name) +
+  local:setattr("label", ?label) +
+  local:setattr("hint", ?hint) +
+  local:setattr("calculation", ?calculation) +
+  local:setattr("appearance", if (?type eq 'begin_group' and ?appearance ne '')
+     then ('collapsed ' + ?appearance) else ?appearance) +
+  local:setattr("relevant", ?relevant) +
+  local:setattr("constraint", ?constraint) +
+  local:setattr("constraint_message", ?constraint_message) +
+  local:setattr("readonly", if (?type eq 'note') then 'true' else ?readonly) +
+  local:setattr("required", ?required)
+};
+declare function local:attrs_choices() {
+  local:setattr("list_name", ?list_name) +
+  local:setattr("list_name", ?('list name')) +
+  local:setattr("name", ?name) +
+  local:setattr("label", ?label) +
+  local:setattr("image", ?image)
+};
+declare function local:attrs_settings() {
+  local:setattr("form_title", ?form_title) +
+  local:setattr("form_title", ?title) +
+  local:setattr("form_id", ?form_id) +
+  local:setattr("default_language", ?default_language)
+};
+let $book := doc('public/grid.xlsx')
+let $root := 'grid'
+let $survey := excel:values($book, "survey!", (), true())
+let $choices := excel:values($book, "choices!", (), true())
+let $settings := excel:values($book, "settings!", (), true())
+let $xlsform := '&lt;xlsform&gt;' +
+  '&lt;survey&gt;' + string-join(matrix:transpose($survey !! (
+  if (?type eq '') then '' else
+  if (?type eq 'begin_group') then
+    ('&lt;group' + (if (?appearance eq '') then ' appearance="collapsed"' else '')
+     + local:attrs() + '&gt;') else
+  if (?type eq 'end_group') then '&lt;/group&gt;' else
+  if (starts-with(?type, 'select_one ')) then
+    ('&lt;select_one choices="' + substring-after(?type, 'select_one ') +
+     '"' + local:attrs() + '/&gt;') else
+  if (starts-with(?type, 'select_multiple ')) then
+    ('&lt;select_multiple choices="' + substring-after(?type, 'select_multiple ') +
+     '"' + local:attrs() + '/&gt;') else
+    ('&lt;' + ?type + local:attrs() + '/&gt;')))) +
+  '&lt;/survey&gt;' +
+  '&lt;choices&gt;' + string-join(matrix:transpose($choices !! (
+  if (?('list name') eq '') then '' else
+  ('&lt;choice' + local:attrs_choices() + '/&gt;')))) +
+  '&lt;/choices&gt;' +
+  '&lt;settings&gt;' + string-join(matrix:transpose($settings !!
+  ('&lt;setting' + local:attrs_settings() + '/&gt;'))) +
+  '&lt;/settings&gt;' +
+  '&lt;/xlsform&gt;'
+let $doc := parse-xml($xlsform)
+let $leaf := function($n) {
+  element {$n/@name} {}
+}
+let $subtree := function($n, $t, $l) {
+  element {$n/@name} {
+    $n/* ! (if (name(current()) eq 'group') 
+            then $t(current(), $t, $l) 
+            else $l(current()))
+  }
+}
+let $begin := '${'
+let $end := '}'
+let $refconv := function($n, $s, $b, $e, $f, $g, $r) {
+  if (contains($s, $b)) then
+   (substring-before($s, $b) + ' ' +
+     $g($n, substring-before(substring-after($s, $b), $e), $r) + ' ' +
+   $f($n, substring-after($s, $e), $b, $e, $f, $g, $r)) else
+   $s
+}
+let $refpath := function($n, $name, $r) {
+  let $target := $n/ancestor::survey//*[string(@name) eq $name]
+  return '/' + string-join(($r, 
+              (reverse($target/ancestor-or-self::*[@name]) ! string(@name))), '/')
+}
+let $bind := function($n, $b, $e, $f, $g, $r) {
+  if (name($n) eq 'group') then () else (
+    let $type := (if (name($n) = ('text', 'note', 'select_one', 'select_multiple'))
+                  then ()
+                  else
+      attribute type {'xsd:' + name($n)})
+    let $xpattrs := $n ! (@required, @readonly, @relevant) ! 
+                    attribute {name()} {if (string(.) eq 'true')
+                                        then 'true()'
+                                        else $f(., string(.), $b, $e, $f, $g, $r)}
+    let $battrs := ($type, $xpattrs)
+    return if ($battrs) then
+     &lt;xf:bind
+       ref="{'/' + string-join(($r, (reverse($n/ancestor-or-self::*[@name]) ! 
+                               string(@name))), '/')}"&gt;{$battrs}&lt;/xf:bind&gt; else ()
+  )
+}
+let $model := &lt;xf:model&gt;
+  &lt;xf:instance xmlns=""&gt;
+    {element {$root}
+      {($doc/xlsform/survey/* ! (if (name(current()) eq 'group') then
+        $subtree(current(), $subtree, $leaf) else
+        $leaf(current())),
+      &lt;meta&gt;
+        &lt;instanceID/&gt;
+      &lt;/meta&gt;)}
+    }
+  &lt;/xf:instance&gt;
+  {$doc/xlsform/survey//* ! 
+   $bind(current(), $begin, $end, $refconv, $refpath, $root)}
+&lt;/xf:model&gt;
+let $input := function($n, $r) {
+  &lt;xf:input ref="{'/' + string-join(($r, (reverse($n/ancestor-or-self::*[@name]) !
+                                          string(@name))), '/')}"&gt;
+    {$n/@appearance}
+    {if ($n/@label ne '') 
+     then &lt;xf:label mediatype="text/markdown"&gt;{$n/@label/text()}&lt;/xf:label&gt;
+     else ()}
+    {if ($n/@hint ne '')
+     then &lt;xf:hint mediatype="text/markdown"&gt;{$n/@hint/text()}&lt;/xf:hint&gt; 
+     else ()}
+  &lt;/xf:input&gt;
+}
+let $templates := map {
+  'group': function($n, $m, $i, $r) {
+      &lt;xf:group ref="{'/' + string-join(($r,
+                     (reverse($n/ancestor-or-self::*[@name]) !
+                      string(@name))), '/')}"&gt;
+        {$n/@appearance}
+        {if ($n/@label ne '')
+         then &lt;xf:label mediatype="text/markdown"&gt;{$n/@label/text()}&lt;/xf:label&gt;
+         else ()}
+        {$n/* ! (if ($m?(name(current()))) 
+                 then $m?(name(current()))(current(), $m, $i, $r)
+                 else $i(current(), $r))}
+      &lt;/xf:group&gt;
+    },
+  'note': function($n, $m, $i, $r) {
+      &lt;xf:output ref="{'/' + string-join(($r, 
+                       (reverse($n/ancestor-or-self::*[@name]) !
+                        string(@name))), '/')}"&gt;
+        {$n/@appearance}
+        {if ($n/@label ne '') 
+         then &lt;xf:label mediatype="text/markdown"&gt;{$n/@label/text()}&lt;/xf:label&gt; 
+         else ()}
+        {if ($n/@hint ne '')
+         then &lt;xf:hint&gt;{$n/@hint/text()}&lt;/xf:hint&gt; 
+         else ()}
+      &lt;/xf:output&gt;
+    },
+  'select_one': function($n, $m, $i, $r) {
+      &lt;xf:select1 ref="{'/' + string-join(($r, 
+                              (reverse($n/ancestor-or-self::*[@name]) !
+                               string(@name))), '/')}"&gt;
+        {$n/@appearance}
+        {if ($n/@label ne '')
+         then &lt;xf:label mediatype="text/markdown"&gt;{$n/@label/text()}&lt;/xf:label&gt;
+         else ()}
+        {if ($n/@hint ne '') 
+         then &lt;xf:hint&gt;{$n/@hint/text()}&lt;/xf:hint&gt; 
+         else ()}
+        {$n/ancestor::xlsform/choices/choice[string(@list_name) eq string($n/@choices)] !
+          &lt;xf:item&gt;
+            &lt;xf:label&gt;{@label/text()}&lt;/xf:label&gt;
+            &lt;xf:value&gt;{@name/text()}&lt;/xf:value&gt;
+          &lt;/xf:item&gt;
+        }
+      &lt;/xf:select1&gt;
+    },
+  'select_multiple': function($n, $m, $i, $r) {
+      &lt;xf:select ref="{'/' + string-join(($r, 
+                       (reverse($n/ancestor-or-self::*[@name]) !
+                        string(@name))), '/')}"&gt;
+        {$n/@appearance}
+        {if ($n/@label ne '')
+         then &lt;xf:label mediatype="text/markdown"&gt;{$n/@label/text()}&lt;/xf:label&gt;
+         else ()}
+        {if ($n/@hint ne '')
+         then &lt;xf:hint mediatype="text/markdown"&gt;{$n/@hint/text()}&lt;/xf:hint&gt;
+         else ()}
+        {$n/ancestor::xlsform/choices/choice[string(@list_name) eq
+                      string($n/@choices)] !
+          &lt;xf:item&gt;
+            &lt;xf:label&gt;{@label/text()}&lt;/xf:label&gt;
+            &lt;xf:value&gt;{@name/text()}&lt;/xf:value&gt;
+          &lt;/xf:item&gt;
+        }
+      &lt;/xf:select&gt;
+    }
+}
+let $view := $doc/xlsform/survey/* ! 
+             (if ($templates?(name(current())))
+              then $templates?(name(current()))(current(), $templates, $input, $root)
+              else $input(current(), $root))
+let $form := document {(processing-instruction
+               xml-stylesheet {'href="xsl/xsltforms.xsl" type="text/xsl"'},
+  &lt;html
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:xf="http://www.w3.org/2002/xforms"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+    &lt;head&gt;
+       &lt;title&gt;{data($doc/xlsform/settings/setting/@form_title)}&lt;/title&gt;
+              {$model}
+    &lt;/head&gt;
+    &lt;body&gt;{$view}&lt;/body&gt;&lt;/html&gt;)}
+let $result := parse-xml(serialize($form, map{'indent': 'yes'}))
+return $result</programlisting>
+    </section>
+
+    <section>
+      <title>Collecting from network equipments</title>
+
+      <para>Network equipments such as switches know which equipments are
+      connected to them using MAC address tables associated to ports. This can
+      be used to locate those equipments and it enables also to check that the
+      switch configuration is the one required (VLAN, PoE, speed,...).
+      Unfortunately, such tables have to be automatically purged in the
+      network equipments. Luckily, there are network equipments with firmwares
+      allowing to interact with them with a REST API using JSON.</para>
+
+      <para>The Data Worker has to periodically collect MAC tables using the
+      REST API then transform and send the resulting data to another Data
+      Worker acting as an HTTP server. The second Data Worker can then propose
+      a dedicated dashboard.</para>
+
+      <programlisting>for $i in 1 to 10000
+let $step := (
+  let $pcs := doc('collect.json')?*
+  let $switches := doc('switches.json')?*
+  let $login := doc('login.json')
+  let $result := map {
+    for $switch in $switches
+    let $m := fn:doc('http://' || xs:string($switch?ip) ||
+                     ':80/rest/v3/login-sessions',
+                map {'method': 'json', 'http-verb': 'POST',
+                     'timeout': '3000'},
+                map {'userName': xs:string($login?user),
+                     'password': xs:string($login?password)})
+    return (if ($m?cookie) then (
+      let $sessionId := map {'method': 'json', 'http-verb': 'GET',
+                             'http-cookie': xs:string($m?cookie)}
+      let $vps := doc('http://' || xs:string($switch?ip) ||
+                      ':80/rest/v3/vlans-ports', $sessionId)?vlan_port_element?*
+      let $macs := doc('http://' || xs:string($switch?ip) || 
+                       ':80/rest/v3/mac-table', $sessionId)?mac_table_entry_element?*
+      let $trk := $vps[?port_mode eq 'POM_TAGGED_STATIC' and ?vlan_id ne 5] !
+                       xs:string(?port_id)
+      for $port in $vps[not(?port_id = $trk)] ! ?port_id
+      for $vlanid in $vps[?port_id eq $port] ! ?vlan_id
+      let $portmacs := $macs[?port_id eq $port] ! ietf:mac(?mac_address)
+      return if (not(empty($portmacs))) then (
+        for $portmac in $portmacs
+        let $pcname := local-name(head($pcs[ietf:mac(?mac) eq $portmac]))
+        let $ename := (if ($pcname) then $pcname else '#' || xs:string($portmac))
+        return entry {$ename} {map{'switch': local-name($switch), 
+                      'port': xs:string($port), 'vlan': xs:string($vlanid)} }
+      ) else ()) else 
+      trace((), local-name($switch) || ': Connection refused. '))
+  }
+  let $t := (if (exists($result?*)) then (
+    trace((),
+      xs:string(current-dateTime()) || '    ' || 
+                count(http:send-request(&lt;http:request method='post'/&gt;,
+      'http://switchmanager:5000/batchcollect.xqy', $result)[2]/node()?*) ||
+      ' MAC entries found. ')
+    ) else 
+      trace((), xs:string(current-dateTime()) ||
+           '    ' || 'No entry. '))
+  let $pause := prof:sleep(1000 * 60 * 3)
+  return ()
+)
+return ()</programlisting>
+
+      <programlisting>declare %updating function local:mergejsonfile($path, $batch) {
+  let $doc := doc($path)
+  let $m := $doc/map()
+  let $update := (
+    for $item in $batch?*
+    return (if ($m?(local-name($item))) then
+        replace node $m?(local-name($item))/node() with 
+          map:merge(($item/node(), $m?(local-name($item))/node()))
+      else
+        insert node entry {local-name($item)} {$item/node()} into $m))
+  let $write := file:write($path, $doc, map {"indent" : "yes"})
+  return $batch
+};
+let $filename := 'collect.json'
+let $batch := request:body-doc()
+let $tstamp := xs:string(current-dateTime())
+let $addstamp := 
+  (for $item in $batch?*
+  return (insert node entry btimestamp {$tstamp} into $item/node(), ()))
+return local:mergejsonfile($filename, $batch)</programlisting>
+    </section>
+
+    <section>
+      <title>XForms 2.0 Test Suite for XSLTForms</title>
+
+      <para>The XForms 2.0 Test Suite can be downloaded as a .zip file. Each
+      test already contains a processing instruction for the XSLTForms XSLT
+      stylesheet to transform it but its path does not correspond to the one
+      for the development environment of XSLTForms, which is the same as
+      Fleur, with NodeJS.</para>
+
+      <para>The Data Worker has to unzip the Test Suite file, change the
+      processing instruction in each test, change the file extension for each
+      test file from .xhtml to .xml and update the index page
+      accordingly.</para>
+    </section>
+
+    <section>
+      <title>Updating users accounts from HR software</title>
+
+      <para>Various applications need an up to date list of users. This can,
+      usually, be obtained from the HR software. Depending on how an
+      application allows or not to partially update its own list of users and
+      how it stores historical data related to them, it can be required to
+      minimize updates as just, for example, modified properties.</para>
+
+      <para>The Data Worker has to extract data from both systems, to compare
+      them, to identify updates to be done and to format them accordingly to
+      the targeted application. For example, it will generate Powershell
+      commands to update an ActiveDirectory domain or generate REST API
+      requests to delete and add members to Gmail groups.</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Conclusion</title>
+
+    <para>This evaluation shows that it is very interesting to use XQuery for
+    writing programs for Data Workers. The corresponding programs are short
+    ones because all the mechanics to effectively access or post data are
+    necessarily embedded at lower level: an XQuery implementation with such
+    features allows programmers to concentrate to data transformation and
+    XQuery is clearly powerful at this.</para>
+
+    <para>Fleur is not yet a mature implementation and, effectively, not yet
+    fully compliant with XQuery specifications but it is now already used in
+    production because of all those extensions for Data Workers. Performance
+    are not always very good but there are already known optimizations to be
+    added.</para>
+
+    <para>For Data Workers, there are more extensions now identified as
+    interesting to be added: generate PDF files (possibly using XSL-FO
+    notation), send and receive emails, run Tesseract OCR to get ALTO XML
+    documents. The use of handlers has also to be improved.</para>
+  </section>
+
+  <bibliography>
+    <title>Bibliography</title>
+
+    <bibliomixed xreflabel="Fleur" xml:id="Fleur">Alain Couthures, <emphasis role="ital">Fleur</emphasis>, <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">https://github.com/AlainCouthures/xphoneforms/blob/master/build/js/fleur.js</link></bibliomixed>
+
+    <bibliomixed xreflabel="XQuery" xml:id="w3c-xquery-31">Robie, Jonathan,
+    Michael Dyck, (eds.), <emphasis role="ital">XQuery 3.1: An XML Query Language</emphasis>, W3C, 2017, <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">http://www.w3.org/TR/xquery-31/</link></bibliomixed>
+
+    <bibliomixed xreflabel="XPath functions" xml:id="xpath">Michael Kay, (ed.), <emphasis
+    role="ital">XPath and XQuery functions and operators 3.1</emphasis>, W3C, 2017, <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">https://www.w3.org/TR/xpath-functions-31/</link></bibliomixed>
+
+    <bibliomixed xreflabel="xquf" xml:id="w3c-xquery-update">Snelson, John and
+    Jim Melton, (eds.), <emphasis role="ital">XQuery Update Facility 3.0</emphasis>, W3C, 2015, <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">http://www.w3.org/TR/xquery-update-30/</link></bibliomixed>
+
+    <bibliomixed xreflabel="XF11" xml:id="XF11">John M. Boyer, (ed.),
+    <emphasis role="ital">XForms 1.1</emphasis>, W3C, 2009, <link
+    xlink:actuate="onRequest" xlink:show="new"
+    xlink:type="simple">https://www.w3.org/TR/2009/REC-xforms-20091020/</link></bibliomixed>
+
+    <bibliomixed xreflabel="XF2" xml:id="XF2">E. Bruchez, <emphasis
+    role="ital">et al.</emphasis>, (eds.), <emphasis role="ital">XForms
+    2.0</emphasis>, W3C, 2018, <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">https://www.w3.org/community/xformsusers/wiki/XForms_2.0</link></bibliomixed>
+
+    <bibliomixed xreflabel="Pemberton 2013" xml:id="Pemberton2013">Pemberton,
+    Steven. <quote>Invisible XML.</quote> Presented at Balisage: The Markup
+    Conference 2013, Montréal, Canada, August 6 - 9, 2013. In
+    <emphasis>Proceedings of Balisage: The Markup Conference 2013.</emphasis>
+    Balisage Series on Markup Technologies, vol. 10 (2013). doi:<biblioid
+    class="doi">10.4242/BalisageVol10.Pemberton01</biblioid>.</bibliomixed>
+
+    <bibliomixed xreflabel="BaseX" xml:id="basex">BaseX - an open source XML
+    database. Homepage. <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">http://basex.org</link></bibliomixed>
+
+    <bibliomixed xreflabel="OFX" xml:id="ofx">Open Financial Exchange.
+    Downloads. <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">http://www.ofx.net/downloads.html</link></bibliomixed>
+
+    <bibliomixed xreflabel="ODK" xml:id="odk">Open Data Kit. XLSForm Online.
+    <link xlink:actuate="onRequest"
+    xlink:show="new"
+    xlink:type="simple">https://opendatakit.org/xlsform/</link></bibliomixed>
+  </bibliography>
+</article>

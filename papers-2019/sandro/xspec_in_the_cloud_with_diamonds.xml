@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink"
+	xmlns:xi="http://www.w3.org/2001/XInclude" version="5.0" xml:lang="en">
+	<info>
+        <title>XSpec in the Cloud with Diamonds</title>
+        <author>
+            <personname>
+                <firstname>Sandro</firstname>
+                <surname>Cirulli</surname>
+            </personname>
+            <affiliation>
+                <orgname>XSpec</orgname>
+            </affiliation>
+            <email>sandro@sandrocirulli.net</email>
+        </author>
+        <keywordset>
+            <keyword>XSpec</keyword>
+            <keyword>Unit Testing</keyword>
+            <keyword>Amazon Web Services</keyword>
+            <keyword>Serverless</keyword>
+        </keywordset>
+
+		<abstract>
+			<para>Running XSpec tests in a development team is usually performed via a CI server/service. However, this comes with limitations related to the use of private repositories and to the cost and burden of administering CI servers.</para>
+
+			<para>This paper describes an alternative approach for running XSpec tests from private repositories using a serverless architecture built on AWS Lambda. It describes the technical configuration and discusses the benefits, cost optimization, and constraints of a serverless architecture for running XSpec tests.</para>
+		</abstract>
+
+	</info>
+
+	<xi:include href="sections/010_intro.xml"/>
+
+	<xi:include href="sections/020_lambda_and_serverless.xml"/>
+
+	<xi:include href="sections/030_technical_configuration.xml"/>
+
+	<xi:include href="sections/040_discussion.xml"/>
+
+	<xi:include href="sections/050_conclusion.xml"/>
+
+	<xi:include href="sections/bibliography.xml"/>
+
+</article>

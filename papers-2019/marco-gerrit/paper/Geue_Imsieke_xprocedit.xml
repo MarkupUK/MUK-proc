@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+  <info>
+    <title>xprocedit, A Browser-Based Open-Source XProc Editor</title>
+    <author>
+      <personname>Marco Geue</personname>
+      <email>marco.geue@stud.hs-merseburg.de</email>
+      <uri>https://github.com/mag-letex/</uri>
+      <personblurb>
+        <para>Marco has studied Information Design and Media Management at Hochschule Merseburg (Merseburg University of Applied
+          Sciences). He wrote his master’s thesis about the subject of this paper, a browser-based XProc editor. He is about to 
+          graduate from Hochschule Merseburg.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Graduate Student</jobtitle>
+        <orgname>Hochschule Merseburg</orgname>
+        <address>
+          <city>Merseburg</city>
+          <country>Germany</country>
+        </address>
+      </affiliation>
+    </author>
+    <author>
+      <personname>Gerrit Imsieke</personname>
+      <email>gerrit.imsieke</email>
+      <uri>https://www.le-tex.de/en/GerritImsieke.html</uri>
+      <personblurb>
+        <para>As one of three managing directors of le-tex publishing services, Gerrit is responsible for XML technologies. He
+          is active in standardization of XProc 3.0 and NISO STS. He suggested the subject and then supervised Marco’s
+          thesis.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Managing Director</jobtitle>
+        <orgname>le-tex publishing services GmbH</orgname>
+        <address>
+          <city>Leipzig</city>
+          <country>Germany</country>
+        </address>
+      </affiliation>
+    </author>
+    <keywordset>
+      <keyword>XProc</keyword>
+      <keyword>Javascript</keyword>
+      <keyword>Graphs</keyword>
+      <keyword>XSLT 3.0</keyword>
+    </keywordset>
+    <abstract>
+      <para>A visual XProc editor can serve at least two purposes: Communicating the process flow to non-programmers and easing
+        the notoriously steep learning curve for programmers.</para>
+      <para>An implementation using the Javascript framework JointJS and the in-browser XSLT 3 processor Saxon-JS is
+        demonstrated, along with the challenges of supporting XProc’s peculiarities in a generic graph editing framework.</para>
+    </abstract>
+  </info>
+
+  
+  <section>
+    <title>Introduction</title>
+    <para>Visual programming languages have been around since the 1960s (see, for example,
+      <citation>Boshernitsan1998</citation>). Visual programming often uses the dataflow programming paradigm, whose description
+      XProc matches exemplarily:</para>
+    <blockquote>
+      <para>Applications are represented as a set of nodes (also called blocks) with input and/or output ports in them. These
+        nodes can either be sources, sinks or processing blocks to the information flowing in the system. Nodes are connected by
+        directed edges that define the flow of information between them. <citation>BoldtSousa2012</citation></para>
+    </blockquote>
+    <para>XProc is an “XML Pipeline Language” that was first specified in 2010 <citation>XProc1</citation>. Its main purpose is
+      the orchestration of XML validation and transformation tasks that traditionally is done with scripting languages and tools
+      such as Ant, Make, shell scripts, or custom Java programs. Two advantages of XProc are: 1. Processing happens in main
+      memory, which means documents need not be serialized or even stored to disk between processing steps, and there are no
+      penalties in JVM startup times that are often associated with shell script or Makefile orchestration. 2. There is no
+      global state in an XProc pipeline, a thing that is responsible for unexpected side effects in Ant, Make or Shell scripts
+      and that makes these programming languages unsuited for encapsulating possibly complex, re-usable functionality. XProc
+      provides this encapsulation and composability in its processing blocks, the so-called “steps.”</para>
+    <para>It has been argued that, given the advances in XPath 3.1 and XSLT 3.0, together with extension modules for dealing
+      with binary data, archives, HTTP APIs, etc., XSLT itself can now be used as a replacement for XProc
+        pipelines <citation>Quin2019</citation>. While this is possible, XSLT does not offer or enforce the degree of processing
+      block encapsulation that XProc offers and that is a prerequisite for creating a visual editor that lets users assemble
+      predefined building blocks.</para>
+    <para>While XProc version 1.0 is primarily focused on processing XML documents, XProc 3.0  <citation>XProc3</citation> knows
+      other document types, namely text, HTML, and JSON, but also arbitrary binary files, as first-class citizens. XProc’s main
+      applications so far are in publishing, and publishing these days requires handling of non-XML HTML and JSON, in
+      particular. XProc 3.0’s embrace of XPath 3.1 as its expression language and the XSLT and XQuery serialization 3.1
+      specification  <citation>Serialization31</citation> are key enablers of its more “webby” capabilities.</para>
+    <para>XProc 3 programs continue to be written in XML syntax, at least this is the only serialization that is specified
+      for 3.0. When writing a browser-based editor, there probably needs to be some translation between the editor’s
+      representation of a pipeline, be it HTML, SVG, or JSON, and XProc’s XML syntax. As it will be shown, the solution
+      presented in this paper uses JSON data structures as the internal representation. Translation from XProc XML to this
+      internal model and back to XProc XML will be done with XSLT 3.0 in the browser and the XPath 3.1 functions that convert
+      between JSON and XML.</para>
+    <para>While the concepts of XProc seem straightforward at first glance – processing steps whose outputs connect with inputs
+      of other steps – many users have reported difficulties in writing actual pipelines. This is partly due to the syntax. The
+      concept of primary inputs and outputs and default readable ports (that is supposed to make pipeline documents less
+      verbose) contributes to this reportedly steep learning curve.</para>
+    <para>Having experienced graph editors that also know the concept of multiple ports per processing unit, namely the Blender
+      node editor <citation>Blender</citation> and the Lego Mindstorms visual programming environment, we at le-tex thought that connecting existing XProc
+      steps graphically will help overcome the initial learning difficulties. It will also be useful to visualize complex XProc
+      pipelines since the XML representation offers almost no visual clues (apart from adjacent primary output/input ports)
+      which steps are connected and how data flows through the pipeline.</para>
+  </section>
+  
+  <section xml:id="special">
+    <title>Why is XProc Special?</title>
+    <para>XProc pipelines are basically directed acyclic graphs where the processing steps are the nodes and the input/output
+      connections are the edges. However, when we at le-tex first tried to use generic browser-based graph editing frameworks
+      for XProc in 2014, we discovered that some fundamental XProc properties are not well supported, to wit: Multiple docking
+      ports per node, the distinction between input ports and options, the distinction between parameter and document inputs,
+      encapsulation/sub-graphs, and default readable ports.</para>
+    <para>Encapsulation, for example, is a powerful feature of XProc that allows to expose a potentially complex pipeline as an
+      apparently monolithic building block with a well-defined interface and opaque innards. Some graph editing frameworks are
+      able to fold a sub-graph so that it occupies less screen real estate. This is no genuine encapsulation though since it
+      requires folded sub-graphs to be copied and pasted rather than re-used. It does not allow the “write once, use many times”
+      approach that XProc’s language design supports so well.</para>
+    <para>This kind of encapsulation can be seen in other functional languages, too, and there are graphical editors for other
+      programming languages. What sets XProc apart is the ability of a processing step to produce many different outputs that
+      don’t need to be consumed at once (or at all). This is useful for example when an encapsulated multi-step conversion
+      pipeline produces the conversion result on one port and intermediate results and validation reports for the input and
+      output on other ports. But this multi-valued, non-simultaneously consumed outputs deviate sufficiently enough from common
+      programming paradigms as to render visual editors for these languages unsuited for editing XProc.</para>
+    <para>Another peculiarity, XProc’s concept of “primary” and “default readable ports” is meant to make pipeline authoring
+      less verbose: The primary port of adjacent (in document order) steps connect implicitly, without the need to establish
+      explicit connections. On the two-dimensional canvas of a visual pipeline editor, however, there is no canonical document
+      order. Turning the 2-D representation into a linear XProc XML document, a task that the visual XProc editor needs to
+      perform, will become an optimization problem where a score needs to be attached to multiple possible serializations,
+      rewarding implicit connections via default readable ports. Alternatively, users of the graphical editor could be forced to
+      make XML document order explicit, a thing that we wanted to avoid for usability reasons.</para>
+    <para>This means that although XProc seems to be a perfect candidate for visual or dataflow programming, its reliance on XML
+      serialization is an extra challenge when converting the natural graph to an XML representation that actually helps people
+      writing their first pipelines.</para>
+    <para>One should acknowledge that a visual XProc programming environment will probably never replace actual coding. To a
+      large extent this is due to the amount of XSLT that many pipelines orchestrate. At least this is what our experience as
+      developers of the transpect framework <citation>transpect</citation> tells us. In most of our pipelines and libraries, the
+      core tasks will be performed by XSLT stylesheets. This is not a shortcoming of XProc but rather a feature. Apart from
+      ripping apart XSLT micropipelines, we don’t strive at replacing what we do in XSLT with XProc steps. We do see a huge
+      benefit in continuing to use XSLT’s template matching and import mechanisms while encapsulating multi-step XSLT,
+      zip/unzip, HTTP request, validation, etc. pipelines in well-defined XProc step signatures with possibly multiple
+      outputs.</para>
+  </section>
+
+  <section>
+    <title>Selecting a Graph Editing Framework</title>
+    <para>The criteria for selecting a graph editing framework were partly XProc-related, partly informed by current software
+      development trends and user expectations:</para>
+    <itemizedlist>
+      <listitem>
+        <para>browser-based</para>
+      </listitem>
+      <listitem>
+        <para>interactive</para>
+      </listitem>
+      <listitem>
+        <para>customizable</para>
+      </listitem>
+      <listitem>
+        <para>provides ports</para>
+      </listitem>
+      <listitem>
+        <para>supports encapsulation (hierarchical graphs)</para>
+      </listitem>
+      <listitem>
+        <para>open source</para>
+      </listitem>
+    </itemizedlist>
+    <para>A market research of graph editing frameworks, excluding those that don’t run in browsers, led to the following
+    score matrix:</para>
+    <informaltable>
+      <tgroup cols="6">
+        <thead>
+          <row>
+            <entry/>
+            <entry>GoJS</entry>
+            <entry>JointJS</entry>
+            <entry>NoFlo/FloHub</entry>
+            <entry>vis.js</entry>
+            <entry>yFiles</entry>
+          </row>
+        </thead>
+        <tbody>
+          <row>
+            <entry><emphasis>interactive</emphasis></entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+            <entry>no/yes</entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+          </row>
+          <row>
+            <entry><emphasis>customizable</emphasis></entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+          </row>
+          <row>
+            <entry><emphasis>encapsulation</emphasis></entry>
+            <entry>no</entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+            <entry>no</entry>
+            <entry>no</entry>
+          </row>
+          <row>
+            <entry><emphasis>ports</emphasis></entry>
+            <entry>no</entry>
+            <entry>yes</entry>
+            <entry>yes</entry>
+            <entry>no</entry>
+            <entry>yes</entry>
+          </row>
+          <row>
+            <entry><emphasis>open source</emphasis></entry>
+            <entry>no</entry>
+            <entry>yes</entry>
+            <entry>yes/partly</entry>
+            <entry>yes</entry>
+            <entry>no</entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+    <para>The Javascript framework that was selected for xprocedit is JointJS 
+      <citation>JointJS</citation>. Although it needs to be said that XProc pipelines
+      are, by far, not a graph type that is supported by JointJS out of the box, its basic support for graph editing, for
+      storing a graph model and for rendering a model as SVG has been very helpful.</para>
+    <para>NoFlo was a contender, but JointJS was chosen after initial experiments were promising. NoFlo didn’t enter the 
+    experimental phase, therefore we cannot say whether it would have required less customizing.</para>
+    <para>Auto-layout was not an initial requirement, but many of the frameworks support it and it will be put to use
+      in particular after loading an existing XProc pipeline.</para>
+    <para>The choice of XSLT 3 and Saxon-JS for converting back and forth between the browser representation (be it SVG or
+      Javascript/JSON) and XProc XML was never really disputed. This is in spite of Saxon-JS not meeting the open-source
+      requirement that we imposed on the graph editing framework. The rationale for this is that we regard XSLT 3 in the browser
+      as a strategic choice of technology, and we want to support the only existing implementation. Graph libraries for the Web,
+      on the other hand, do too little for XProc-style graphs out of the box to justify an investment in a commercial graph
+      library.</para>
+  </section>
+  
+  <section xml:id="solution">
+    <title>Solution</title>
+    <para>The solution, called xprocedit <citation>xprocedit</citation>, consists of an extension to the JointJS shape model in
+      order to accommodate different kinds of XProc steps (atomic, compound, multicontainer; standard/user-defined),
+      primary/non-primary ports, and options that act like input ports but are displayed differently and can have default
+      values.</para>
+    <para>More details are given in one of the author’s master’s thesis <citation>GeueMT</citation>.</para>
+    <para>XProc 3.0 is currently in the later stages of being specified. One XProc 1.0 concept that 3.0 does away with is
+      parameter ports. It was decided that parameter ports will not be supported by xprocedit. However, for pipelines that don’t
+      use parameter ports, an XProc 1.0 serialization is still available. This is because the generated pipelines need to be
+      tested but XProc 3.0 processors are not widespread yet. Support for XDM 3.1 maps, which serve as a replacement for
+      parameter ports when supplied as a parameter option, is currently being implemented in xprocedit. It should be possible,
+      if users are interested and if funding is available, to use xprocedit as an XProc 1.0→3.0 migration tool, converting
+      parameter ports to map options during import. </para>
+    <para>An issue where an interactive editor may help is validation, or rather, forcing the user to only create valid
+      pipelines. Ideally, a graphical pipeline editor will not, for example, let users connect two steps with a directed edge
+      that points from input to output, from input to input, or from a step to itself. Another check that is built into the
+      tooling might prevent users from connecting an output port that may emit multiple documents to an input port that only
+      accepts a single document. To that end, a certain amount of custom Javascript application logic had to be employed, and
+      this is not finished yet. Verifying that the declared content types of an output port match the content types that an
+      input port accepts is another future custom Javascript validation that is interesting in designing XProc 3.0 pipelines
+      with their support for non-XML documents.</para>
+    <para>Some constraints, such as whether there are no loops in the pipeline or whether all required inputs are connected,
+      are currently only checked upon export, via XSLT, and with poor error reporting.</para>
+    <para>As mentioned in the previous section, export from the internal Javascript model via its JSON serialization is performed
+    by XSLT 3.0 transformations in the browser, starting from the result of applying <code>fn:json-to-xml()</code> to the JSON
+    model.</para>
+    <para>The framework maintains an internal Javascript object representation of the graph. It was decided that the XProc XML
+      document be generated from the JSON serialization of this model, rather than from the SVG rendering. The main reason is
+      that, although the JSON representation also contains some layout information, it is considered as more stable than an SVG
+      rendering. The tool that was chosen for generating the XProc XML document, Saxon-JS, supports XSLT 3 and XPath 3.1, and
+      therefore it is equally capable of transforming JSON documents to XML as it is capable of transforming SVG to another XML
+      vocabulary. What finally tipped the scale in favour of converting JSON rather than SVG to XProc was symmetry: There also
+      needs to be an import process that imports pipelines and step libraries to the internal model, which is Javascript/JSON
+      rather than SVG.</para>
+    <para>An important aspect when generating pipelines for future human editing in XML format is this: There can be multiple
+      equivalent XML representations of a given graph. Consider the following pipeline (<xref linkend="fig_xslt_pipeline"/>,
+      taken from <citation>GeueMT</citation>):</para>
+    <figure xml:id="fig_xslt_pipeline">
+      <title>A Simple XSLT Pipeline</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="img/simple_xslt_pipeline.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>When serializing this pipeline as an XProc XML document, two variants are possible:</para>
+    <programlisting language="xml">&lt;p:declare-step xmlns:p="http://www.w3.org/ns/xproc"
+  xmlns:c="http://www.w3.org/ns/xproc-step" version="1.0">
+  &lt;p:output port="result" primary="true"/>
+  
+  &lt;p:load name="load-xsl" href="test.xsl"/>
+  
+  &lt;p:load name="load-xml" href="test.xml"/>
+  
+  &lt;p:xslt>
+    &lt;p:input port="stylesheet">
+      &lt;p:pipe port="result" step="load-xsl"/>
+    &lt;/p:input>
+    &lt;p:input port="parameters">&lt;p:empty/>&lt;/p:input>
+  &lt;/p:xslt>
+  
+&lt;/p:declare-step></programlisting>
+    <para>and</para>
+    <programlisting language="xml">&lt;p:declare-step xmlns:p="http://www.w3.org/ns/xproc"
+  xmlns:c="http://www.w3.org/ns/xproc-step" version="1.0">
+  &lt;p:output port="result" primary="true"/>
+  
+  &lt;p:load name="load-xml" href="test.xml"/>
+  
+  &lt;p:load name="load-xsl" href="test.xsl"/>
+  
+  &lt;p:sink/>
+  
+  &lt;p:xslt>
+    &lt;p:input port="source">
+      &lt;p:pipe port="result" step="load-xml"/>
+    &lt;/p:input>
+    &lt;p:input port="stylesheet">
+      &lt;p:pipe port="result" step="load-xsl"/>
+    &lt;/p:input>
+    &lt;p:input port="parameters">&lt;p:empty/>&lt;/p:input>
+  &lt;/p:xslt>
+  
+&lt;/p:declare-step></programlisting>
+    <para>The first variant uses a connection between the primary output of the step named <code>load-xml</code> with the
+      primary input of the XSLT step, while the second variant serializes the <code>p:load</code> steps in reverse order and
+      therefore needs to insert a <code>p:sink</code> step in between, and it needs to connect the primary input of the XSLT
+      step, <code>source</code>, explicitly with the primary output, <code>result</code>, of <code>load-xml</code>.</para>
+    <para>Unless one wants to use the x-y-coordinates as an ordering hint, the graph editor does not provide clues about the
+      preferred serialization order for the <code>p:load</code> steps. One possibility that was quickly rejected was to use
+      another type of connectors in the 2-D graph that represent document order. The idea was rejected because it puts an
+      additional burden onto the user that seems unnecessary.</para>
+    <para>Generating a serialization that makes maximum use of primary port connections is an optimization problem. The author
+      addressed it by a graph traversal that favours serializing primary ports adjacently when there are multiple choices. This 
+    is a heuristics that does not guarantee optimal results but solves this issue well enough.</para>
+    <para>The import mechanism has to deal with a problem that is also related to default readable ports: It needs to make
+      implicit connections explicit for ports and also for options. The core of this problem has already been addressed in an
+      XSLT-based XProc documentation tool whose normalized output will be converted to JointJS’s internal JSON graph model
+      using Saxon-JS.</para>
+    <bridgehead>Sub-Graphs</bridgehead>
+    <para>The subpipelines of compound steps such as <code>p:for-each</code> are displayed in their own tabs. Some bookkeeping
+      in the Javascript application will make sure that they are included in the JSON representation upon export and that they
+      are removed when the placeholder block in the containing graph is removed. JointJS would have permitted in-place folding
+      of subpipelines, but expanding them would have quickly occupied much screen space and it would also have necessitated more
+      advanced auto-layout capabilities.</para>
+    <para>Auto-layout is currently being added to the editor, its primary application being rendering the pipeline and its
+      subpipelines (in separate tabs) initially after loading an existing pipeline.</para>
+    <para>For round-tripping (import, edit, export, import, …), in order to spare users the ordeal of recreating a decent layout
+      in xprocedit over and over again, there is an option to preserve layout information in the serialized pipeline, using
+      XProc <code>p:pipeinfo</code> elements.</para>
+    <para>The application’s user interface is still under development; in March 2019 it looked like <xref linkend="fig_ui"
+      />.</para>
+    <figure xml:id="fig_ui">
+      <title>User Interface</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="img/2019_03_04_screenshot.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>The step library palettes on the left are still supplied statically as JSON structures. There will be an import
+      process that processes <code>p:import</code> statements and makes available the imported steps, grouped by namespace
+      prefix. A difficulty that has already been solved is that imports often (in case of transpect, at least) use canonical
+      import URIs that are not identical with their locations on the Web server that xprocedit runs on. A catalog resolver
+      written in XSLT that runs in the browser will perform the required URI translations when recursively resolving the
+      imports, and it will also restore the canonical URIs when serializing the XProc XML from the internal
+      representation.</para>
+  </section>
+
+  <section>
+    <title>Other Visual XProc Editors</title>
+    <para>Even before XProc 1.0 was finalized, EMC published the interactive XProc
+        Designer <citation>EMCXProcDesigner</citation> that ran in the browser. It was built using the Google Web
+        Toolkit <citation>GWT</citation>. The editor was visually appealing, but lacked an important feature: It was not
+      possible to import other steps or step libraries. This and other features are mentioned in a feature “pipeline” but 
+      development seems to have stalled since many years.</para>
+    <para>Another recently developed visual XProc editor is GProc <citation>GProc</citation>. It is written in Python with a
+      GTK+ interface, therefore it does not run in the browser. Similar to xprocedit, it is the result of a master’s thesis.</para>
+  </section>
+  
+  <section xml:id="outlook">
+    <title>Outlook</title>
+    <para>xprocedit has been written as part of one of the author’s master’s thesis.Much effort has gone into adapting the
+      Javascript graph framework for XProc, therefore, given the limited amount of time available, some crucial features such as
+      pipeline and library import are not functional yet. Refactoring some of the user interface components, such as the option
+      editor, can use some rework. It is conceivable to use Saxon-JS to a larger extent for generating these types of forms.</para>
+    <para>While pipelines are currently “stored” in main memory, we will probably add a RESTXQ service, provided by a BaseX
+      database, to store the edited pipelines and to load step libraries from.</para>
+    <para>If there is interest and funding, XProc can become a native graph type in JointJS or its commercial derivative,
+        Rappid <citation>JointJS</citation>.</para>
+    <para>If there is interest not only in editing pipelines in the browser but also in executing them in the browser, it is
+      conceivable that, using Saxon-JS and interfacing other Javascript libraries, a subset of XProc 3.0 will be made available
+      in the browser at some stage, probably as part of another master’s thesis.</para>
+    <para>An intermediate solution would be to run an XProc processor on a server and to post pipelines (and payloads) from the
+      editor to the server via HTTP. A specific appeal of this solution is that both nascent XProc 3.0 processors, Calabash and
+      Morgana, will accept alternative pipeline serialization formats than XML. So xprocedit might be able to post its internal
+      graph representation as RDF or as its native JSON model, without the need to do the default readable port optimization
+      that is only meant to simplify further editing in XML format.</para>
+  </section>
+
+  <section>
+    <title>Conclusion</title>
+    <para>A prototype of a visual XProc editor has been presented. Although the design choice for the graph library has been
+      vindicated, a considerable amount of effort was necessary and will be necessary in order to add XProc as another supported
+      graph type to the library, JointJS. Given that the visual editor will never been a complete programming environment (since
+      much project-specific code will be written in XSLT, XQuery, schema languages, etc.) and XProc is a niche language, it is
+      not clear whether xprocedit will be developed further or whether it will experience the fate of XProc Designer, whose development
+      stalled shortly after the first release. At least the code is open source and can be picked up and modified by anyone.</para>
+
+  </section>
+
+  <bibliography xml:id="marco-references">
+    <bibliomixed>
+      <abbrev>Blender</abbrev>
+      <title>Blender Documentation: Node Editor</title>
+      <bibliomisc><link xlink:href="https://docs.blender.org/manual/en/latest/editors/node_editor/"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>BoldtSousa2012</abbrev>
+      <author><personname>Boldt Sousa, Tiago</personname></author>,
+      (<date>2012</date>).
+      <title>Dataflow Programming: Concept, Languages and Applications</title>
+      <bibliomisc><link xlink:href="https://paginas.fe.up.pt/~prodei/dsie12/papers/paper_17.pdf"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>Boshernitsan1998</abbrev>
+      <author><personname>Boshernitsan, Marat</personname></author>,
+      <author><personname>Downes, Michael</personname></author>
+      (<date>1998</date>).
+      <title>Visual Programming Languages: A Survey</title>
+      <bibliomisc><link xlink:href="https://www2.eecs.berkeley.edu/Pubs/TechRpts/2004/6201.html"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>EMCXProcDesigner</abbrev>
+      <title>EMC XProc Designer</title>
+      <bibliomisc><link xlink:href="https://community.emc.com/docs/DOC-4382"></link></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>GeueMT</abbrev>
+      <author>Geue, Marco</author>
+      (<date>2019</date>).
+      <title>Entwicklung eines grafischen Editors für XProc-Pipelines mit dem SVG-basierten JavaScript-Framework JointJS</title>
+      Master’s Thesis, Hochschule Merseburg
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>GProc</abbrev>
+      <author>Tatsuya Haddow</author>
+      <title>GProc – A Graphical Authoring Tool for XML Pipelines</title>
+      <bibliomisc><link xlink:href="https://gitlab.com/in2erval/gproc/"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>GWT</abbrev>
+      <title>Google Web Toolkit (GWT)</title>
+      <bibliomisc><link xlink:href="https://opensource.google.com/projects/gwt"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>JointJS</abbrev>
+      <title>JointJS</title>
+      <bibliomisc><link xlink:href="https://www.jointjs.com/"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>Quin2019</abbrev>
+      <author>Liam Quin</author>
+      (<date>2019</date>).
+      <title>XProc in XSLT: Why and Why Not</title>.
+      In: XML Prague 2019 Conference Proceedings, p. <pagenums>255</pagenums>.
+      <bibliomisc><link xlink:href="http://archive.xmlprague.cz/2019/files/xmlprague-2019-proceedings.pdf"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>Serialization31</abbrev>
+      <title>XSLT and XQuery Serialization 3.1</title>, W3C Recommendation, <date>21 March 2017</date>
+      <bibliomisc><link xlink:href="https://www.w3.org/TR/2010/REC-xproc-20100511/"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>transpect</abbrev>
+      <title>transpect, An Open-Source Framework for Converting and Checking Data</title>
+      <bibliomisc><link xlink:href="https://transpect.github.io/"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>XProc1</abbrev>
+      <title>XProc: An XML Pipeline Language</title>, W3C Recommendation, <date>11 May 2010</date>
+      <bibliomisc><link xlink:href="https://www.w3.org/TR/xslt-xquery-serialization-31/"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>XProc3</abbrev>
+      <title>XProc 3.0: A Pipeline Language</title>
+      <bibliomisc><link xlink:href="http://spec.xproc.org/"/></bibliomisc>
+    </bibliomixed>
+    <bibliomixed>
+      <abbrev>xprocedit</abbrev>
+      <title>xprocedit</title>
+      <bibliomisc><link xlink:href="https://github.com/mag-letex/xprocedit/"></link></bibliomisc>
+    </bibliomixed>
+
+  </bibliography>
+
+</article>

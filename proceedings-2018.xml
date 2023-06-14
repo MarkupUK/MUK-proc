@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbookxi.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<book xmlns="http://docbook.org/ns/docbook" 
+        xmlns:xi="http://www.w3.org/2001/XInclude"
+        xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+    <info>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="xsl/img/background.jpg"/>
+            </imageobject>
+        </mediaobject>
+        <cover>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="xsl/img/background.jpg"/>
+                </imageobject>
+            </mediaobject>
+        </cover>
+        <title>Markup UK 2018 Proceedings</title>
+        <!--<authorgroup><author><personname><firstname>B. Tommie</firstname><surname>Usdin</surname></personname></author><author><personname><firstname>Rob</firstname><surname>Walpole</surname></personname></author><author><personname><firstname>Mark</firstname><surname>Dunn</surname></personname></author><author><personname><firstname>Bert</firstname><surname>Willems</surname></personname></author><author><personname> <firstname>Tony</firstname> <surname>Graham</surname> </personname></author><author><personname><firstname>David</firstname><surname>Maus</surname></personname></author><author><personname> <firstname>Makoto</firstname> <surname>Murata</surname> </personname></author><author><personname> <firstname>Hans-Jürgen</firstname> <surname>Rennau</surname> </personname></author><author><personname> <firstname>Hauke</firstname> <surname>Brandes</surname> </personname></author><author><personname><firstname>Achim</firstname> <surname>Berndzen</surname></personname></author><author><personname><firstname>Philip</firstname><surname>Hodder</surname></personname></author><author><personname> <firstname>Robin</firstname> <surname>La Fontaine</surname> </personname></author><author><personname><firstname>Steven</firstname><surname>Pemberton</surname></personname></author></authorgroup>-->
+        
+    </info>
+    <!--<acknowledgements>
+        <para>The organisers wish to thank the following organisations and individuals:</para>
+        <itemizedlist>
+            <listitem>
+                <para>Mulberry Technoologies</para>
+            </listitem>
+            <listitem>
+                <para>Adam Retter</para>
+            </listitem>
+            <listitem>
+                <para>Jirka Kosek</para>
+            </listitem>
+            <listitem>
+                <para>Norm Walsh</para>
+            </listitem>
+        </itemizedlist>
+    </acknowledgements>-->
+    
+    <xi:include href="papers-2018//BTU-MarkupUK.xml"/>
+    <xi:include href="papers-2018//Markup2018RobWalpole.xml"/>
+    <xi:include href="papers-2018//MarkupUK_bibliographic_references.xml"/>
+    <!-- Bethan goes here -->
+    <xi:include href="papers-2018//ToveyPaper.xml"/>
+    <xi:include href="papers-2018//willems/Modern%20amendment%20drafting.xml"/>
+    <xi:include href="papers-2018//graham/CSS-Print.xml"/>
+    <xi:include href="papers-2018//maus/paper.xml"/>
+    <xi:include href="papers-2018//crepdl.xml"/>
+    <xi:include href="papers-2018//rethinking-transformation.xml"/>
+    <xi:include href="papers-2018//berndzen_xproc_markkup-uk.xml"/>
+    <xi:include href="papers-2018//Lightweight%20XML%20DevOps%20using%20Apache%20Ant%20(MarkupUk%20-%202018.xml"/>
+    <!-- Mike Kay goes here -->
+    <xi:include href="papers-2018//markupuk2018mhk.xml"/>
+    <xi:include href="papers-2018//markupuk-laf01/markupuk-laf01/markupuk-laf02.xml"/>
+    <xi:include href="papers-2018//pemberton/testsuite.db"/>
+</book>

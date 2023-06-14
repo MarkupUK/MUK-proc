@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article xmlns="http://docbook.org/ns/docbook"
+	 xmlns:xl="http://www.w3.org/1999/xlink"
+	 version="5.0" xml:lang="en">
+  <info>
+    <title>XSLTForms for the ‘20s</title>
+
+    <keywordset>
+      <keyword>XSLTForms</keyword>
+      <keyword>XForms</keyword>
+      <keyword>XSLT</keyword>
+      <keyword>XQuery</keyword>
+      <keyword>HTML</keyword>
+      <keyword>CSS</keyword>
+      <keyword>Javascript</keyword>
+    </keywordset>
+
+    <abstract>
+      <para>Since 2009, XSLTForms has been developed with support for old
+      browsers. It is now time to consider modern browsers and XForms 2.0
+      support with XPath/XQuery 2.0+ instead of XPath 1.0</para>
+    </abstract>
+
+    <author>
+      <personname><firstname>Alain</firstname><surname>Couthures</surname></personname>
+
+      <personblurb>
+        <para>Alain Couthures is a non-conventional expert programmer finding
+        solutions to problems many would not even imagine being resolvable. He
+        has already implemented XForms at client-side (XSLTForms) and is also
+        implementing XQuery in Javascript. He is a member of the W3C XForms
+        Users Community Group.</para>
+      </personblurb>
+
+      <email>alain.couthures@agencexml.com</email>
+    </author>
+  </info>
+
+  <para>More and more complex forms are to be used but do they all work as
+  users would like? XForms is remaining as a nice declarative approach to
+  allow authors, even without strong programming abilities, to write robust
+  forms. XSLTForms is a light XForms implementation for browsers, at client
+  side.</para>
+
+  <section>
+    <title>XSLTForms since 2009</title>
+
+    <para>XSLTForms <citation>XSLTForms</citation> has been compatible with successive browser versions
+    starting from Internet Explorer 4. It is based on XSLT 1.0, CSS and
+    vanilla Javascript. Consequently, XSLTForms is composed of 3 files:
+    <filename>xsltforms.xsl</filename>, <filename>xsltforms.css</filename>
+    and <filename>xsltforms.js</filename>.</para>
+
+    <para>This XSLT stylesheet acts as a compiler, generating both HTML
+    elements with a bunch of CSS classes and Javascript instructions. The
+    complex part in it is the XPath 1.0 parser.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[<xf:input ref="PersonGivenName" incremental="true">
+ <xf:label>Please enter your first name: </xf:label>
+</xf:input>]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[<span id="xsltforms-mainform-input-4_4_2_" class="xforms-disabled xforms-control xforms-input xforms-appearance">
+ <span class="focus"> </span>
+ <label for="xsltforms-mainform-input-input-4_4_2_" id="xsltforms-mainform-label-2_4_4_2_" class="xforms-label">Please enter your first name: </label>
+ <span class="value">
+  <input type="text" id="xsltforms-mainform-input-input-4_4_2_" incremental="true" class="xforms-value" />
+ </span>
+ <span class="xforms-required-icon">*</span>
+ <span class="xforms-alert">
+  <span class="xforms-alert-icon"> </span>
+ </span>
+</span>]]></programlisting>
+
+    <para>And</para>
+
+    <programlisting><![CDATA[XsltForms_xpath.create(xsltforms_subform,"PersonGivenName",false,
+ new XsltForms_locationExpr(false,
+  new XsltForms_stepExpr('child',
+   new XsltForms_nodeTestName('','PersonGivenName')
+  )
+ )
+);
+new XsltForms_input(xsltforms_subform,xsltforms_subform.id + "-input-4_4_2_",2,"text",
+ new XsltForms_binding(null, "PersonGivenName"),null,"true",null,null,null
+);]]></programlisting>
+
+    <para>XForms 1.1 Recommendation <citation>XF11</citation> is based on XPath 1.0: no sequences, no
+    <code>eq</code>, <code>ne</code>, <code>lt</code>, … operators, no types, ... XSLTForms has its own XPath 1.0
+    engine in two steps: the parser written in XSLT 1.0 and the evaluator
+    written in Javascript. It is frustrating for authors used to retrieve data
+    from XML databases to be restricted to XPath 1.0 while XQuery/XPath 4.0 is
+    now emerging.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[concat('Hello ', PersonGivenName, '. We hope you like XForms!')]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[new XsltForms_functionCallExpr('http://www.w3.org/2005/xpath-functions concat',
+ new XsltForms_cteExpr('Hello '),
+ new XsltForms_locationExpr(false,
+  new XsltForms_stepExpr('child',
+   new XsltForms_nodeTestName('','PersonGivenName')
+  )
+ ),
+ new XsltForms_cteExpr('. We hope you like XForms!')
+)]]></programlisting>
+
+    <para>For generating Javascript instructions, XSLT 1.0 is not a very nice
+    approach because of a rather limited function set and just named templates
+    to process strings. For example, performance is not good with very long
+    element names… When applied at client-side, the XSLT stylesheet execution
+    results in a blank-page effect before HTML elements being rendered.</para>
+  </section>
+
+  <section>
+    <title>Browsers have evolved</title>
+
+    <para>XSLT 1.0 is still available on major browsers but some smartphones
+    don’t have it. Some browser vendors would be happy removing their XSLT
+    engine just to gain memory. They usually argue that XSLT 1.0 is not
+    significantly used in websites. And Mozilla Firefox own XSLT 1.0 engine
+    bugs won’t be fixed…</para>
+
+    <para>HTML, CSS and Javascript have evolved significantly to HTML5, CSS3
+    and ECMAScript 6 and browsers support many of their features which allows
+    more powerful programming.</para>
+
+    <para>Machines are faster and Javascript is more and more optimized for
+    performance.</para>
+
+    <para>Vanilla Javascript can still be a pertinent choice because even once
+    famous Javascript frameworks come and go while others don’t bother with
+    ascending compatibility… They do not seem to be really interested in
+    performance either.</para>
+
+    <para>By the way, Node.js appeared so vanilla Javascript can also run
+    outside a browser. Just using it, it is very easy to run an HTTP server on
+    a local machine: Node.js can be used to interact with files, databases and
+    so on while XForms is interacting with users.</para>
+
+    <para>All these evolutions allow XSLTForms modernization to be declined in
+    the following axes:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>An HTML5 notation for XForms elements and CSS styling of
+        them</para>
+      </listitem>
+
+      <listitem>
+        <para>An XQuery/XPath 3.1 parser written in Javascript</para>
+      </listitem>
+
+      <listitem>
+        <para>An XQueryX 3.1 to Javascript transpiler</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>XForms 2.0 <citation>XF2</citation> is also in good progress and XSLTForms should support all
+    its features as well.</para>
+  </section>
+
+  <section>
+    <title>HTML5 notation for XForms elements and CSS styling</title>
+
+    <para>XSLTForms is now using an HTML5 notation for XForms elements
+    replacing numerous <tag>DIV</tag> and <tag>SPAN</tag> embedded elements
+    with only CSS classes to differentiate them. This is still performed with
+    XSLT 1.0 but it can also be done with vanilla Javascript and Node.js.</para>
+
+    <para>HTML5 is allowing custom elements and CSS classes can be defined for
+    them. To avoid name conflicts, XForms elements are transformed into
+    <tag>xforms-*</tag> elements (<tag>xforms-input</tag>, for example) and
+    XForms attributes into <computeroutput>xf-*</computeroutput> attributes
+    (<computeroutput>xf-selected</computeroutput>, for example). Shadow DOM is
+    not currently used in XSLTForms but it cannot be used for grouping
+    controls anyway.</para>
+
+    <para>Each HTML attribute with AVT is renamed with the prefix
+    <computeroutput>xf-template-</computeroutput> and the <computeroutput>xf-avt</computeroutput> attribute is added to the corresponding
+    HTML element.</para>
+
+    <para>XForms repeat elements are automatically converted into XForms
+    repeat attributes when in HTML tables.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[<xf:input ref="PersonGivenName" incremental="true">
+ <xf:label>Please enter your first name: </xf:label>
+</xf:input>]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[<xforms-input xf-ref="PersonGivenName" xf-incremental="true">
+ <xforms-label>Please enter your first name: </xforms-label>
+</xforms-input>]]></programlisting>
+
+    <para>There is no Javascript instructions generation in the new XSLT
+    stylesheet.</para>
+
+    <para>HTML5 is not allowing custom elements within <tag>HEAD</tag> element so
+    <tag>xforms-model</tag> elements have to go within <tag>BODY</tag> element.</para>
+
+    <para>Inline XML instances and XML schemas have to be protected within
+    <tag>SCRIPT</tag> elements with a not-supported type (<computeroutput>application/xml</computeroutput>, for example)
+    to preserve letter cases. Because of a design error in Mozilla Firefox
+    XSLT engine, instances are also to be serialized with entities.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[<xf:instance>
+ <data xmlns="">
+  <PersonGivenName/>
+ </data>
+</xf:instance>]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[<xforms-instance>
+ <script type="application/xml">&lt;data xmlns=""&gt;&lt;PersonGivenName/&gt;&lt;/data&gt;</script>
+</xforms-instance>]]></programlisting>
+
+    <para>As a consequence, for XSLTForms, the XSLT 1.0 stylesheet is lighter
+    and the transformation is more than 3 times faster which is nicer for
+    users, reducing the blank page wait.</para>
+
+    <para>The XSLT stylesheet is much simpler and it becomes easy to rewrite
+    it in a procedural programming language. It could also be done with
+    XQuery <citation>XQuery</citation> <citation>XPF</citation>, of course.
+    It has, actually, already been done in Javascript for
+    Node.js because browser debuggers didn’t allow anymore breakpoints in
+    Javascript when resulting from an XSLT transformation (it has been fixed
+    in browsers since, but a few months later).</para>
+
+    <para>It is also possible to directly write forms in HTML5 as the XSLT
+    stylesheet would generate them. When generating XForms pages with XQuery
+    at server side, it might be more convenient than finding some trick to add
+    the XSLT processing instruction to be applied at client side not at
+    server-side. It is, of course, also good for performance and there is no
+    blank page effect at all.</para>
+
+    <para>Yet, XSLTForms requires more custom sub elements, such as
+    <tag>xforms-body</tag>, <tag>xforms-help</tag>, … to render XForms controls with HTML and
+    CSS. This is now performed with Javascript when building the form.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[<xforms-input xf-ref="PersonGivenName" xf-incremental="true">
+  <xforms-label>Please enter your first name: </xforms-label>
+  </xforms-input>]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[<xforms-input xf-ref="PersonGivenName" xf-incremental="true">
+  <xforms-label>Please enter your first name: </xforms-label>
+  <xforms-body>
+    <input>
+  </xforms-body>
+  <xforms-required></xforms-required>
+  <xforms-alert-mark></xforms-alert-mark>
+  <xforms-alert></xforms-alert>
+</xforms-input>]]></programlisting>
+
+    <para>Because of CSS attribute selectors, CSS rules are powerful enough to
+    manage custom elements visibility. XSLTForms is not anymore adding its own
+    CSS classes: it is adding run-time attributes instead. For example, an
+    XForms group without a binding will always be visible but, with a binding,
+    an extra attribute (<computeroutput>xf-bound</computeroutput>) will be programmatically added when
+    effectively bound to enable visibility. Models and actions are always
+    hidden.</para>
+
+    <para>Default CSS rules have been aligned to CSS rendering of XForms
+    tutorial written by Steven Pemberton <citation>XFTUT</citation>.</para>
+
+    <para>The <filename>xsltforms.css</filename> file has, effectively, been fully
+    rewritten.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[xforms-input:not([xf-required])[xf-invalid] > xforms-label::after {
+  content: "\2716";
+  color: red;
+}]]></programlisting>
+  </section>
+
+  <section>
+    <title>XQuery/XPath parser in Javascript</title>
+
+    <para>XForms is evaluating most XPath expressions in forms repeatedly. So,
+    it is much more efficient, especially in browsers, to parse them once and
+    preserve some compiled form for repeated evaluations.</para>
+
+    <para>Previously, XSLTForms was using XSLT to parse XPath 1.0 expressions
+    into Javascript code to create objects with a <code>.run()</code> method. Performance
+    was good enough but with some unexpected delays for very long node names
+    in XML instances…</para>
+
+    <para>This XPath parser has been rewritten in Javascript to be executed
+    just-in-time when an expression is to be evaluated for the first time.
+    Again, the XSLT stylesheet is lighter and the blank page wait is
+    reduced.</para>
+
+    <para>Because the previous parser was targeting XPath 1.0, the new one has
+    been extended to support XQuery 3.1 and generate XQueryX <citation>XQueryX</citation> stored in
+    Javascript arrays (each element or attribute as an array of name and
+    value).</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[concat('Hello ', PersonGivenName, '. We hope you like XForms!')]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[[Fleur.XQueryX.functionCallExpr,[
+  [Fleur.XQueryX.functionName,['concat']],
+  [Fleur.XQueryX.arguments,[
+    [Fleur.XQueryX.stringConstantExpr,[[Fleur.XQueryX.value,['Hello ']]]],
+    [Fleur.XQueryX.pathExpr,[
+      [Fleur.XQueryX.stepExpr,[
+        [Fleur.XQueryX.xpathAxis,['child']],
+        [Fleur.XQueryX.nameTest,['PersonGivenName']]
+      ]]
+    ]],
+    [Fleur.XQueryX.stringConstantExpr,[[Fleur.XQueryX.value,['. We hope you like XForms!']]]]
+  ]]
+]]]]></programlisting>
+
+    <para>Which can be serialized in XQueryX as</para>
+
+    <programlisting><![CDATA[<xqx:functionCallExpr>
+  <xqx:functionName>concat</xqx:functionName>
+  <xqx:arguments>
+    <xqx:stringConstantExpr>
+      <xqx:value>Hello </xqx:value>
+    </xqx:stringConstantExpr>
+    <xqx:pathExpr>
+      <xqx:stepExpr>
+        <xqx:xpathAxis>child</xqx:xpathAxis>
+        <xqx:nameTest>PersonGivenName</xqx:nameTest>
+      </xqx:stepExpr>
+    </xqx:pathExpr>
+    <xqx:stringConstantExpr>
+      <xqx:value>. We hope you like XForms!</xqx:value>
+    </xqx:stringConstantExpr>
+  </xqx:arguments>
+</xqx:functionCallExpr>]]></programlisting>
+
+    <para>On Node.js, the XQueryX structure is, then, the input for a new
+    XQuery engine, named Fleur <citation>Fleur</citation>, which also includes a DOM3 engine. It has to
+    run asynchronous calls on functions such as <code>fn:doc()</code>, <code>http:send-request()</code>,
+    <code>file:write()</code>, <code>prof:sleep()</code>,…</para>
+
+    <para>Because <code>async</code>/<code>await</code> feature was not yet being supported in Node.js and
+    old browsers, current version Fleur is still struggling with callbacks hell,
+    call stack overflow. Using this version from XSLTForms would have needed a
+    massive reorganization of sources: a converter from XQueryX to old XPath
+    1.0 objects of XSLTForms has, temporarily, been added to remove the
+    previous XPath 1.0 parser written in XSLT 1.0.</para>
+
+    <para>The <code>fleur()</code> Javascript function has been added to be used within the
+    Console in the browser debugger to evaluate XPath expressions.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[fleur("instance()")]]></programlisting>
+
+    <para>Returns</para>
+
+    <programlisting><![CDATA["<data xmlns=\"\"><PersonGivenName/></data>"]]></programlisting>
+
+    <para>Because rendering in Javascript console is rather limited, an XForms
+    console has been created (accessible with F1 key). Currently limited to
+    expression evaluation, it will be enriched to render, with HTML, Model
+    Item Properties (<computeroutput>type</computeroutput>, <computeroutput>relevant</computeroutput>,
+    <computeroutput>required</computeroutput>, <computeroutput>valid</computeroutput>,
+    <computeroutput>read-only</computeroutput>,...) bound to
+    XForms instance data nodes.</para>
+
+    <para>With Node.js easily allowing to run an http server, Fleur is also a
+    nice XQuery Web server for XSLTForms to generate inline XML instances,
+    manipulate files, REST APIs,…</para>
+  </section>
+
+  <section>
+    <title>XQueryX 3.1 to Javascript transpiler</title>
+
+    <para>Now, all browsers support async/await feature, so does Node.js. The
+    Javascript arrays resulting from the XPath/XQuery parser can now be
+    converted into Javascript functions.</para>
+
+    <para>To evaluate an expression, the context is passed as unique parameter
+    to the Javascript function. Its body contains a sequence of instructions
+    with a Reverse Polish Notation order: arguments and parameters are stacked
+    before function calls. Path evaluations require <code>if</code> statements to stop
+    when a step returns an empty sequence. Predicates are performed with
+    inline functions to be called for each sequence item. Error management is
+    implemented throwing Javascript exceptions.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[concat('Hello ', PersonGivenName, '. We hope you like XForms!')]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[ctx => {
+  ctx.xqx_stringConstantExpr('Hello ');
+  ctx.xqx_pathExpr();
+  ctx.xqx_xpathAxis_child();
+  ctx.xqx_nameTest("PersonGivenName");
+  ctx.restoreContext();
+  ctx.xs_string_1();
+  ctx.xqx_stringConstantExpr('. We hope you like XForms!');
+  ctx.fn_concat(3);
+  return ctx;
+};]]></programlisting>
+
+    <para>This is optimized for Javascript interpreter own call stack and
+    <code>async</code>/<code>await</code> use is reduced to minimal.</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[doc('r2d2.urdf.xml')/robot/joint[@name eq 'swivel']]]></programlisting>
+
+    <para>Becomes</para>
+
+    <programlisting><![CDATA[async ctx => {
+  ctx.xqx_pathExpr();
+  await ctx.xqx_filterExpr_async(async ctx => {
+    ctx.xqx_stringConstantExpr('r2d2.urdf.xml');
+    await ctx.fn_doc_1_async();
+    return ctx;
+  });
+  if (ctx.item.isNotEmpty()) {
+    ctx.xqx_xpathAxis_child();
+    ctx.xqx_nameTest("robot");
+    if (ctx.item.isNotEmpty()) {
+      ctx.xqx_xpathAxis_child();
+      ctx.xqx_nameTest("joint");
+      if (ctx.item.isNotEmpty()) {
+        ctx.xqx_predicateExpr(ctx => {
+          ctx.xqx_pathExpr();
+          ctx.xqx_xpathAxis_attribute();
+          ctx.xqx_nameTest("name");
+          ctx.restoreContext();
+          ctx.atomize();
+          ctx.xqx_stringConstantExpr('swivel');
+          ctx.xqx_valueComp(Fleur.eqOp);
+          return ctx;
+        });
+      }
+    }
+  }
+  ctx.restoreContext();
+  return ctx;
+};]]></programlisting>
+
+    <para>It is also enabling static optimization when generating the
+    Javascript source. For example, atomizing and node sorting are not always
+    necessary when calling a function. Instead of Javascript, with XSLT, a
+    more sophisticated transpiler could be written to transform XQueryX to
+    Javascript functions.</para>
+
+    <para>The <code>fleur()</code> Javascript function returns a type-explicit
+    serialization which simulates an equivalent XQuery expression for the
+    result of evaluation (more explicit than adaptative output).</para>
+
+    <para>For example,</para>
+
+    <programlisting><![CDATA[fleur("xs:date('2021-05-21') - xs:date('2021-05-10')")]]></programlisting>
+
+    <para>Returns</para>
+
+    <programlisting><![CDATA["xs:dayTimeDuration('P11D')"]]></programlisting>
+  </section>
+
+  <section>
+    <title>XForms 2.0 support in XSLTForms</title>
+
+    <para>XForms 2.0 comes with XPath 2.0 and later support. XSLTForms will
+    have XPath 3.1 soon…</para>
+
+    <para>XSLTForms is already supporting some major XForms 2.0 new features
+    such as variables and AVT.</para>
+
+    <para>XForms 2.0 Test Suite can be checked with XSLTForms running
+    it. As for XForms 1.1 Test Suite, the corresponding form will be extended
+    to produce the new Test Report.</para>
+
+    <para>New extensions will also be considered such as the use of HTML5
+    <tag>TEMPLATE</tag> elements to populate <tag>xforms-body</tag> elements, or the ability to
+    script XForms actions and use XQuery Update Facility <citation>XQUF</citation> when applicable.</para>
+  </section>
+
+  <bibliography xml:id="references">
+
+    <bibliomixed>
+      <abbrev>XSLTForms</abbrev>
+      Couthures, Alain: <title>XSLTForms</title>.<bibliomisc><link xl:href="https://github.com/AlainCouthures/declarative4all/tree/master/public/direct"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>Fleur</abbrev>
+      Couthures, Alain: <title>Fleur</title>.<bibliomisc><link xl:href="https://github.com/AlainCouthures/declarative4all/blob/master/build/js/fleur.js"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>XQuery</abbrev>
+      Robie, Jonathan - 
+      Dyck, Michael (eds.): <title>XQuery 3.1: An XML Query Language</title>. W3C, 2017<bibliomisc><link xl:href="http://www.w3.org/TR/xquery-31/"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>XPF</abbrev>
+      Kay, Michael (ed.): <title>XPath and XQuery functions and operators 3.1</title>. W3C, 2017<bibliomisc><link xl:href="https://www.w3.org/TR/xpath-functions-31/"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>XQUF</abbrev>
+      Snelson, John -
+      Melton, Jim (eds.): <title>XQuery Update Facility 3.0</title>. W3C, 2015<bibliomisc><link xl:href="http://www.w3.org/TR/xquery-update-30/"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>XQueryX</abbrev>
+      Melton, Jim - 
+      Spiegel, Josh (eds.): <title>XQueryX 3.1</title>. W3C, 2017<bibliomisc><link xl:href="http://www.w3.org/TR/xquery-31/"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>XF11</abbrev>
+      Boyer, John M. (ed.): <title>XForms 1.1</title>. W3C, 2009<bibliomisc><link xl:href="https://www.w3.org/TR/2009/REC-xforms-20091020/"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>XF2</abbrev>
+      Bruchez, Eric - al. (eds.): <title>XForms
+      2.0</title>. W3C, 2018<bibliomisc><link xl:href="https://www.w3.org/community/xformsusers/wiki/XForms_2.0"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>
+      <abbrev>XFTUT</abbrev>
+      Pemberton, Steven: <title>XForms Hands On Tutorial</title>. 2020<bibliomisc><link xl:href="https://homepages.cwi.nl/~steven/xforms/xforms-hands-on/tutorial.xhtml"/></bibliomisc>
+    </bibliomixed>
+  </bibliography>
+</article>

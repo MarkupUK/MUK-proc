@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbookxi.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0"
+  xml:lang="en" xml:id="murata">
+
+  <info>
+    <title>CREPDL: Protect Yourself from the Proliferation of Unicode Characters</title>
+
+    <authorgroup>
+      <author>
+        <personname>
+          <firstname>Makoto</firstname>
+          <surname>Murata</surname>
+        </personname>
+        <!--<email>eb2mmrt@gmail.com</email>-->
+        <affiliation>
+          <orgname>Keio University and JEPA</orgname>
+        </affiliation>
+      </author>
+    </authorgroup>
+    <keywordset>
+      <keyword>Unicode</keyword>
+      <keyword>ISO/IEC 10646</keyword>
+      <keyword>subset</keyword>
+      <keyword>collection</keyword>
+      <keyword>CJK</keyword>
+      <keyword>regular expression</keyword>
+      <keyword>grapheme cluster</keyword>
+    </keywordset>
+
+    <abstract>
+      <para>This paper studies machine-readable notations for describing subsets of Unicode or
+        ISO/IEC 10646. Unicode regular expressions can describe any subset, but they have
+        performance problems for huge subsets and cannot directly capture subsets defined in terms
+        of other subsets. Meanwhile, the upcoming second edition of ISO/IEC 19757-7 Character
+        Repertoire Description Language (CREPDL) overcomes these problems by providing references to
+        well-known subsets and external CREPDL scripts.</para>
+    </abstract>
+  </info>
+
+  <section>
+    <title>Introduction</title>
+    <para>Which character in Unicode are you willing to accept? If you receive UTF-8 text from
+      somebody, it might contain any of the 136,690 code points of Unicode 10.</para>
+
+    <para>Accepting any Unicode character may lead to problems in the future. First, nobody can read
+      all characters. Second, few fonts cover all characters. Third, some software such as document
+      editors supports only a subset of Unicode.</para>
+
+    <para>Historically, legacy encodings have protected users from the proliferation of characters.
+      For example, as long as you use Shift JIS, you only have to worry about 7,000 characters. But
+      UTF-8 now exposes almost 88,000 CJK<footnote><para>Chinese, Japanese and Korean</para></footnote> ideographic characters.</para>
+
+    <para>In the Unicode era, we need a language for describing which character is to be allowed and
+      then examining text against descriptions in this language. ISO/IEC 19757-7 Character
+      REPertoire Description Language (CREPDL) <xref linkend="CREPDL2"/> is an attempt of ISO/IEC
+      JTC1/SC34 for such a language. Although the first edition was restricted to code points, the
+      second edition can handle code point sequences, which represent grapheme clusters
+      (“user-perceived characters”).</para>
+
+    <para>The rest of this paper is organized as follows. In <xref linkend="subsetsInUnicode"/> and <xref linkend="subsetsinISOIEC10646"/>, we study subsets in
+      Unicode and ISO/IEC 10646, respectively. In <xref linkend="machineReadableNotations"/>, we study two existing machine-readable
+      notations for describing subsets: regular expressions <xref linkend="uts18"/> and a W3C
+      notation <xref linkend="w3cnotation"/>. In particular, we make clear that regular expressions
+      have performance problems for huge subsets and cannot directly capture subsets defined in
+      terms of other subsets. In <xref linkend="crepdlDesignImpl"/>, we have a quick overview of the design and
+      implementation of CREPDL and see how it overcomes limitations of the existing
+      notations.</para>
+
+  </section>
+  <section xml:id="subsetsInUnicode">
+    <title>Subsets in Unicode</title>
+    <para>The Unicode standard <xref linkend="Unicode"/> does not mandate the support of all Unicode
+      characters. Rather, it allows implementations to support subsets of Unicode characters.</para>
+
+    <para>But Unicode does not define any subsets. It does not provide any mechanisms for specifying
+      such subsets either. This is made clear by the following bullet extracted from
+      "Interpretation" subsubclause in the subclause 3.2 (Conformance Requirements) of the Unicode
+      standard.</para>
+    <blockquote><itemizedlist>
+      <listitem>
+        <para>Any means for specifying a subset of characters that a process can interpret is
+          outside the scope of this standard.</para>
+      </listitem>
+    </itemizedlist></blockquote>
+
+    <para>However, it is true that Unicode regular expressions can be used for representing subsets.
+      We will discuss this topic in Section 4.1.</para>
+  </section>
+
+  <section xml:id="subsetsinISOIEC10646">
+    <title>Subsets in ISO/IEC 10646</title>
+
+
+    <para>Likewise, conformant implementations of ISO/IEC 10646 <xref linkend="ISO10646"/> may
+      support subsets rather than all characters in ISO/IEC 10646.</para>
+
+    <para>But ISO/IEC 10646 goes much further than Unicode. A subset is defined as either an
+      implementation-defined list of code points, a standardized collection, or a combination of the
+      two. Collections are standardized in Annex A of ISO/IEC 10646.</para>
+
+    <para>In the following subsections, we study collections in Annex A. But it is interesting to
+      note that ISO/IEC 10646 does not provide a standard notation for specifying subsets. Different
+      collections in Annex A are represented by different notations.</para>
+
+    <section>
+      <title>Collections</title>
+      <section>
+        <title>Code Points and Ranges</title>
+
+        <para>Most collections in Annex A are very simple. They are ranges of code points. For
+          example, <code>LATIN-1 SUPPLEMENT</code> (collection 2) is a range 00A0-00FF.</para>
+
+        <para><code>MULTILINGUAL EUROPEAN SUBSET 2</code> (collection 282) is more complicated. It
+          is specified by the following ranges of code points as indicated for each row.</para>
+
+        <example>
+          <title><code>MULTILINGUAL EUROPEAN SUBSET 2</code></title>
+          <programlisting> 
+Plane 00
+Row Values within row
+00  20-7E A0-FF
+01  00-7F 8F 92 B7 DE-EF FA-FF
+02  18-1B 1E-1F 59 7C 92 BB-BD
+    C6-C7 C9 D8-DD EE
+03  74-75 7A 7E 84-8A 8C 8E-A1 
+    A3-CE D7 DA-E1
+04  00-5F 90-C4 C7-C8 CB-CC D0-EB 
+    EE-F5 F8-F9
+1E  02-03 0A-0B 1E-1F 40-41 56-57 
+    60-61 6A-6B 80-85 9B F2-F3
+1F  00-15 18-1D 20-45 48-4D 50-57 
+    59 5B 5D 5F-7D 80-B4 B6-C4
+    C6-D3 D6-DB DD-EF F2-F4 F6-FE
+20  13-15 17-1E 20-22 26 30 32-33 
+    39-3A 3C 3E 44 4A 7F 82 A3-A4
+    A7 AC AF
+21  05 16 22 26 5B-5E 90-95 A8
+22  00 02-03 06 08-09 0F 11-12 19-1A
+    1E-1F 27-2B 48 59 60-61 64-65
+    82-83 95 97
+23  02 10 20-21 29-2A
+25  00 02 0C 10 14 18 1C 24 2C 34 3C
+    50-6C 80 84 88 8C 90-93
+    A0 AC B2 BA BC C4 CA-CB D8-D9
+26  3A-3C 40 42 60 63 65-66 6A-6B
+    FB 01-02
+FF  FD</programlisting>
+        </example>
+
+        <para>Although this collection is not small, CJK collections are significantly larger. For
+          example, <code>JIS2004 IDEOGRAPHICS EXTENSION</code> (collection 371) has 3695 code
+          points. <code>BASIC JAPANESE</code> (collection 285) contains 6884 code points. <code>IICORE</code>
+          (collection 370) has 9810 code points. Ranges are not useful for such CJK collections
+          since code points in them are scattered. The definitions of these CJK collections are
+          provided as electronic attachments.</para>
+      </section>
+      <section>
+        <title>Open Collections and Fixed Collections</title>
+
+        <para>Some collections defined in Annex A contain unassigned code points. Such collections
+          are called <emphasis>open</emphasis> collections. Meanwhile, <emphasis>fixed</emphasis>
+          collections contain assigned code points only.</para>
+
+        <para>Unassigned code points in open collections may be assigned by later versions of
+          ISO/IEC 10646. Meanwhile, fixed collections remain unchanged in future versions.</para>
+      </section>
+      <section>
+        <title>References to Other Collections</title>
+        <para>Some collections are defined as the union of other collections. For example,
+            <code>MODERN EUROPEAN SCRIPTS</code> (collection 283) is the union of more than 30
+          collections, each of which is a simple range. <code>COMMON JAPANESE</code> (collection
+          287) is defined as the union of <code>BASIC JAPANESE</code> (collection 285) and an
+          enumerated list of 609 code points. Although it is possible to copy the definition of
+          referenced collections and avoid references, the result would be less readable and harder
+          to maintain.</para>
+      </section>
+      <section>
+        <title>Grapheme Clusters</title>
+
+        <para>A grapheme cluster <xref linkend="usa29"/> is a sequence of code points that
+          represents“user-perceived characters”. A simple example is a base character followed by a
+          combining character.</para>
+
+        <para><code>CONTEMPORARY LITHUANIAN LETTERS</code> (collection 284) is the first collection
+          containing grapheme clusters such as &lt;004A, 0303> and &lt;0069, 0307, 0301>. Note that
+          0303 is allowed to follow some code points (e.g, 004A), but is not allowed to follow
+          others (e.g., 004B).</para>
+
+        <para><code>MOJI-JOHO-KIBAN IDEOGRAPHS-2016</code> (collection 390) is a collection
+          applicable to persons' names in Japanese public service. This collection contains grapheme
+          clusters such as &lt;5289,E0101> and &lt;5351,FE00>, where E0101 is an ideographic
+          variation selector and FE00 is a variation selector. Although E0101 is allowed to follow
+          5289, it is not allowed to follow other characters (5288, for example).</para>
+
+        <para>The size of <code>CONTEMPORARY LITHUANIAN LETTERS</code> is much smaller than that of
+            <code>MOJI-JOHO-KIBAN IDEOGRAPHS-2016</code>. The number of code points and grapheme
+          clusters in <code>CONTEMPORARY LITHUANIAN LETTERS</code> (collection 284) is less than
+          100. But the number of code points in <code>MOJI-JOHO-KIBAN IDEOGRAPHS-2016</code> is more
+          than 52000 and that of grapheme clusters is more than 10000.</para>
+      </section>
+      <section>
+        <title>User-defined Subsets</title>
+        <section>
+          <title>Subsets Defined by Governments</title>
+
+          <para>Although collections in ISO/IEC 10646 are defined for technical reasons, the
+            Japanese government defines sets of CJK ideographic characters for non-technical
+            reasons. For example, Kyouiku Kanji <xref linkend="kyouiku"/>is a set of CJK ideographic
+            characters for elementary school education. It has 1006 characters. Another set, Jouyou
+            Kanji, contains 2136 CJK ideographic characters for use in official government
+            documents. Governments in Mainland China, Taiwan, Hong-Kong, and Korea also define sets
+            of CJK ideographic characters.</para>
+        </section>
+        <section>
+          <title>Subsets for Describing Font Coverage</title>
+
+          <para>Characters covered by commercial fonts in Japan are slightly different from ISO/IEC
+            10646 collections for some reasons (backward compatibilities with Shift JIS, for
+            example). Machine-readable descriptions of font-covered subsets make it easier to
+            compare different fonts having different coverage.</para>
+        </section>
+      </section>
+    </section>
+  </section>
+  <section xml:id="machineReadableNotations">
+    <title>Existing Machine-readable Notations for Describing Subsets</title>
+    <section>
+      <title>Unicode Regular Expressions</title>
+
+      <para>Unicode regular expressions <xref linkend="uts18"/> can be used for representing Unicode
+        subsets. In fact, in the Unicode Common Locale Data Repository <xref linkend="cldr"/>,
+        subsets for each locale are represented by regular expressions. Subsubsection 5.3.3 (Unicode
+        Sets) of Unicode Technical Standard #35 <xref linkend="uts35"/> describes the use of regular
+        expressions for subsets and demonstrates the use of code points, ranges, code point
+        sequences, and set operations (union, inverse, difference, and intersection).</para>
+
+      <para>Any collection defined in ISO/IEC 10646 can be represented by a Unicode regular
+        expressions. In particular, code point sequences representing grapheme clusters (e.g.,
+          <code>&lt;5289,E0101></code>) can be represented by regular expressions (e.g.,
+          <code>{\u5289\U000E0101}</code>). </para>
+
+      <para>However, there are two problems. When collections are small, these problems are
+        insignificant. But they become quite significant for large collections such as CJK
+        collections.</para>
+
+      <section>
+        <title>Referencing other subsets</title>
+
+        <para>Unicode regular expressions cannot reference collections defined in ISO/IEC 10646.
+          Likewise, they cannot reference other regular expressions. Thus, regular expressions
+          cannot directly capture collections defined in terms of other collections. It is thus
+          necessary to create a gigantic regular expression by copying the definition of each
+          referenced collection. This might be acceptable for <code>MODERN EUROPEAN SCRIPTS</code> (collection
+          283). But it is too inconvenient for <code>COMMON JAPANESE</code> (collection 287) since it references
+          <code>JIS2004 IDEOGRAPHICS EXTENSION</code> (collection 371), which contains 3695 code points.</para>
+
+
+      </section>
+      <section>
+        <title>Performance</title>
+
+        <para>Unicode regular expression engines are slow for large collections. However, hash-based
+          set operations are much faster. This observation is based on an experiment with ICU's
+          Regular Expressions package<footnote><para><uri>http://www.icu-project.org/userguide/regexp</uri></para></footnote> and a hash-based set of the programming language F#.</para>
+
+        <para>First, I created a regular expression for the <code>MULTILINGUAL EUROPEAN SUBSET 2</code>
+          collection. After creating a matcher (an instance of the class RegexMatcher) from it, I
+          invoked it for the string "&amp;#x3000;" 100000 times. In my computing environment (AMD
+          A10-7800, 16GB Memory, Windows 10), the elapsed time was about 0.4 seconds.</para>
+
+        <para>I then created a hash-based set for the same collection and tested if it contains the
+          same string. I did this test 100000 times. The elapsed time was about 0.015 seconds. Thus,
+          the hash-based set is more than 20 times faster than the ICU's Regular Expressions
+          package.</para>
+
+
+        <para>Second, I did the same experiment for the <code>IICORE</code> collection. In the case of the
+          regular expression matcher, the elapsed time was about 23 seconds. In the case of the
+          hash-based set, the elapsed time was about 0.015 seconds. Thus, the hash-based set is more
+          than 1600 times faster than the ICU's Regular Expressions package.</para>
+
+        <para>The slow performance of regular expression engines might not be problematic if the
+          collection is not large. But it is fatal for huge CJK collections.</para>
+      </section>
+    </section>
+    <section>
+      <title>A Notation for Character Collections for the WWW</title>
+
+      <para>“A Notation for Character Collections for the WWW” <xref linkend="w3cnotation"/>
+        (hereafter W3C notation for short) provides an XML syntax for describing subsets. Although
+        it has not become a W3C recommendation and has not been implemented, it has a number of
+        interesting ideas.</para>
+
+      <para>The W3C notation does not use regular expressions. Rather, it introduces XML elements
+          (<code>range</code> and <code>enum</code>) for representing ranges and code points,
+        respectively.</para>
+
+      <para>An interesting feature of the W3C notation is its <code>kernel</code> and
+          <code>hull</code> elements. They are used to define open collections.</para>
+
+      <para>Unlike regular expressions, the W3C notation is equipped with a mechanism that
+        references other subset descriptions or well-known subsets (e.g., collections in ISO/IEC
+        10646). This notation can thus easily describe subsets defined in terms of other
+        subsets.</para>
+
+      <para>The W3C notation also has set operations (union, inverse, difference, and intersection).
+        They allow subsets to be defined in terms of other subsets.</para>
+
+      <para>However, the W3C notation lacks mechanisms for describing grapheme clusters.</para>
+    </section>
+  </section>
+  <section xml:id="crepdlDesignImpl">
+    <title>Design and Implementation of CREPDL</title>
+    <section>
+      <title>Language Design</title>
+
+      <para>CREPDL is intended to combine the best parts of Unicode regular expressions and the W3C
+        notation. Unlike regular expressions, CREPDL can easily handle large collections. Unlike the
+        W3C notation, CREPDL can handle grapheme clusters. </para>
+
+      <para>First, CREPDL allows the use of Unicode regular expressions as atomic expressions. This
+        is done by the <code>char</code> element of CREPDL. Note that sequences of code points,
+        which represent grapheme clusters, can be represented by regular expressions. </para>
+
+      <para>Second, CREPDL borrows mechanisms of the W3C notation with some modifications.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>CREPDL allows references to collections defined in ISO/IEC 10646 and other
+            well-known subsets. The <code>repertoire</code> element of CREPDL represents such
+            references. For example, <code>IICORE</code> (collection 370) can be referenced by
+              <code>&lt;repertoire registry="10646" number="370"/></code>.</para>
+        </listitem>
+        <listitem>
+          <para>CREPDL allows references to other CREPDL scripts by URIs. The <code>ref</code>
+            element of CREPDL represents such references. </para>
+        </listitem>
+        <listitem>
+          <para>CREPDL provides set operation by the <code>union</code>, <code>intersection</code>,
+            and <code>difference</code> elements.</para>
+        </listitem>
+        <listitem>
+          <para>CREPDL allows open collections and fixed collections by the <code>kernel</code> and
+              <code>hull</code> elements. </para>
+        </listitem>
+
+      </itemizedlist>
+
+      <para>The CREPDL processor has two working modes: <code>character</code> and
+          <code>graphmeCluster</code>. If the mode is <code>character</code>, the CREPDL processor
+        examines each code point in the input text stream. If the mode is
+          <code>graphemeCluster</code>, the CREPDL processor extracts grapheme clusters from the
+        text stream by applying the algorithm as defined in <xref linkend="usa29"/>. It then
+        validates each grapheme cluster.</para>
+
+      <para>Huge well-known collections referenced by <code>&lt;repertoire></code> can be implemented
+        by hash-based sets. Thus, the CREPDL processor can handle such collections very
+        efficiently.</para>
+
+      <para>This paper does not cover details of the CREPDL language. Interested readers are
+        encouraged to review the CD or upcoming DIS for ISO/IEC 19757-7.</para>
+    </section>
+
+    <section>
+      <title>Implementation</title>
+
+      <para>An open source implementation of CREPDL is available at
+          <uri>https://github.com/CITPCSHARE/CREPDL</uri>. It is written in F# (a functional
+        programming language). This implementation relies on the ICU regular expression
+        engine.</para>
+
+      <para>Large collections in Annex A of ISO/IEC 10646 are implemented as hash-based sets.
+        Validation against such collections is thus very efficient.</para>
+
+      <para>Another GitHub repository provides a collection of example CREPDL scripts. It is
+        available at <uri>https://github.com/CITPCSHARE/CREPDLScripts</uri>.</para>
+    </section>
+  </section>
+  <section>
+    <title>Concluding Remarks and Future Works</title>
+    <para>The upcoming revision of CREPDL is intended to combine the best parts of Unicode regular
+      expressions and the W3C notation. CREPDL is expected to work nicely for huge subsets. The F#
+      implementation of CREPDL is publicly available.</para>
+
+    <para>The next step is to use CREPDL for comparing different subsets covered by different fonts.
+      It is not easy to directly compare two CREPDL scripts. However, if there is a list of all
+      grapheme clusters in Unicode, validation of this list against two CREPDL scripts can provide
+      definitive answers.</para>
+
+  </section>
+  <bibliography>
+    <bibliomixed xml:id="cldr" xreflabel="[1]">
+      <abbrev>1</abbrev>
+      <title>CLDR - Unicode Common Locale Data Repository</title>
+      <address><link xl:href="http://cldr.unicode.org/">http://cldr.unicode.org/</link></address>
+    </bibliomixed>
+    <biblioentry xml:id="ISO10646" xreflabel="[2]">
+      <abbrev>2</abbrev>
+      <title>ISO/IEC 10646, Universal Coded Character Set (UCS) </title>
+    </biblioentry>
+    <biblioentry xml:id="CREPDL2" xreflabel="[3]">
+      <abbrev>3</abbrev>
+      <title>ISO/IEC CD 19757-7:2017, Document Schema Definition Languages (DSDL) — Part 7:
+        Character Repertoire Description Language (CREPDL)</title>
+    </biblioentry>
+    <bibliomixed xml:id="kyouiku" xreflabel="[4]">
+      <abbrev>4</abbrev>
+      <title>Kyōiku kanji, Wikipedia</title>
+      <address><link xl:href="https://en.wikipedia.org/wiki/Kyōiku_kanji">https://en.wikipedia.org/wiki/Kyōiku_kanji</link></address>
+    </bibliomixed>
+    <bibliomixed xml:id="Unicode" xreflabel="[5]">
+      <abbrev>5</abbrev>
+      <title>The Unicode Consortium. The Unicode Standard.</title>
+      <address><link xl:href="http://www.unicode.org/versions/latest/">http://www.unicode.org/versions/latest/</link></address>
+    </bibliomixed>
+    <bibliomixed xml:id="usa29" xreflabel="[6]">
+      <abbrev>6</abbrev>
+      <title>Unicode Standard Annex #29: Unicode Text Segmentation</title>
+      <address><link xl:href="http://www.unicode.org/reports/tr29/">http://www.unicode.org/reports/tr29/</link></address>
+    </bibliomixed>
+    <bibliomixed xml:id="uts18" xreflabel="[7]">
+      <abbrev>7</abbrev>
+      <title> Unicode Technical Standard #18: Unicode Regular Expressions</title>
+      <address><link xl:href="http://www.unicode.org/reports/tr18/">http://www.unicode.org/reports/tr18/</link></address>
+    </bibliomixed>
+    <bibliomixed xml:id="uts35" xreflabel="[8]">
+      <abbrev>8</abbrev>
+      <title>Unicode Technical Standard #35: Unicode Locale Data Markup Language (LDML)</title>
+      <address><link xl:href="http://www.unicode.org/reports/tr35/">http://www.unicode.org/reports/tr35/</link></address>
+    </bibliomixed>
+    <bibliomixed xml:id="w3cnotation" xreflabel="[9]">
+      <abbrev>9</abbrev>
+      <title>W3C Note 14-January-2000: A Notation for Character Collections for the WWW</title>
+      <address><link xl:href="https://www.w3.org/TR/2000/NOTE-charcol-20000114/">https://www.w3.org/TR/2000/NOTE-charcol-20000114/</link></address>
+    </bibliomixed>
+  </bibliography>
+</article>

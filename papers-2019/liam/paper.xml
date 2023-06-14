@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/css" href="resources/css/paper.css"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0">
+	<info>
+		<title>Dispelling Myths About Markup Formats: When What Why Where</title>
+		<author>
+			<personname>Liam Quin</personname>
+			<email>liam@fromoldbooks.org</email>
+			<uri>https://www.delightfulcomputing.com/</uri>
+			<personblurb>
+				<para><?oxy-placeholder content="Details about you"?></para>
+			</personblurb>
+			<affiliation>
+				<jobtitle>Owner and coffee-slave</jobtitle>
+				<orgname>Delightful Computing</orgname>
+			</affiliation>
+		</author>
+		<keywordset>
+			<keyword>declarative markup</keyword>
+			<keyword>markup</keyword>
+			<keyword>vocabulary</keyword>
+			<keyword>markdown</keyword>
+			<keyword>XML</keyword>
+		</keywordset>
+		<abstract>
+			<para>Misunderstandings about the goals and strengths of different document and data interchange
+				formats can lead to suboptimal decisions. Such misunderstandings appear widespread.
+				The purpose of this paper is to suggest areas in which each format has strengths,
+				and to provide clear explanations that people can use to place XML in the context of
+				other current markup systems.</para>
+			<para>Common misconceptions about XML include statements such as “XML was designed for Web
+				services and therefore unsuitable for documents;” “XML was designed to replace HTML
+				and has failed;” “XML cannot transmit semantics of any kind;” “XML is dead.” In
+				fact, XML is alive and well. There are misconceptions about other formats, too, of
+				course.</para>
+		</abstract>
+	</info>
+	<section>
+		<title>Introduction</title>
+		<para>Declarative markup languages have been around for many years. There were declarative
+			systems built from Unix <emphasis>troff</emphasis> macro libraries in the 1970s and
+			1980s, and of course SGML, Scribe, LaTeX and many others attempt to be more or less
+			declarative and more or less general ways to represent and process documents with
+			computers.</para>
+		<para>The choice of which markup system to use should be based on clear well-understood
+			criteria. These might include:<itemizedlist>
+				<listitem>
+					<para>Which notation has a closest fit to the document or documents. For
+						example, a document with a lot of mixed markup and running text will be more
+						difficult to process in some systems than others, as will a multilingual
+						document;</para>
+				</listitem>
+				<listitem>
+					<para>Which notation has associated tools that perform the processing the
+						project needs;</para>
+				</listitem>
+				<listitem>
+					<para>Which system the developers like the most or hate the most;</para>
+				</listitem>
+				<listitem>
+					<para>Which system will be most likely to have active support for the entire
+						duration of the project;</para>
+				</listitem>
+				<listitem>
+					<para>What will be the costs and what will be the gains of each format;</para>
+				</listitem>
+				<listitem>
+					<para>What are all the other similar projects using.</para>
+				</listitem>
+			</itemizedlist></para>
+		<para>Very often, the emotional aspects of the decision outweigh the technical
+			aspects. This paper primarily explores the technical aspects, but
+			also provides the reader with some ammunition to make an effective
+			presentation in the emotional arena.</para>
+		<para>The examples of criteria enumerated above do not include the
+			single most important aspects of a decision: the context and the
+			situation.  The <emphasis>context</emphasis> is an emergent property
+			of organizational culture, fashion, predicted usage, and much more;
+			some of this is listed explicitly here and some not. The
+				<emphasis>situation</emphasis>, or the circumstances around the
+			decision, must be viewed in terms of the wider context: instructions
+			for identifying radioactive material in a nuclear power plant might
+			have to be understood for a hundred years or more; a financial
+			transaction must be archived for a period determined by a legal
+			statute of limitation; British laws are written on vellum and stored
+			in a stone tower in some cases for a thousand years or more. But
+			over the lifetime of the information the context in which it is used
+			may change: a financial record might be read by corporate accounting
+			staff or, later, by a government auditor.</para>
+		<para>The available tools will vary, but the organization may have a
+			legal need to make information available regardless of applications
+			originally used to process it. Similarly, software applications,
+			operating systems, even display and user interface hardware
+			constraints, all change over time. But a bigger question is who
+			determines the format: who determines what information is stored,
+			and how, and how is it to be used. A document that is read by an
+			application to configure user preferences is likely designed by a
+			programmer; a transcription of a mediaeval manuscript is more likely
+			to be represented in ways determined by the people working with the
+			text itself rather than with any particular application.</para>
+		<para>The following sections attempt to identify good and less
+			successful contexts for different markup formats, and, again, to
+			provide ways of describing these contexts.</para>
+		<section>
+			<title> HTML: The HyperText Markup Language (HTML).</title>
+			<para>The first standardized version of HTML was described by a
+				combination of prose and an SGML DTD.  In this sense, and one
+				other (see XHTML later in this paper) HTML shares some ancestry
+				with XML However, people working with XML and with HTML often
+				have very different ways of looking at markup. The difference
+				can be illustrated by the meaning of the word
+					<quote>semantics</quote> in the respective communities. In
+				the HTML world, it’s common to hear people to describe the
+				meaning of an element in terms of what a Web browser does when
+				it encounters the start and end tags. Although most browser
+				developers no longer refer to start and end tags as separate
+				commands, the idea remains that operational semantics, Web
+				browser behaviour, is the primary focus of HTML design. Marking
+				up in the sense of identifying the content of a document seems
+				alien here: there’s no <emphasis>poem</emphasis> element, for
+				example, and tie <emphasis>cite</emphasis> element has no
+				standard way to identify the author of a quotation or to give a
+				bibliographic reference.</para>
+			<para>HTML offers some extensibility: one can use markup such
+				as:</para>
+			<programlisting>&lt;span class="volno"3&lt;/span></programlisting>
+			<para>to indicate the issue number of a volume containing a journal
+				within a bibliographic reference. As with <quote>plain
+					XML</quote> there is no standard way to mark up a
+				bibliography and one is actually more likely in practice to find
+				simply</para>
+			<programlisting>&lt;b>3&lt;/b></programlisting>
+			<para>in practice, or, worse,</para>
+			<programlisting>&lt;span class="cn506dw"3&lt;/span></programlisting>
+			<para>inserted by a content management system, framework, or word
+				processor conversion.</para>
+			<para>IHTML 5 includes elements such as <emphasis>nav</emphasis> and
+					<emphasis>main</emphasis>, but their goal is to help people
+				and programs navigate round documents by identifying the
+				functions of different parts, not to try and label the parts and
+				have the browser automatically function appropriately.</para>
+			<para>HTML, then, is strongest when the Web is the primary end
+				output format. It should be mentioned that there are also
+				products that support generating PDF for print from HTML and
+				CSS, and that the EPUB 3 standard uses XHTML (with a move to
+				HTML possible in the future).</para>
+			<para>A difficulty with HTML can be that the content can be
+				difficult to reuse or re-purpose. If you do the work to annotate
+				your HTML so that audiobooks can be made, or to use
+					<emphasis>class</emphasis> attributes consistently enough
+				that your aircraft repair manual can be generated automatically
+				from your twenty-thousand-page operations manual, you will be
+				replicating the work that might already have been done for you
+				with an SGML or XML system: the tools are not generally designed
+				for large, long, complex documents with precise domain-specific
+				requirements. <emphasis role="bold">The primary application
+					domain and usage context of HTML is the Webb
+					browser.</emphasis></para>
+			<para>A <emphasis>benefit</emphasis> of using HTML, however, can be
+				reduced staff training. If your writers are already familiar
+				with HTML, they can be up and running quickly. Beware, however,
+				that saving a few hours of training does not end up costing you
+				weeks or months of work when you discover the files are not
+				consistently marked up or contain errors that weren’t flagged by
+				(error-tolerant) HTML systems or Web browsers.</para>
+		</section>
+	</section>
+	<section>
+		<title>Markdown</title>
+		<para>The name <emphasis>Markdown</emphasis> is of course a play on
+				<emphasis>markup</emphasis>, with the implication that it’s
+			somehow <emphasis>less</emphasis>: less work, not to hard to
+			understand. For very simple documents Markdown can indeed be easy.
+			In the manner of DEC NotesFiles from the 1970s and 1980s, one uses
+			ASCII symbols for *bold* and _italic_. Hypertext links are more
+			complex, and tables are supported only in some of the Markdown
+			variants and can be a nightmare to use in a text editor.  <emphasis
+				role="bold">The primary context for using markup is where people
+				edit the text directly in a plain text editor</emphasis> and
+			this means that it is really only intended, and only suitable for,
+			simple documents. If you are using a tool that edits Markdown and
+			hides the syntax then you might as well be editing HTML or XML: the
+			primary reason to use Markdown files is that you have tools, such as
+			github or a wiki of some sort, that consume it.</para>
+		<para>Since there are no special tools needed, and since Markdown can
+			really only cope with simple documents, the syntax can be easy to
+			learn and training costs can be low. Markdown is generally close to
+			a subset of the format used by Wikipedia, so, with extensions as
+			needed, it can clearly scale. </para>
+		<para>The semantics recorded in Markdown is purely operational: go bold,
+			go italic; whilst some variants have additional tagging support, the
+			primary assumption is that the appearance of the document (or the
+			sound, when read out loud by text to speech) is primary.</para>
+		<para>Markup is <emphasis>fabulous</emphasis>, though, for very simple
+			README documents for projects such as computer source code, where
+			the file can be read easily in a plain text viewer or editor without
+			any special tools.</para>
+		<para>If you choose to use Markdown for a project, be aware there are
+			competing versions and make sure you have a fully compatible
+			tool-set if you need one. If, however, you have figures, tables,
+			footnotes, cross-references, running page headers (or even page
+			numbers), or other features that go outside the normal remit of
+			Markdown, or if you foresee a need to reuse the information and
+			extract information from the text, you will almost certainly be
+			better off with a richer format.</para>
+		<para>If necessary, you can provide a tool to read a specific version of
+			Markdown and convert it to (say) XML-encoded TEI documents for users
+			in a text-based environment.</para>
+	</section>
+
+	<section>
+		<title>RDF and Linked Data</title>
+		<para>The Resource Description Framework (RDF) is really a data model for
+			exchange of knowledge representation. Linked Data conforms to the
+			same model: triplets of (subject, relationship, object), where all
+			three terms are URIs (Uniform Resource Identifiers), so that if two
+			triplets use the same URI for the same subject then the properties
+			from both triples apply to it, and so on.</para>
+		<para>RDF is <emphasis>not</emphasis> a model for documents. One can
+			extract triplets from documents, but if it is to be useful the
+			extraction is normally lossy: a list of the characters and places
+			mentioned in a novel such as <citetitle>Star Wars</citetitle> is a
+			common example, together with externally-derived triplets describing
+			relationships such as <emphasis>was born at</emphasis> or
+				<emphasis>loves</emphasis> or <emphasis>caused to become
+				frozen</emphasis>. The list does not include every occurrence of
+			every word in the novel, and the book cannot be reconstructed from
+			the list. This example is very typical in its relationship to
+			information, to the original book. Query languages such as GraphQL
+			and SPARQL can then be used to explore the data and to support
+			applications. Note that Linked Data may in many cases represent a
+			complete data set, but even there the data is normally unordered,
+			unlike words and paragraphs in writing.</para>
+		<para>A weakness of RDF is that triplets are not natively labeled as to
+			their source. In practice a <emphasis>triple store</emphasis> (a
+			content management system for RDF) will normally extend the model to
+			add permissions and information about who added each triple, but
+			this is not normally accessible to the standard query languages. RDF
+			stores may also support federated queries, in which case the
+			additional information is not passed between systems, potentially
+			leading to trust and security issues.</para>
+		<para>The RDF model is also used for the Really Simple Syndication
+			format (RSS), so that RSS files are simple XML representations of an
+			RDF data model.</para>
+		<para>RDF values are simple (atomic) strings: there is no direct support
+			for mixed content such as running text in HTML, and text fragments
+			containing element markup, such as one finds in RSS, have to be
+			escaped and are treated by RDF systems as simple strings. RDF query
+			languages tend to be weak in string processing, exacerbating
+			difficulties here: you can’t generally use SPARQL to find all RSS
+			feed items containing an HTML link to a given resource, for
+			example.</para>
+		<para>Linked Data in all of its forms provides ways to think about
+			property-based reasoning, and can be very useful when working with
+			metadata, especially in conjunction with other document formats. </para>
+	</section>
+	<section>
+		<title>JavaScript Object Notation (JSON)</title>
+		<para>JSON rapidly became very popular in the realm of Web development.
+			It uses a mixture of <emphasis>array</emphasis>, which are ordered
+			sequences of JSON items; <emphasis>objects</emphasis>, which are
+			unordered collections of key-value pairs in which the key is a
+			string and the value is any JSON item,;and, finally, values such as
+			integers and strings. This is sufficient to represent static
+			JavaScript objects (there are no function items).</para>
+		<para>JSON has taken over from XML for the purpose of exchanging
+			program-generated data via distributed APIs (largely replacing the
+			use of SOAP) and for configuration of Web-based software. The
+			notation uses square brackets for arrays and curly braces for
+			objects, making it familiar to programmers of C-like languages and
+			also allowing automatic brace-matching in many widely-used text
+			editors.</para>
+		<para>Large JSON files can be difficult to edit directly, as you can end
+			up with large numbers of closing braces in a clump, reminiscent of
+			LISP. It’s slightly easier than HTML in this regard, though, where
+			you can end up with masses of <emphasis>&lt;/div></emphasis> tags
+			together, given that text editors tend not to support tag-matching
+			(show me the start tag corresponding to this close tag) but do
+			support brace-matching.</para>
+		<para>JSON does <emphasis>not</emphasis> support mixed content: that is,
+			you can’t have running text with embedded markup. You can
+				<emphasis>represent</emphasis> mixed content with an array of
+			mixed strings and objects, but is not suitable for manipulation
+			without tools or programs, and is considerably more verbose than the
+			corresponding Markdown or even XML or HTML markup in this case. It’s
+			also easy to lose significant spaces around the embedded markup when
+			working in this fashion.</para>
+		<para>There are libraries to import JSON files, and often to export
+			them, in all major programming languages today. Often, reading JSON
+			results in language-native objects, so that no query language is
+			needed in simple cases.  This is a marked contrast from XML or HTML,
+			where the result is usually a relatively complex data
+			structure.</para>
+		<para>JSON, then, is strongly favoured by many developers over any of
+			the other formats in this paper because it is much easier for them.
+			JSON belongs in a context in which the format of the data, the exact
+			representation of information, and even the choice of what is to be
+			represented is in the hands of programmers. In contexts in which
+			document authors own their data and choose the contents, or where
+			interoperability of the information between applications is
+			paramount, JSON is much weaker than XML or RDF. However, see the
+			next section for JSON and RDF.</para>
+	</section>
+	<section>
+		<title>JSON-LD: JSON meets RDF</title>
+		<para>JSON-LD is a way to represent linked data in JSON. It provides a
+			mechanism to reduce the verbosity of the result by a
+				<emphasis>context</emphasis> that authors can use to give short
+			names for URIs in the data.</para>
+		<para>JSON-LD is intended for environments and contexts (in the sense of
+			this paper) in which JSON is already in use and there’s a need to
+			add support for linked data using the RDF data model, perhaps to
+			support graph-based query languages.</para>
+		<para>Although JSON-LD combines the advantages of both JSON and RDF, it
+			also inherits many of their disadvantages: the underlying data model
+			of RDF is not extended to include the source of triplets, and mixed
+			content is still not directly supported.</para>
+	</section>
+	<section>
+		<title>Portable Document Format (PDF)</title>
+		<para>A disadvantage in some applications of all of the above formats is
+			that they are not easily printed in a useful way. HTML is the
+			closest, as Cascading Style Sheets (CSS) can be used with formatting
+			software to make print-ready pages, but it is necessary to write
+			separate CSS stylesheets for different HTML documents. The result of
+			formatting HTML for print is usually PDF, which raises the question
+			of whether PDF is useful as a document interchange format.</para>
+		<para>PDF documents can be printed: PDF is a <emphasis>page description
+				language</emphasis> and a PDF file describes the exact location
+			of the page of everything inside it, both text and graphics.
+			Unfortunately for document interchange this also means that PDF
+			files cannot be edited to insert or delete content: the remainder of
+			text on the page does not normally reflow.</para>
+		<para>The PDF format contains machinery for embedding fonts, and for
+			complex graphics. It is a compressed form of the PostScript
+			language. Using PDF can provide <emphasis>page fidelity</emphasis>
+			in many cases, in the sense that printed pages will look the same
+			everywhere, scaled if desired to print on differently-sized
+			paper.</para>
+		<para>Since PDF is not easily edited, and has limited accessibility to
+			people who are blind or who cannot distinguish certain colours or
+			who need low (or high) contrast, it is not suitable as a primary
+			document format.</para>
+		<para>Reading and processing PDF in programs is difficult; there
+				<emphasis>are</emphasis> libraries for C and JavaScript and
+			other languages, but the resulting data structures are complex.
+			There are no standard query languages for PDF, and it should be
+			noted that even determining natural-language word-breaks is
+			unreliable, using heuristics based on the position of each letter of
+			the word on the page to try and detect the spaces. In addition, it
+			is not usually possible to distinguish between a line-break at a
+			hyphen in the original input and a hyphen inserted to facilitate
+			line-breaking: text formatting is <emphasis>lossy</emphasis> so that
+			the original document cannot be reconstructed reliably.</para>
+	</section>
+	<section>
+		<title>Domain-specific XML Vocabularies</title>
+		<para>Like RDF, XML is really a framework for one’s own information: it
+			does not come with much in the way of predefined semantics, whether
+			behavioural or extrinsic. Like HTML, XML has a simple tag-based
+			syntax for representing elements, but unlike HTML, XML does not
+			predefine any element names. There is also no single data model for
+			XML, although a few data models predominate in practice, primarily
+			DOM and XDM.</para>
+		<para>Since XML does not predefine element names, and also does not
+			support anonymous (unnamed) elements, one needs a set of XML names
+			for elements (and their attributes) to use. A set of element names
+			and constraints on them can loosely be called a
+				<emphasis>vocabulary</emphasis>. To make XML useful, there are
+			three common paths people take, depending on their situation and the
+			project context: to use a domain-specific XML vocabulary; to extend
+			an existing XML vocabulary; to develop a custom XML vocabulary.
+			Subsequent sections will describe each of these in turn, including
+			some examples and some exceptions.</para>
+		<para>Some frequently-heard complaints about XML should be mentioned
+			here. People say that XML files are large compared to, for example,
+			JSON; this is often true although XML compresses well. But the names
+			repeated in XML end tags and the quotes around attribute values also
+			provide a level of redundancy: experience with SGML minimization
+			showed that the ability to omit these increased support costs
+			considerably, because they created common situations in which the
+			document would parse and even validate, but the interpretation of
+			the parser differed from that of the human user.</para>
+		<para>Another common complaint about XML from developers is that the
+			APIs for working with XML are inelegant. Although this was true
+			fifteen years ago, today there are often much more convenient APIs,
+			ranging from XQuery and XPath to JQuery. But in any case the primary
+			question of context for an XML project is whether the document
+			maintainers are in control of the markup or whether the developers
+			are. The former case is a primary use-case for XML. When developers
+			are in control, JSON may be a better fit for short-form key-value or
+			object-like documents. XML remains the format of choice for mixed
+			content, where there is a mixture of text and markup at the same
+			level.</para>
+	</section>
+	<section>
+		<title>XHTML™: The Extensible HyperText Markup Language</title>
+		<para>XHTML is a widely-used XML vocabulary that is also a reworking of
+			HTML into XML. There are two primary versions:
+				1.<emphasis>x</emphasis> and 5. Version 5 is the current
+			version, and is an XML syntax for HTML 5. The original XHTML 1
+			versions supported customization using XML DTDs, the original
+			mechanism to define an XML vocabulary. XHTML 5 does not use
+			grammar-based validation, and is primarily intended for use in Web
+			browsers.  XHTML is also used by the EPUB standard for electronic
+			books, where it has the advantage that a device-specific rendering
+			engine can be used without having to worry about full HTML
+			compatibility. This is important because Web browsers tend to be
+			very flexible in displaying files containing errors, so existing
+			content often contains a lot of syntax errors, which in turn means
+			any software that tries to process arbitrary HTML needs a relatively
+			complex parser and a lot of compatibility code. With XHTML, the
+			syntax checking is strict, and enforced by the XML parser.</para>
+		<para>Since XHTML files can be read by XML parsers, they are amenable to
+			processing with XSLT and XProc, and to being stored in databases and
+			queries with XQuery. Modern versions of XSLT and XQuery can also
+			create XHTML 5 files.</para>
+		<para>XHTML, like HTML, is designed in the context of Web browsers. Like
+			all software, Web browsers evolve. Over time, elements change
+			meaning or are dropped entirely. However, HTML 5 dropped the idea of
+			including a version number in HTML files, which may cause problems
+			with long-term archiving. Of course, any vocabulary could change
+			over time, but the mitigation there is to combine grammar-based
+			validation and specific version marking; HTML and XHTML do
+			neither.</para>
+		<para>XHTML is good for projects at the edge of XML and the Web, because
+			they are equally usable by both tool-sets. The element names are
+			also understood by Web search engines, so that serving XHTML files
+			directly on the open Web makes sense and works. XHTML 5 is a good
+			choice for generic documents such as blogs, as well as for Web-based
+			applications. It has deficiencies in validation compared to
+			domain-specific vocabularies, but it would also be fair to consider
+			XHTML to be a domain-specific XML vocabulary for sharing documents
+			on the World Wide Web. The name (X)HTML is sometimes used to refer
+			to the vocabulary independently of whether the XML or slightly
+			different HTML syntax is used.</para>
+		<para>If you are producing your own domain-specific vocabulary, it is
+			worth considering using (X)HTML 5 element names for plain text
+			paragraphs and for markup within them, simply because (X)HTML is,
+			overall, the most widely-used vocabulary on the planet. However,
+			beware of false promises: if you use <emphasis>p</emphasis> for
+			paragraphs, people may expect to be able to use
+				<emphasis>ol</emphasis> for a list, <emphasis>i</emphasis> for
+			italics, and so on.</para>
+	</section>
+	<section>
+		<title>DocBook</title>
+		<para>DocBook is a domain-specific XML vocabulary widely used for
+			technical documentation.  There are widely-available tools to
+			convert documents between DocBook and a wide variety of other
+			formats, including ODF (q.v.) and into PDF.</para>
+		<para>DocBook is a fairly large vocabulary, and uses the <quote>element
+				pool</quote> concept described by Eve Maler and  Jeanne El
+			Andaloussi in <citetitle>Developing SGML DTDs</citetitle> to make
+			authoring easier: a core set of element names are available pretty
+			much everywhere.</para>
+		<para>Sometimes people criticize DocBook because the most common
+			conversion to HTML does not produce elegant pages, but that is not a
+			feature of DocBook itself, and when the conversion goes well, people
+			do not realize the original format was DocBook.</para>
+	</section>
+	<section>
+		<title>Customizing DocBook: Mallard</title>
+		<para>DocBook from the beginning provided for extensions, using an SGML
+			and XML DTD syntax to allow people to add their own elements and
+			modules. But sometimes you want to <emphasis>reduce</emphasis>
+			rather than <emphasis>extend</emphasis>.</para>
+		<para>A difficulty for authors using DocBook can be that at any given
+			point in a document there can be a bewilderingly large number of
+			possible elements that can be inserted. People working with DocBook
+			all day quickly learn them, but occasional users can find this to be
+			a barrier. Mallard is a subset of DocBook that was devised for
+			writing online help the GNOME project, and is an example of a
+			customization. Mallard also has its own Markdown variant,
+				<emphasis>Ducktype</emphasis>.  Mallard also adds semi-automatic
+			linking between topics, so that some processing is required before
+			the files are usable by DocBook tools, but that is not an issue in
+			the context of online help for the GNOME desktop.</para>
+		<para>Note: Although DocBook has its own extension mechanisms, Mallard
+			ended up as a standalone system, and today uses elements from HTML
+			such as <emphasis>p</emphasis> and <emphasis>em</emphasis> rather
+			than <emphasis>para</emphasis> and <emphasis>emphasis</emphasis> of
+			DocBook. Like many project-specific extensions, it evolved.</para>
+		<para>Starting off with an industry-standard vocabulary and customizing
+			it can considerably reduce the work needed to develop a format, but
+			people within the project have to make a conscious decision about
+			the value of having their documents conform to the original
+			vocabulary.</para>
+	</section>
+	<section>
+		<title>The Text Encoding Initiative (TEI)</title>
+		<para>The Text Encoding Initiative is both an organization and an
+			eponymous vocabulary and associated methodology for transcribing
+			texts for the purpose of analysis, study, and the production of fac
+			simile editions. It is widely used in the Digital Humanities.</para>
+		<para>The TEI vocabulary was originally intended
+				<emphasis>always</emphasis> to be customized to particular
+			academic projects. However, a core subset, TEI Lite, became popular.
+			The TEI Consortium provides an extension mechanism, One Document
+			Does It All (ODD), which simplifies making a customization of TEI,
+			and in particular one that includes and combines specific
+				<quote>modules</quote> such as one for drama or one for
+			transcribing natural-language dictionaries.</para>
+		<para>The primary context for using TEI is academic text processing and
+			study of texts. An advantage of using it in that context is the high
+			level of expertise and availability of assistance from other
+			academics, as well as tools </para>
+	</section>
+	<section>
+		<title>Open Document Format (ODF), OOXML</title>
+		<para>Whereas PDF files are compressed binary extensions of the
+			PostScript language which, when executed, produce page images, ODF
+			and OOXML are XML representations, again binary and compressed but
+			extractable as text. However, rather than specifying the position of
+			items on the page, ODF and OOXML provide an XML-based representation
+			of editable documents.</para>
+		<para>Word processors generally are strong in their tools for commenting
+			on documents and performing collaborative reviews. The model is that
+			a reviewer sends an annotated copy of a document to the author, who
+			then in turn reviews the comments and suggested changes; this model
+			fits well with many social contexts of writing and working with
+			documents.</para>
+		<para>The ODF and OOXML formats were designed to serialize OpenOffice
+			and Microsoft Word™ documents (respectively) to XML, and support
+			document revision. Unlike PDF, ODF and OOXML documents are intended
+			to be editable by the recipient, and text reflows.</para>
+		<para>Unfortunately, the OOXML specification, despite being very large,
+			is also incomplete. In addition, the XML is written in the
+			word-processing implementation domain, not in the user’s problem
+			domain. The XML is complex and relatively difficult to work with,
+			although freely available libraries and XSLT transformations exist
+			to work with them. Word processor formats tend not to nest
+			structures very much: for example, list items tend to be considered
+			as automatically-numbered paragraphs and not to be nested inside a
+			containing list element. Points at which there had one been style
+			changes or selection boundaries may also be retained in the markup,
+			further complicating processing.</para>
+		<para>Word processing files are not generally ideal for archiving or
+			interchange except in specific contexts such as the need for review
+			or specific print-based workflows. Generated HTML may also have
+			accessibility problems, and unless users are systematic with the use
+			of named styles there tends to be only weak semantic labeling. Word
+			processors in many cases reduce the apparent cost of writing,
+			because they make it seem easy. Unfortunately in a wider context
+			this can merely result in increasing costs and complexity elsewhere
+			in workflow processes when finer-grained control over markup and
+			document features may be needed. In this regard, word processor
+			files can be similar to HTML documents. In all cases final archived
+			documents need to be saved in format that is independent of any
+			particular version of any software.</para>
+	</section>
+	<section>
+		<title>Raster Images</title>
+		<para>Although raster (bitmap) image formats such as TIFF, PNG, GIF
+			,BMP, JPEG and so forth can be suitable for non-textual content,
+			text inside such image formats is really just a picture of text: it
+			cannot be searched or copied and pasted, and text readers are not
+			able to speak it out loud.</para>
+		<para>Note that JPEG images in particular use a
+				<emphasis>lossy</emphasis> compression, which introduces
+				<quote>artifacts</quote> that can be visible and can hinder
+			optical character recognition or other reuse of the files.</para>
+		<para>Document page-images are most often used in situations where
+			digital versions of original documents are unavailable and paper
+			copies have been scanned. For archival use it’s important to use an
+			image format that is open and standard and that has as few
+			interoperability problems as possible. PNG is better than TIFF in
+			this regard, since TIFF files vary between platforms, but both are
+			better than Windows BMP or PhotoShop PSD (proprietary) or JPEG
+			(lossy).</para>
+	</section>
+	
+	<section>
+		<title>Conclusion</title>
+		<para>The purpose of this paper is to discuss some formats, both XML and
+			non-XML, with a perspective of the contexts in which each format is
+			appropriate. There is no single <quote>best</quote> format, and no
+			single way to represent information digitally. Rather, the context
+			in which information will be used determines the perspective from
+			which a choice should be made.</para>
+
+	</section>
+
+	<bibliography xml:id="liam-references">
+		<bibliomixed> <abbrev>DB5SPEC</abbrev> <author>
+			<personname><surname>Walsh</surname><firstname>Norman</firstname></personname>
+			</author>: <title>The DocBook Schema</title>. Working Draft 5.0a1, <date>29 June
+			2005</date>, <orgname>OASIS</orgname>. <bibliomisc><link
+			xl:href="http://www.docbook.org/specs/wd-docbook-docbook-5.0a1.html"/></bibliomisc> </bibliomixed>
+		
+		<bibliomixed>
+			<abbrev>SGMLDTD</abbrev>
+			<author>
+				<personname><surname>Maler</surname>
+					<firstname>Eve</firstname></personname>
+			</author>, <author>
+				<personname><surname>El
+						Andaloussi</surname><firstname>Jeanne</firstname></personname>
+			</author>: <title>Developing SGML DTDs</title>. <date>15 December
+				1995</date>,<publishername>Prentice Hall PTR</publishername>
+		</bibliomixed>
+		
+	</bibliography>
+
+</article>

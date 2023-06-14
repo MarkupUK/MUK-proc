@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/css" href="resources/css/paper.css"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0">
+	<info>
+		<title>“FYI we’re not looking to go to print”</title>
+		<subtitle>Restyling the Markup UK Proceedings</subtitle>
+		<author>
+			<personname>Tony Graham</personname>
+			<email>tgraham@antenna.co.jp</email>
+			<uri>https://www.antennahouse.com</uri>
+			<personblurb>
+				<para>Tony Graham is a Senior Architect with Antenna House, where he works on their XSL-FO and CSS formatter, cloud-based authoring solution, and related products. He also provides XSL-FO and XSLT consulting and training services on behalf of Antenna House.</para>
+				<para>Tony has been working with markup since 1991, with XML since 1996, and with XSLT/XSL-FO since 1998. He is Chair of the Print and Page Layout Community Group at the W3C and previously an invited expert on the W3C XML Print and Page Layout Working Group (XPPL) defining the XSL-FO specification, as well as an acknowledged expert in XSLT. Tony is the developer of the 'stf' Schematron testing framework and also Antenna House's 'focheck' XSL-FO validation tool, a committer to both the XSpec and Juxy XSLT testing frameworks, the author of "Unicode: A Primer", and a qualified trainer.</para>
+			</personblurb>
+			<affiliation>
+				<jobtitle>Senior Architect</jobtitle>
+				<orgname>Antenna House</orgname>
+				<orgdiv>XML Division</orgdiv>
+			</affiliation>
+		</author>
+		<keywordset>
+			<keyword>XSL-FO</keyword>
+			<keyword>DocBook</keyword>
+		</keywordset>
+		<abstract><para>Markup UK is a markup conference, and its conference proceedings start life as DocBook XML markup.
+				DocBook has a standard set of XSLT 1.0 stylesheets for transforming DocBook XML
+				markup into other formats.</para><para>Markup UK 2018 was put together very rapidly, so it is a tribute to the usefulness of the
+				DocBook XSLT stylesheets that the conference had proceedings at all. However, the
+				PDF proceedings were the stock DocBook styles done with a Garamond font and with the
+				addition of some front matter with sponsors’ logos and acknowledgements.</para>
+			<para>The Markup UK 2019 proceedings were produced using the
+			same customisation. Happily for the conference, a second page of sponsors’
+			logos was needed, but that was about the only change. It was agreed shortly after the conference 
+			that the styles should be improved. The full instructions for what to do were “FYI we’re
+			not looking to go to print, if that influences any of your decisions.”</para>
+			<para>It did,
+			but it didn’t make the task any easier. This paper discusses the changes to the
+			proceedings and how the DocBook stylesheets were customised to achieve them.</para>
+		</abstract>
+	</info>
+	<para>The ‘classic’ academic paper or conference proceedings paper (to the extent
+			that there is one) has one or two columns of justified text per page. If there are two
+			columns per page, the title and abstract, etc., typically span both columns.</para>
+	<para>Papers
+			typically start on an odd-numbered, right-hand page: this could just follow from
+			right-hand pages being the ‘front’ of a leaf, or it could be a by-product of
+			single-article reprints of papers needing to start on a right-hand page.<footnote>
+				<para>Magazines and newspapers start articles as a two-page spread when it suits them, but in my limited experience, papers in journals and in conference proceedings do not start with a two-page spread.</para>
+			</footnote> Graphics are typically floated to the top
+			(and sometimes also to the bottom) of the page. In a two-column paper, graphics can be
+			either one column wide or span both columns. Large graphics might instead be grouped at
+			the back of the paper, after the references. The combination of a two-column layout plus
+			floating figures generally takes fewer pages than if all text, headings, and figures
+			span the width of the page.</para>
+	<para>The changes fall into three areas: Markup UK look-and-feel; not going to print; and
+		accessibility.</para>
+	<section>
+		<title>Markup UK look-and-feel</title>
+		<para>As stated previously, the 2018 proceedings used a Garamond font. It was initially
+			intended to continue to use the Garamond in the restyling, but this Garamond has only
+			regular and italic styles and does not have a bold weight. This was almost okay, because
+			the heading hierarchy could have been indicated solely by changing
+			font size, font style, and spacing before and after titles.
+			However, some of the papers used DocBook’s <code>&lt;emphasis role="strong"></code>,
+			which is typically expected to render as bold text.</para>
+		<para>The Markup UK website has its own distinctive style, so the current PDF styles are
+			based on that. Major headings use the same colour and ‘League Gothic’ font as the main
+			title in the website, while minor heading and titles of tables and figures use the font
+			with black text.</para>
+		<figure pgwide="1">
+			<title>Website 'look-and-feel' applied to proceedings</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="img/website-compare.jpg" width="100%"/>
+				</imageobject>
+			</mediaobject>
+		</figure>
+		<para>The CSS for the website uses a ‘font-family’ property setting for body text that
+			resolves as a Helvetica-like font on every platform:</para>
+		<programlisting language="css">font-family: "Helvetica Neue", Arial, sans-serif, "Apple
+			Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";</programlisting>
+		<para>The proceedings instead use local copies of the open-source Liberation Sans font
+			family <biblioref linkend="liberation" /> so that PDFs produced on Windows and Linux are
+			identical. The two members of the Markup UK committee who work on the proceedings
+			use different operating systems that provide different fonts, so this is essential if they are to avoid seemingly
+			random differences in their formatted proceedings.</para>
+		<para>Liberation Sans is a metrically compatible<footnote>
+			<para>Corresponding characters have the same width.</para>
+			</footnote> open-source replacement for Arial <biblioref linkend="arial" />, which has a
+			proprietary license. Arial, which is packaged with Microsoft Windows, was created to be
+			metrically identical to Helvetica so that a document designed for Helvetica could be
+			displayed and printed without having to pay for a Helvetica license.</para>
+		<para>Liberation Sans has a complementary Liberation Mono font family that is used for
+			program listings, etc. Liberation Mono is metrically compatible with Courier New,
+			although its shapes are closer to Liberation Sans than to Courier New.</para>
+		<para>To save from having to configure the XSL formatter to use the fonts, the XSL-FO uses an AH Formatter extension for declaring local fonts inside <code>fo:declarations</code>:<programlisting language="xml"><![CDATA[<!-- https://github.com/liberationfonts/liberation-fonts/releases -->
+<axf:font-face
+    src="url('{$muk-xsl.dir}/liberation-fonts-ttf-2.00.5/LiberationSans-Regular.ttf')"
+    font-family="Liberation Sans" />
+<axf:font-face
+    src="url('{$muk-xsl.dir}/liberation-fonts-ttf-2.00.5/LiberationSans-Bold.ttf')"
+    font-family="Liberation Sans"
+    font-weight="bold" />]]></programlisting></para>
+		<para>The red highlight from the Markup UK logo is reused in list item markers and in
+			callout numbers in a DocBook <code>&lt;calloutlist></code>.</para>
+		<figure>
+			<title><code>programlisting</code> callouts use Markup UK red</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="img/callouts.png" />
+				</imageobject>
+			</mediaobject>
+		</figure>
+		<para> List markers for
+			<code>&lt;itemizedlist></code> are also diamond-shaped to reflect the overlapped ‘&lt;>’
+			diamond in the Markup UK logo.</para>
+		<figure>
+			<title>List markers reflect the Markup UK logo</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="img/lists.png" />
+				</imageobject>
+			</mediaobject>
+		</figure>
+		<para>The grey rectangles with rounded corners from the website are reflected in the front
+			cover title, paper titles, and as a border delimiting an abstract from the rest of its
+			paper.</para>
+	</section>
+	<section>
+		<title>Not going to print</title>
+		<para>Because the proceedings were not intended to be printed, each paper starts as a
+			two-page spread, with the first page as the left-hand page of the spread. This better
+			suits modern wide displays that can easily show two pages side-by-side. The front matter
+			also had several elements that started on right-hand pages. These can now start on
+			either page, with no blank pages in the front matter.</para>
+		<para>There are also some things that were not done because of not going to print: for
+			example, the cover image exactly fits its A4 page. If the proceedings were meant to be
+			printed, the image would be larger than the page – it would ‘bleed’ past the edges of
+			the paper – to avoid any misalignment in the printing and cutting leaving white edges on
+			the paper.</para>
+		<section>
+			<title>Front matter</title>
+		<figure>
+			<title>Original front-matter</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="img/front-matter-old.png" />
+				</imageobject>
+			</mediaobject>
+		</figure>
+			<para>The original front-matter comprised:<itemizedlist>
+				<listitem>
+					<para>Title page with the background image from the Markup UK website plus the title, <quote>Markup UK 2019 Proceedings</quote></para>
+				</listitem>
+				<listitem>
+					<para>A page with just the proceedings title</para>
+				</listitem>
+				<listitem>
+					<para>Two pages of sponsor logos on the front and back of one leaf</para>
+				</listitem>
+				<listitem>
+					<para>A page of credits and thank yous</para>
+				</listitem>
+				<listitem>
+					<para>A blank page</para>
+				</listitem>
+				<listitem>
+					<para>The table of contents</para>
+				</listitem>
+				<listitem>
+					<para>A blank page before the title and abstract of the first paper</para>
+				</listitem>
+			</itemizedlist></para>
+		<figure>
+			<title>Restyled front matter</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="img/front-matter-new.png" />
+				</imageobject>
+			</mediaobject>
+		</figure>
+			<para>Changes to the front matter include:
+			<itemizedlist>
+				<listitem>
+					<para>No blank or nearly blank pages</para>
+				</listitem>
+				<listitem>
+					<para>Revised title page with the graphic as a background image that fills the page.</para>
+					<para>The title incorporates the Markup UK logo (which has alternate text of <quote>Markup UK </quote>), and the year is coloured with the red of the logo. This was simple enough with XSLT 1.0, but it is the sort of thing that would be simpler with XSLT 2.0 or XSLT 3.0:<programlisting language="xml"><![CDATA[<xsl:variable name="text" select="normalize-space(.)" />
+
+<xsl:choose>
+  <xsl:when test="starts-with($text, 'Markup UK ')">
+    <fo:external-graphic
+        content-height="24mm" scaling="uniform"
+        content-width="scale-to-fit"
+        src="url({$muk-xsl.dir}/img/MarkupUK-2.svg)"
+        axf:alttext="Markup UK " />
+    <fo:block />
+    <xsl:variable
+        name="rest"
+        select="substring-after($text, 'Markup UK ')" />
+    <xsl:choose>
+      <xsl:when
+          test="string-length($rest) >= 4 and
+                translate(substring($rest, 1, 4),
+                          '1234567890',
+                          '') = ''">
+        <fo:inline
+            color="{$muk.red}" text-depth="0">
+          <xsl:value-of
+              select="substring($rest, 1, 4)" />
+        </fo:inline>
+        <xsl:value-of
+            select="substring($rest, 5)" />
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:value-of select="$rest" />
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:when>
+  <xsl:otherwise>
+    <xsl:apply-templates />
+  </xsl:otherwise>
+</xsl:choose>]]></programlisting></para>
+				</listitem>
+				<listitem>
+					<para>Sponsor logos on two facing pages. The size and sequence of the logos were kept the same because it was not known what had been arranged with the sponsors about the appearance of their logos.</para>
+				</listitem>
+				<listitem>
+					<para>Page of credits and thank yous. This, also, is largely unchanged from the original and for the same reason.</para>
+				</listitem>
+				<listitem>
+					<para>Revised table of contents with formatting that reflects the formatting of the titles and
+					 author names in the articles. The titles are larger than in the original to make it easier to click on them to go to an article. The page numbers were kept small and are put close to the titles rather than being separated by leaders because the page numbers are less significant when the proceedings are read in a PDF reader.</para>
+				</listitem>
+			</itemizedlist></para>
+		</section>
+		<section>
+			<title>Papers</title>
+			<figure>
+				<title>Original paper</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="img/paper-old.png" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+			<para>An original paper comprised:<itemizedlist>
+				<listitem>
+					<para>Title, authors’ names and affiliations, and abstract (if present) on a right-hand page</para>
+				</listitem>
+				<listitem>
+					<para>Text of the article, starting on the following left-hand page</para>
+				</listitem>
+			</itemizedlist></para>
+			<para>The abstract page and the text pages are formatted as a single column with a wide left-margin. Section titles are formatted with zero left-margin so that they hang to the left of the body text.</para>
+			<figure>
+				<title>Restyled paper</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="img/paper-new.png" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+			<para>Changes to the formatting of pages include:<itemizedlist>
+				<listitem>
+					<para>Papers start on a left-hand page so that, on a wide screen, papers can be read as a sequence of two-page spreads.</para>
+				</listitem>
+				<listitem>
+					<para>The title, authors’ names and affiliations, and abstract (if present) are not on a separate page</para>
+				</listitem>
+				<listitem>
+					<para>Left-hand and right-hand page are symmetrical, with a narrower margin next to the gutter and a wider margin on the outer edge of the page. The narrower margins are to make it easier for the reader’s eyes to move from a left-hand page to a right-hand page.</para>
+				</listitem>
+			</itemizedlist></para>
+		</section>
+	</section>
+	<section>
+		<title>Accessibility</title>
+		<para>Markup UK 2019 included the <quote>Accessibility Matters</quote> paper by Tony Graham. The slides,
+			but not the paper, covered the facts that:<itemizedlist>
+				<listitem><para>Justified text causes problems for some
+			people with certain cognitive disabilities</para></listitem>
+				<listitem><para>Long lines can cause problems for people
+			with some reading or vision disabilities</para></listitem>
+				<listitem><para>People with some cognitive disabilities
+			find it difficult to track text when the lines are close together.</para></listitem>
+			</itemizedlist></para>
+		<para>The existing
+			proceedings failed on every count except possibly the line height (but possibly only for
+			some people). During and after the <quote>Accessibility Matters</quote> talk, there were multiple tweets from conference
+			attendees about the difficulty of reading justified text. <biblioref linkend="lapeyre"/></para>
+		<figure>
+			<title>Tweet about justified text</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="img/lapeyre.png" />
+				</imageobject>
+			</mediaobject>
+		</figure>
+		<para>Given that, it was not credible to try for a ‘classic’ two columns of justified text
+			with floating figures. Instead, the font size has increased – to reduce the number of
+			characters per line – and the text is now left aligned. Hyphenation is disabled, so the
+			only hyphens in the formatted text are from words, such as ‘over-enthusiastic’, that
+			were written with hyphens. The proceedings now take about 10% more pages (currently 234
+			pages versus 212), but “we’re not planning on going to print”, so there's no printing
+			cost from the extra pages.</para>
+	</section>
+	<section>
+		<title>DocBook</title>
+		<para>As stated previously, the original proceedings used the DocBook XSLT 1.0 stylesheets. <biblioref linkend="xslt10-stylesheets"/> The restyling continued to use the XSLT 1.0 stylesheets because:
+		<itemizedlist>
+			<listitem>
+				<para>There was an existing customisation for the sponsor logo pages and the credits page</para>
+			</listitem>
+			<listitem>
+				<para>People were already familiar with using the customization (not least because at least one of them had written it)</para>
+			</listitem>
+			<listitem>
+				<para>At the time, the DocBook XSLT 2.0 stylesheets had not gained much traction, and the XSLT 3.0 (xslTNG) stylesheets were not publicly available</para>
+			</listitem>
+			<listitem>
+				<para>The initial approach had been to change very little, up until the Garamond font proved unsuitable and it was decided to be consistent with the Markup UK website</para>
+			</listitem>
+		</itemizedlist></para>
+		<para>The style changes are made using the mechanisms that are provided in the DocBook
+			stylesheets.</para>
+		<section>
+			<title>Titles</title>
+			<para>The DocBook XSLT 1.0 stylesheets support a templating mechanism for customising
+				the title page, table of contents, and section titles. The template file is XML, of
+				course. A template file is transformed into an XSLT module that is included when the
+				DocBook source is transformed into XSL-FO. The template file is a mix of:<itemizedlist><listitem><para>Elements
+				and attributes specific to the template mechanism</para></listitem>
+					<listitem><para>Elements corresponding to the DocBook elements to be handled at that point</para></listitem>
+					<listitem><para>Attribute values
+				corresponding to XSL Formatting Objects to generate</para></listitem>
+					<listitem><para>Literal XSL property
+				attributes to generate in the output XSL-FO.</para></listitem></itemizedlist></para>
+			<para>The templating mechanism does save a
+				lot of work maintaining XSLT templates, but there is a learning curve to
+				understanding the roles of the different elements and how they work together.</para>
+			<para>This is the beginning of the template for the front matter of an article:<programlisting language="xml"><![CDATA[<t:titlepage t:element="article" t:wrapper="fo:block-container"
+	     span="all" font-family="{$title.fontset}"
+	     padding-bottom="1lh">
+  <t:titlepage-content t:side="recto" start-indent="0pt" text-align="left">
+    <t:wrapper t:wrapper="fo:block" background-color="{$muk.background}"
+	       axf:border-radius="{$muk.border-radius}" margin-top="20mm"
+	       margin-left="-150pt" padding-left="150pt" margin-right="0"
+	       padding="{$muk.border-radius}" padding-bottom="0.25mm"
+	       axf:hanging-punctuation="start allow-end"
+	       color="{$muk.blue}">
+      <title t:named-template="component.title"
+	     param:node="ancestor-or-self::article[1]"
+	     keep-with-next.within-column="always" font-weight="normal"
+	     font-size="30pt"/>
+      <subtitle font-size="20pt"/>
+    </t:wrapper>
+    <productname param:node="ancestor-or-self::article[1]"
+		 keep-with-next.within-column="always" font-size="30pt"
+		 font-weight="bold"/>
+    <corpauthor space-before="0.5em"
+                font-size="{$author.font-size}"/>
+    <authorgroup space-before="0.5em"
+                 font-size="{$author.font-size}"/>
+    <author space-before="0.5em"
+            font-size="{$author.font-size}"/>]]></programlisting></para>
+			<para>Elements and attributes with the <code>t</code> namespace prefix, such as <code>t:titlepage</code>, are specific to the templating mechanism. The <filename>template.xsl</filename> stylesheet in the DocBook XSLT 1.0 distribution uses those to generate a stylesheet that can be included in the customisation. See Chapter 11, Title page customization, in <citetitle>DocBook XSL: The Complete Guide</citetitle> <biblioref linkend="docbookxsl"/> for further information. Note that the <code>t:wrapper</code> element to wrap the definitions for other elements is an Antenna House extension that has only just been submitted as a pull request for the XSLT 1.0 stylesheets.</para>
+			<para>Elements in the default namespace have no namespace URI. These elements correspond to DocBook elements. Depending on a setting in the template file, the elements are processed either in the order shown in the template or in document order as they appear in the DocBook document.</para>
+			<para>The generated stylesheet includes an <code>xsl:template</code> for each of these elements. That template generates the element specified by the <code>t:wrapper</code> attribute of the <code>t:titlepage</code> element. Unprefixed attributes of the template element are copied as literal attributes on the wrapper element in the generated XSLT. The attribute values are not evaluated when the attributes are copied to the generated stylesheet, but they are evaluated when the generated stylesheet is used as part of a customisation, at which point any attribute value templates are evaluated. The generated stylesheet uses a sophisticated (or confusing, depending on your familiarity with it) arrangement of attribute sets and mode names to make it possible to influence the processing of particular elements in specific or less specific contexts.</para>
+			<para>This is the template generated for <code>author</code> in the previous example:<programlisting language="xml"><![CDATA[<xsl:template match="author" mode="article.titlepage.recto.auto.mode">
+  <fo:block-container xmlns:fo="http://www.w3.org/1999/XSL/Format"
+                      xsl:use-attribute-sets="article.titlepage.recto.style"
+                      space-before="0.5em" font-size="{$author.font-size}">
+    <xsl:apply-templates select="." mode="article.titlepage.recto.mode"/>
+  </fo:block-container>
+</xsl:template>]]></programlisting></para>
+			<para>When <code>t:named-template</code> is present, the generated template calls the named template instead of finding a matching template for the current element. Parameters to be passed to the named template are defined using attributes with the <code>param</code> prefix; for example, <code>param:node="ancestor-or-self::article[1]"</code>.</para><para>This is the template generated for <code>title</code> in the previous example:<programlisting language="xml"><![CDATA[<xsl:template match="title" mode="article.titlepage.recto.auto.mode">
+  <fo:block-container xmlns:fo="http://www.w3.org/1999/XSL/Format"
+      xsl:use-attribute-sets="article.titlepage.recto.style"
+      keep-with-next.within-column="always" font-weight="normal"
+      font-size="30pt">
+    <xsl:call-template name="component.title">
+      <xsl:with-param name="node" select="ancestor-or-self::article[1]"/>
+    </xsl:call-template>
+  </fo:block-container>
+</xsl:template>]]></programlisting></para>
+		</section>
+		<section>
+			<title>Other customisations</title>
+			<para>Other changes were made by overriding specific XSLT templates in the DocBook XSLT
+				1.0 stylesheets. This is fully expected for any non-trivial customisation of the
+				stylesheets. The DocBook stylesheets are highly modular, and it was found to be
+				simplest to put overrides in files corresponding to the original module containing
+				the overridden template. For example, <code>muk-lists.xsl</code> overrides some of
+				the templates in <code>list.xsl</code> in the DocBook XSLT 1.0 stylesheets.</para>
+			<section>
+				<title>Syntax highlighting</title>
+				<para>The customisation enables the option in the DocBook XSLT 1.0 Stylesheets to
+					perform syntax highlighting on program listings using the XSLTHL syntax
+					highlighting utility. <biblioref linkend="xslthl"/></para>
+				<para>XSLTHL feels like a good fit for use with XSLT because it is an extension function for the XSLT processor, it does not require any other programming language, and its configuration files are XML. In reality: it is quite old; development on SourceForge had stalled and no new languages had been added for several years; it only works with Xalan, Saxon 6.5, and SaxonB (up to around Saxon 9.1) and only on Java.<footnote>
+					<para>Antenna House has contributed a PR that lets XSLTHL work with Saxon versions up to 9.9, but that is not in any official release.</para>
+				</footnote></para>
+				<para>Highlighters for XQuery, DTDs and batch files were added to the
+					XSLTHL project on GitHub to handle more formats used in the papers.</para>
+			</section>
+			<!--<section>
+				<title>Program listings</title>
+				<para>The customisation determines whether a program listing contains any lines with more than
+					71 characters and automatically causes a wide program listing to be formatted
+					the full width of the page. If the program listing is too wide for the page, the
+					formatter reduces its font size so that it fits.</para>
+			</section>-->
+		</section>
+	</section>
+	<section>
+		<title>Authoring</title>
+		<para>Issues with the 2019 authors’ use of DocBook led to the development of an Oxygen framework that extends the DocBook 5 framework by adding some Schematron checks for some of the issues. The stylesheets for the proceedings are now also bundled with the framework so that authors can preview how their paper will look in the proceedings. The framework is available as an Oxygen add-on that the Oxygen editor will offer to update whenever a new add-on release is made.</para>
+		<figure>
+			<title>Edit in Oxygen and preview in AH Formatter GUI</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="img/framework.png" />
+				</imageobject>
+			</mediaobject>
+		</figure>
+		<para>The support for authoring went through three stages:
+		<itemizedlist>
+			<listitem>
+				<para>The extension framework and the Schematron file were available from the GitHub repository. <biblioref linkend="MUK-xsl" /> The Schematron was not used by the validation scenario defined in the framework.</para>
+				<para>Using the framework would require cloning the GitHub repository and configuring Oxygen to look for framework files in the cloned directory.</para>
+			</listitem>
+			<listitem>
+				<para>The <quote>markupuk-2019-paper</quote> repository from Markup UK 2019 <biblioref linkend="xmlpaper"/> was forked to create a new GitHub repository. The Markup UK stylesheets were added as a submodule, and transformation scenarios were added for formatting using the stylesheets. The new repository was configured as a <quote>template</quote>: forking a template repository on GitHub generates a new repository with all of the current files in the template but without their revision history.</para>
+				<para>Because the new repository does not share any history with its template, if the template repository is updated – for example, to include updates to the XSLT stylesheets – the changes cannot be merged into the new repository. If, instead, the new repository was a fork of the original repository, it would be possible to update the new repository to reflect changes in the original repository. However, if the user has modified their project file, there is potential for an update to cause conflicts that would have to be fixed by editing the framework XML file.</para>
+			</listitem>
+			<listitem>
+				<para>The original framework repository was modified to include the stylesheets as a submodule and transformation scenarios to use the stylesheets were added. In addition, the Oxygen add-on definition file that was already in the repository was modified to refer to a Zip file from the repository as the location for the add-on’s files. For each new release, a new Zip file is generated and added to the files for the release. The add-on definition is updated to use the new version number and refer to the location of the new Zip file.</para>
+				<para>The framework now includes a template Oxygen project from which new Oxygen projects can be created. The template project includes a sample article that demonstrates some DocBook usage. It also defines some transformation scenarios, but these use the XSLT stylesheets from the framework rather than having the stylesheets bundled with each generated project. It is expected that the template project will not need to be updated very often. The most likely changes would be updates to the sample article, which would not affect an existing article.</para>
+				<para>Once Oxygen is configured to use the add-on definition, Oxygen will automatically detect new releases of the framework and offer to update it. This saves authors from needing to think about Git and Git submodules. If the template project is updated, the only way to get the changes is to create a new project and then copy files between the old and new projects. However, as stated previously, the template project is expected to not change very much.</para>
+			</listitem>
+		</itemizedlist></para>
+	</section>
+	<section>
+		<title>Current status</title>
+		<para>Overall, the new styles are an improvement on the existing styles. However, because
+			the restyling happened after the 2019 conference and long after the papers were written (and
+			because authors weren’t provided with a sample of how to properly tag footnotes and
+			references, etc.), the 2019 proceedings are in a limbo state where most of the remaining
+			improvements require changes to the source that no-one has the time, energy, and
+			authority to change. The authoring framework can help future authors, but it was developed too late to help the other 2021 authors.</para>
+		<para>The process of developing the new styles resulted in multiple improvements to the DocBook
+			XSLT 1.0 Stylesheets and to the XSLTHL syntax highlighting utility.</para>
+		<para>Developing the customisation has been sporadic, and it is still a work in progress. The code is
+			available on GitHub <biblioref linkend="MUK-xsl" /> for anyone to copy and
+			modify. Comments and pull requests are welcome.</para>
+	</section>
+	<bibliography xml:id="graham-references">
+		<bibliomixed xml:id="docbookxsl"> <abbrev>DOCBOOK-XSL</abbrev> <author>
+			<personname><surname>Stayton</surname><firstname>Bob</firstname></personname>
+		</author>: <title>DocBook XSL: The Complete Guide</title>. <edition>Fourth Edition</edition>, <date>September 2007</date>, <orgname>OASIS</orgname>. <bibliomisc><link
+			xl:href="http://www.sagehill.net/docbookxsl/index.html" /></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="arial"> <abbrev>ARIAL</abbrev> <title>Arial</title>. <orgname>Wikipedia</orgname>. <bibliomisc><link
+			xl:href="https://en.wikipedia.org/wiki/Arial" /></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="lapeyre"><abbrev>LAPEYRE</abbrev> <author>
+			<personname><surname>Lapeyre</surname>
+				<firstname>Deborah</firstname> <othername>A.</othername></personname>
+			</author>: <title>Tweet</title>.
+			<date>9 June 2019</date>,
+			<orgname>Mulberry Technologies, Inc.</orgname>
+			<bibliomisc><link xl:href="https://twitter.com/dalapeyre/status/1137659806288924672"/></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="liberation"> <abbrev>LIBERATION</abbrev> <title>Liberation fonts</title>. <orgname>Wikipedia</orgname>. <bibliomisc><link
+			xl:href="https://en.wikipedia.org/wiki/Liberation_fonts" /></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="MUK-docbook"> <abbrev>MUK-docbook</abbrev> <author>
+			<orgname>Markup UK</orgname>
+		</author>: <title>‘MUK_docbook’ add-on Oxygen framework</title>, <orgname>Markup
+			UK</orgname> <bibliomisc><link xl:href="https://github.com/MarkupUK/paperFramework"
+			 /></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="MUK-xsl"> <abbrev>MUK-xsl</abbrev> <author>
+			<orgname>Markup UK</orgname>
+		</author>: <title>XSL stylesheets for Markup UK proceedings</title>, <orgname>Markup
+			UK</orgname> <bibliomisc><link xl:href="https://github.com/MarkupUK/MUK-xsl"
+			/></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="xmlpaper"> <abbrev>XMLPAPER</abbrev> <author>
+			<personname><surname>Talau</surname><firstname>Cristian</firstname></personname> <affiliation><org><orgname>Syncro Soft SRL</orgname>
+			</org></affiliation>
+		</author>: <title>XMLPaper: XML-based Conference Paper Workflow</title>. <date>6 June 2019</date>, <orgname>Markup UK</orgname>. <bibliomisc><link
+			xl:href="https://markupuk.org/2019/webhelp/index.html#xmlpaper.html" /></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="xslt10-stylesheets"> <abbrev>XSLT10-STYLESHEETS</abbrev> <author>
+			<orgname>DocBook</orgname>
+		</author>: <title>DocBook XSLT 1.0 Stylesheets</title>, <orgname>DocBook</orgname> <bibliomisc><link xl:href="https://github.com/docbook/xslt10-stylesheets"
+			/></bibliomisc></bibliomixed>
+		<bibliomixed xml:id="xslthl"> <abbrev>XSLTHL</abbrev> <author>
+			<personname><surname>Molhanec</surname> <firstname>Michal</firstname></personname>
+		</author>, <author><personname><surname>Kosek</surname> <firstname>Jirka</firstname></personname></author>, <author><personname><surname>Hendriks</surname> <firstname>Michiel</firstname></personname></author>: <title>XSLT syntax highlighting</title>, <bibliomisc><link xl:href="https://github.com/xmlark/xslthl"
+		/></bibliomisc></bibliomixed>
+	</bibliography>
+</article>

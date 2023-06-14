@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbook.rng" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<bibliography xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+	version="5.0">
+
+    <biblioentry xml:id="api_gateway">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>Amazon API Gateway</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/api-gateway">https://aws.amazon.com/api-gateway</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="bash_layer">
+        <publishername>GitHub</publishername>
+        <title>Bash Lambda Layer</title>
+        <biblioid class="uri">
+            <link xlink:href="https://github.com/gkrizek/bash-lambda-layer">https://github.com/gkrizek/bash-lambda-layer</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="billing">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>What Is AWS Billing and Cost Management?</title>
+        <biblioid class="uri">
+            <link xlink:href="https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/billing-what-is.html">https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/billing-what-is.html</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="cloudformation">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>AWS CloudFormation</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/cloudformation">https://aws.amazon.com/cloudformation</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="cloudwatch">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>Amazon CloudWatch</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/cloudwatch">https://aws.amazon.com/cloudwatch</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="cncf">
+        <publishername>Cloud Native Computing Foundation</publishername>
+        <title>CNCF WG-Serverless Whitepaper v1.0</title>
+        <biblioid class="uri">
+            <link xlink:href="https://github.com/cncf/wg-serverless/raw/master/whitepapers/serverless-overview/cncf_serverless_whitepaper_v1.0.pdf">https://github.com/cncf/wg-serverless/raw/master/whitepapers/serverless-overview/cncf_serverless_whitepaper_v1.0.pdf</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="custom_runtime">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>Custom AWS Lambda Runtimes</title>
+        <biblioid class="uri">
+            <link xlink:href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html">https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="fowler">
+        <author>
+            <personname>
+                <firstname>Martin</firstname>
+                <surname>Fowler</surname>
+            </personname>
+        </author>
+        <title>Serverless Architectures</title>
+        <biblioid class="uri">
+            <link xlink:href="https://martinfowler.com/articles/serverless.html">https://martinfowler.com/articles/serverless.html</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="git2s3">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>Git Webhooks with AWS Services</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws-quickstart.s3.amazonaws.com/quickstart-git2s3/doc/git-to-amazon-s3-using-webhooks.pdf">https://aws-quickstart.s3.amazonaws.com/quickstart-git2s3/doc/git-to-amazon-s3-using-webhooks.pdf</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="iam">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>AWS Identity and Access Management</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/iam">https://aws.amazon.com/iam</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="iam_role">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>IAM Roles</title>
+        <biblioid class="uri">
+            <link xlink:href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html">https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="kms">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>AWS Key Management Service (KMS)</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/kms">https://aws.amazon.com/kms</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="lambda">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>What is AWS Lambda?</title>
+        <biblioid class="uri">
+            <link xlink:href="https://docs.aws.amazon.com/lambda/latest/dg/welcome.html">https://docs.aws.amazon.com/lambda/latest/dg/welcome.html</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="lambda_pricing">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>AWS Lambda pricing</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/lambda/pricing">https://aws.amazon.com/lambda/pricing</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="layers">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>AWS Lambda Layers</title>
+        <biblioid class="uri">
+            <link xlink:href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html">https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="markupuk2019">
+        <publishername>GitHub</publishername>
+        <title>Markup UK 2019</title>
+        <biblioid class="uri">
+            <link xlink:href="https://github.com/cirulls/markupuk2019">https://github.com/cirulls/markupuk2019</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="s3">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>Amazon S3</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/s3">https://aws.amazon.com/s3</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="sns">
+        <publishername>Amazon Web Services, Inc.</publishername>
+        <title>Amazon Simple Notification Service</title>
+        <biblioid class="uri">
+            <link xlink:href="https://aws.amazon.com/sns">https://aws.amazon.com/sns</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+    <biblioentry xml:id="xspec">
+        <publishername>GitHub</publishername>
+        <title>XSpec</title>
+        <biblioid class="uri">
+            <link xlink:href="https://github.com/xspec/xspec">https://github.com/xspec/xspec</link>
+        </biblioid>
+        <date><![CDATA[Accessed: ]]>26 May 2019</date>
+    </biblioentry>
+
+
+</bibliography>

@@ -1,0 +1,3 @@
+The exchange of data in XML goes hand in hand with its validation. Mature technologies for this task exist. But often more is needed than just the technical application of XML Schema, Schematron or Relax NG. A user-friendly solution requires an abstraction from the XML foundation. Initiation and result of a validating process needs to be put into the context of the end users domain and be a guidance to solve conformance problems. 
+
+This paper shows how Schematron, XSLT, XQuery and JavaScript have been glued together to address these requirements. Although the subcheck framework (http://subcheck.io) was implemented specifically for the Timed Text Markup Language (TTML) the approach can be used by any other XML vocabulary.

@@ -1,0 +1,632 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<?xml-stylesheet type="text/css" href="resources/css/paper.css"?>-->
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0">
+<info>
+<title>Accessibility Matters</title>
+<author>
+<personname>Tony Graham</personname>
+<email>tony@antennahouse.com</email>
+<email>tgraham@antenna.co.jp</email>
+<uri>https://www.antennahouse.com/</uri>
+<personblurb>
+<para><?oxy-placeholder content="Details about you"?></para>
+</personblurb>
+<affiliation>
+<jobtitle>Senior Architect</jobtitle>
+<orgname>Antenna House, Inc.</orgname>
+</affiliation>
+</author>
+<keywordset>
+<keyword>accessibility</keyword>
+<keyword><?oxy-placeholder content="keyword"?></keyword>
+</keywordset>
+<abstract>
+<para>XML, by itself, does not have any support for accessibility. XML is extremely
+flexible, but it needs to flex in the right directions if it is going to support the
+information necessary to make a document accessible. This is a guided tour
+of some of the features of the HTML, Web Content Accessibility Guidelines (WCAG),
+and PDF/UA (Universal Accessibility) standards. It concentrates on file formats
+rather than User Agent behaviour, since the information needed to make accessible
+HTML or PDF usually needs to be included in, or able to be inferred from, the source
+XML.</para>
+<para>However, it’s rarely the raw XML that is presented to users. This paper also
+strays into some aspects of styling the content to make it more accessible.</para>
+</abstract>
+</info>
+
+<section><title>What is accessibility?</title>
+<para>Accessibility is the inclusive practice of making content more accessible to people with disabilities. Accessibility <quote>involves a wide range of disabilities, including visual, auditory, physical, speech, cognitive, language, learning, and neurological disabilities. Accessible content is also more usable by older individuals with changing abilities due to aging and will often improve usability for users in general.</quote> <biblioref linkend="wcag21"/></para>
+</section>
+
+<!--<section><title>Types of disability</title>
+<para>Relevant standards include:</para>
+</section>-->
+
+<section><title>Standards for accessibility</title>
+<para>Relevant standards include:</para>
+<itemizedlist><listitem><para>Matterhorn Protocol <biblioref linkend="matterhorn"/></para></listitem>
+<listitem><para>PDF File 508 Checklist (WCAG 2.0 Refresh)
+<uri>https://www.hhs.gov/web/section-508/making-files-accessible/checklist/pdf</uri></para></listitem>
+<listitem><para>PDF Techniques for WCAG 2.0
+<uri>https://www.w3.org/TR/2014/NOTE-WCAG20-TECHS-20140408/pdf.html</uri></para></listitem>
+<listitem><para>Web Content Accessibility Guidelines (WCAG) 2.1 <biblioref linkend="wcag21"/></para></listitem></itemizedlist>
+</section>
+
+<section>
+<title>Accessibility in, accessibility out</title>
+<para>The well-known acronym GIGO for “Garbage in, garbage out” <biblioref linkend="gigo"/> refers to poor-quality input producing poor-quality output. The corollary for accessibility is that good accessibility in your output requires that the information necessary for that good accessibility needs to be present in your data. Chandi Perera of Typefi likens adding accessibility at the end to baking a cake and then trying to take the nuts out of the cake when serving because someone in the room has a nut allergy <biblioref linkend="perera"/>. Trish Ang of Slack put it more simply: <quote>it’s easier to add the blueberries in before you’ve baked the muffin.</quote> <biblioref linkend="ang"/></para>
+<para>Software, even the software doing the final formatting, can help by adding some of the accessibility information. In a JATS-List post, Bruce Rosenblum of Inera stated that his conversion software has <quote>been setting scope attributes in JATS XML files for years for customers who need section 508 compliance and it's met their requirements.</quote> <biblioref linkend="rosenblum"/> However, relying on software at the end of the process to fulfil the letter, but not the spirit, of accessibility requirements can, to continue the food analogies, leave everyone with a bad taste in their mouth.</para>
+<para>One of the best known accessibility requirements for web pages is to provide alternate text for images and links. Formatting software such AH Formatter can include alternate text when generating Tagged PDF output, but a formatter can only work with what’s in its XSL-FO or HTML input. The AH Formatter Online Manual notes <quote>It is the FO/HTML creator’s responsibility to provide meaningful alternate text.</quote> <biblioref linkend="taggedpdf"/> Since the formatter can’t stop and ask for the input to be edited and then resume, so it has to take increasingly desperate steps to find alternate text to use for an element:</para>
+<itemizedlist>
+<listitem>
+<para>If the <tag class="attribute">axf:alttext</tag> property is present and not empty, its value is used.</para>
+</listitem>
+<listitem>
+<para>Otherwise, if the element contains text, that text is used.</para>
+</listitem>
+<listitem>
+<para>Otherwise, if the source is HTML and the element has a <tag class="attribute">title</tag> property, its value is used.</para>
+</listitem>
+<listitem>
+<para>Otherwise, the value of the <tag class="attribute">role</tag> property, if present and not empty, is used.</para>
+</listitem>
+<listitem>
+<para>Otherwise, a single space character (U+0020) is used.</para>
+</listitem>
+</itemizedlist>
+<para>The <tag class="attribute">role</tag> property is a poor alternative, since it is not designed for use as alternate text, and, obviously, a single space character is even less meaningful, but if the source document does contain meaningful accessibility information, then that accessibility information can be included in the output.</para>
+</section>
+
+<section>
+<title>HTML</title>
+<para>Source XML in formats such as DocBook, JATS, or DITA are often transformed into HTML for delivery, inclusion in an EPUB, or for formatting. HTML may also be used as the source document. HTML source documents may likewise be transformed into different HTML for delivery. The output HTML may include, for example: a new or updated Table of Contents; changed or additional metadata; or, for use with CSS Paged Media, additional copies of content to be removed from the flow and used in running headers and footers.</para>
+
+<para>The first step in making accessible HTML is to use the most appropriate element whenever possible.</para>
+
+<para>How HTML is presented in the browser, including dynamic content, user interface controls, and accessibility APIs, is out of scope for this paper. Important standards in this area include WAI-ARIA 1.1 <biblioref linkend="waiaria"/> and the rest of the WAI-ARIA 1.1 suite of specifications <biblioref linkend="waiariasuite"/>.</para>
+</section>
+
+<section>
+<title>Tagged PDF</title>
+
+
+<para>“Tagged PDF” is not a separate PDF specification. It refers to PDF that includes additional information about the logical structure of the document. Tagged PDF was first defined in PDF 1.4. Later versions of the PDF specification added more tag (‘Structure Element’) types and more properties of Structure Elements. PDF 2.0 <biblioref linkend="pdf20"/> added some new tags and deprecated some of the existing tags.</para>
+<para>The text, graphics, and images in Tagged PDF can be extracted and reused for other purposes. For example, to make content accessible to users with visual impairments. PDF/UA files (see <xref linkend="sec-pdfua"/>) are Tagged PDF files that also conform to additional requirements.</para>
+
+<para>AH Formatter embeds PDF tags (‘StructElem’) for XSL Formatting Object elements as shown in <xref linkend="fo-tags"/>. Other XSL-FO formatters have similar mappings.<footnote><para>The information provided by other formatters, however, was either incomplete <biblioref linkend="fop"/> or not in a format that could just be pasted into this paper <biblioref linkend="xep"/>.</para></footnote></para>
+<table rules="rows" frame="below" xml:id="fo-tags">
+<caption>XSL Formatting Objects and PDF tags</caption>
+  <col width="30%"/>
+  <col width="30%"/>
+  <col width="40%"/>
+<thead>
+<tr>
+<th>FO element</th>
+<th>PDF ‘Structure Element’</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>fo:root</td>                       <td>Document</td><td></td></tr>
+<tr><td>fo:page-sequence</td>              <td>Part</td><td></td></tr>
+<tr><td>fo:flow</td>                       <td>Sect</td><td></td></tr>
+<tr><td>fo:static-content</td>             <td>Sect</td><td></td></tr>
+
+<tr><td>fo:block</td>                      <td>P or Div</td>
+<td>P when it has the content of inline-level, otherwise Div
+</td></tr>
+
+<tr><td>fo:block-container</td>            <td>Div or Sect</td>
+<td>Sect when absolute-position="fixed" or "absolute", otherwise Div
+
+</td></tr>
+
+<tr><td>fo:inline</td>                     <td>Span or Reference
+</td><td>Reference when the child of fo:footnote, otherwise Span
+
+</td></tr>
+<tr><td>fo:inline-container</td>           <td>Span</td><td></td></tr>
+<tr><td>fo:leader</td>                     <td>Span</td><td></td></tr>
+<tr><td>fo:page-number</td>                <td>Span</td><td></td></tr>
+<tr><td>fo:page-number-citation</td>       <td>Span</td><td></td></tr>
+<tr><td>fo:page-number-citation-last</td>  <td>Span</td><td></td></tr>
+<tr><td>fo:scaling-value-citation</td>     <td>Span</td><td></td></tr>
+<tr><td>fo:index-page-citation-list</td>   <td>Span</td><td></td></tr>
+<tr><td>fo:bidi-override</td>              <td>Span</td><td></td></tr>
+
+<tr><td>fo:footnote</td>                   <td></td><td>The footnote-reference-area embeds a Sect that contains all the footnotes on the page
+
+
+</td></tr>
+<tr><td>fo:footnote-body</td>              <td>Note</td><td></td></tr>
+<tr><td>fo:float</td>                      <td>Sect</td><td></td></tr>
+<tr><td>fo:external-graphic</td>           <td>Figure or Formula</td><td>Formula in case of MathML, otherwise Figure</td></tr>
+<tr><td>fo:instream-foreign-object</td>    <td>Figure or Formula</td><td>Formula in case of MathML, otherwise Figure</td></tr>
+<tr><td>fo:basic-link</td>                 <td>Link</td><td></td></tr>
+
+<tr><td>itemizedlist</td>                 <td>L</td><td></td></tr>
+<tr><td>listitem</td>                  <td>LI</td><td></td></tr>
+<tr><td>listitem-label</td>            <td>Lbl</td><td></td></tr>
+<tr><td>listitem-body</td>             <td>LBody</td><td></td></tr>
+
+<tr><td>fo:table</td>                      <td>Table</td><td></td></tr>
+<tr><td>fo:table-caption</td>              <td>Caption</td><td></td></tr>
+<tr><td>fo:table-header</td>               <td>THead</td><td></td></tr>
+<tr><td>fo:table-footer</td>               <td>TFoot</td><td></td></tr>
+<tr><td>fo:table-body</td>                 <td>TBody</td><td></td></tr>
+<tr><td>tr</td>                  <td>TR</td><td></td></tr>
+<tr><td>td</td>                 <td>TH or TD</td><td>
+TH within fo:table-header, otherwise TD
+
+</td></tr>
+
+<tr><td>axf:form-field</td><td>Form</td><td></td></tr>
+
+
+<tr><td>axf:ruby</td><td>Ruby</td><td></td></tr>
+<tr><td>axf:ruby-base</td><td>RB</td><td></td></tr>
+<tr><td>axf:ruby-text</td><td>RT</td><td></td></tr>
+
+</tbody>
+</table>
+
+<para>AH Formatter embeds PDF tags (‘StructElem’) for HTML/CSS elements and pseudo-elements as shown in the following table:</para>
+<table rules="rows" frame="below">
+<caption>HTML elements and PDF tags</caption>
+  <col width="50%"/>
+  <col width="50%"/>
+<thead>
+<tr>
+<th>HTML element</th>
+<th>PDF ‘Structure Element’</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>html</td><td>Document</td></tr>
+<tr><td>div</td><td>Div</td></tr>
+<tr><td>h1</td><td>H1</td></tr>
+<tr><td>h2</td><td>H2</td></tr>
+<tr><td>h3</td><td>H3</td></tr>
+<tr><td>h4</td><td>H4</td></tr>
+<tr><td>h5</td><td>H5</td></tr>
+<tr><td>h6</td><td>H6</td></tr>
+<tr><td>p</td><td>P</td></tr>
+<tr><td>ul</td><td>L</td></tr>
+<tr><td>ol</td><td>L</td></tr>
+<tr><td>li</td><td>LI</td></tr>
+<tr><td>li::marker</td><td>Lbl</td></tr>
+<tr><td>dl</td><td>L</td></tr>
+<tr><td>dt</td><td>Lbl</td></tr>
+<tr><td>dd</td><td>LBody</td></tr>
+<tr><td>blockquote</td><td>BlockQuote</td></tr>
+<tr><td>caption</td><td>Caption</td></tr>
+<tr><td>table</td><td>Table</td></tr>
+<tr><td>tr</td><td>TR</td></tr>
+<tr><td>td</td><td>TD</td></tr>
+<tr><td>th</td><td>TH</td></tr>
+<tr><td>thead</td><td>THead</td></tr>
+<tr><td>tfoot</td><td>TFoot</td></tr>
+<tr><td>tbody</td><td>TBody</td></tr>
+
+<tr><td>ruby</td><td>Ruby</td></tr>
+<tr><td>rb</td><td>RB</td></tr>
+<tr><td>rt</td><td>RT</td></tr>
+
+
+<tr><td>span</td><td>Span</td></tr>
+<tr><td>img</td><td>Figure</td></tr>
+<tr><td>a[href]</td><td>Link</td></tr>
+<tr><td>other block elements</td><td>Div</td></tr>
+<tr><td>other inline elements</td><td>Span</td></tr>
+</tbody>
+</table>
+
+
+<section>
+<title>Specialised PDF tags</title>
+<para>When you generate PDF/UA or Tagged PDF output, the formatter maps each FO or each HTML element in the source to an equivalent ‘Structure Element’ in the PDF. However, there are several specialized Structure Elements that do not have correspondingly specialized FOs or HTML elements.</para>
+<section>
+<title>AH Formatter</title>
+<para>In some cases, AH Formatter will map a general-purpose FO to the specialized Structure Element based on the context: for example, <tag class="element">fo:inline</tag> ordinarily maps to ‘Span’, but the <tag class="element">fo:inline</tag> child of <tag class="element">fo:footnote</tag> maps to ‘Reference’ since the <tag class="element">fo:inline</tag> is formatted to produce the footnote citation. Otherwise, to override the default mapping, specify the Structure Element name in the <tag class="attribute">axf:pdftag</tag> property in XSL-FO or the <literal>-ah-pdftag</literal> property in CSS.</para>
+</section>
+<section>
+<title>FOP</title>
+<para>FOP implements a default mapping from FO type to Structure Element type, but the documentation <biblioref linkend="xep"/> provides only three example mappings. Individual FOs may have the default mapping overridden using the  <tag class="attribute">role</tag> property.</para>
+</section>
+<section>
+<title>XEP</title>
+<para>XEP <biblioref linkend="xep"/> provides two mechanisms for overriding its default mappings from FO to Structure Element name. The default mappings of each FO type to a Structure Element name may be overridden by specifying a custom <filename>rolemap.xml</filename> file. Individual FOs may have the default mapping overridden using the <tag class="attribute">rx:pdf-structure-tag</tag> extension attribute. The allowed values are ‘H1’, ‘H2’, ‘H3’, ‘H4’, ‘H5’, ‘H6’, ‘P’ , ‘TH’, ‘TR’ and ‘Artifact’. When the <tag class="attribute">rx:pdf-structure-tag</tag> value is ‘Artifact’, an additional <tag class="attribute">rx:artifact-type</tag> attribute may be specified.  Its allowed values are ‘Pagination’, ‘Page’ and ‘Layout’. When the <tag class="attribute">rx:artifact-type</tag> value is ‘Pagination’, an additional <tag class="attribute">rx:artifact-type</tag> attribute may be specified.  Its allowed values are ‘Header’, ‘Footer’ and ‘Watermark’.</para>
+</section>
+</section>
+</section>
+
+<section xml:id="sec-pdfua">
+<title>PDF/UA</title>
+<para>PDF/UA, defined in ISO 14289-1, is the specification intended for improving the  accessibility of PDF based on the ISO 32000-1 (PDF 1.7) specification.  ISO 14289-1 defines separate requirements for the PDF file format, behaviour of a conforming reader, and behaviour of Assistive Technology (AT) devices. Only the file format requirements are in scope for this paper.</para>
+<para>The main features of PDF/UA file format requirements are:</para>
+
+<itemizedlist>
+<listitem><para>Contents must be tagged in logical reading order.</para>
+</listitem>
+
+<listitem><para>Meaningful graphics, annotations and numerical formulas must include alternate text descriptions.</para>
+<para>Alternate text descriptions for graphics or numerical formulas can be specified by the <literal>-ah-alttext</literal> property, links can be specified by  the ‘-ah-annotation-contents’ property.</para>
+</listitem>
+
+<listitem><para>Security settings must allow assistive technology to have access to the content.</para>
+</listitem>
+<listitem><para>Including bookmarks in the PDF/UA is recommended.</para>
+</listitem>
+<listitem><para>Annotations, links and multimedia may be included.</para>
+</listitem>
+<listitem><para>The language of the document must be specified.</para>
+</listitem>
+<listitem><para>All fonts must be embedded.</para>
+</listitem>
+</itemizedlist>
+
+
+<section>
+<title>Matterhorn Protocol</title>
+<para>The Matterhorn Protocol, published by the PDF Association, is a checklist of all the ways that it is possible for a PDF file to not conform to PDF/UA.  The Matterhorn Protocol document consists of 31 Checkpoints comprised of 136 Failure Conditions. Some failure conditions can be checked programmatically, but others require human review.
+</para>
+
+<figure>
+<title>Matterhorn Protocol failure conditions for tables</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="matterhorn-protocol.svg" />
+</imageobject></mediaobject>
+</figure>
+</section>
+
+<section>
+<title>PAC 3 PDF/UA checker</title>
+<para>PDF Accessibility Checker 3 (PAC 3)<footnote><para><link xl:href="http://www.access-for-all.ch/en/pdf-lab/536-pdf-accessibility-checker-pac-3.html" /></para></footnote> by Access For All is a freeware utility for Windows that checks PDF files for PDF/UA conformance.  The program implements the Matterhorn Protocol checks.  When you open a PDF file in PAC 3, the program runs its checks and shows a summary of the results.  Since there is no interactive checking, the program can only warn about some of the failure conditions that require human checking.<!--  Unfortunately, the program also has some bugs in its checking.-->
+</para>
+
+<figure>
+<title>PAC 3 PDF/UA checker</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="pac3-en.png" />
+</imageobject></mediaobject>
+</figure>
+</section>
+</section>
+
+<section>
+<title>Common Structures</title>
+
+<para>This section discusses how to represent structures that are commonly found in text documents as HTML, Tagged PDF, or PDF/UA (as applicable) for best accessibility.</para>
+<section>
+<title>Language indication</title>
+
+<para>Correctly identifying the language assists assistive technologies.</para>
+
+<section>
+<title>HTTML</title>
+
+<para></para>
+</section>
+</section>
+
+<section>
+<title>Part, Article, Section, or Division</title>
+
+<para>There are multiple Structure Element types for representing the top-level hierarchy of the document:</para>
+<table rules="rows" frame="below" cellspacing="10">
+<caption>PDF tags for top-level structure of a document</caption>
+  <col width="50%"/>
+  <col width="50%"/>
+<thead>
+<tr>
+<th><para>Structure type</para></th>
+<th><para>Description</para></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><para>Document</para></td>
+<td><para>A complete document</para></td>
+</tr>
+<tr>
+<td><para>Art</para></td>
+<td><para>A relatively self-contained body of text with a single narrative. An article should not contain another article.</para></td>
+</tr>
+<tr>
+<td><para>Sect</para></td>
+<td><para>A container for grouping related elements</para></td>
+</tr>
+<tr>
+<td><para>Div</para></td>
+<td><para>A generic block-level element or group of elements</para></td>
+</tr>
+</tbody>
+</table>
+<para>By default, AH Formatter maps <tag class="element">fo:root</tag> to ‘Document’, <tag class="element">fo:page-sequence</tag> to ‘Part’, <tag class="element">fo:flow</tag> to ‘Sect’, and both <tag class="element">para-container</tag> and any <tag class="element">para</tag> that contains only block-level FOs to‘Div’. It is possible, for example, to use <tag class="element">axf:pdftag</tag> to map the higher-level <tag class="element">para-container</tag> and <tag class="element">para</tag> to ‘Sect’ if that better represents the structure of the document or to map <tag class="element">fo:root</tag> to ‘Art’ if the document is a single article.</para>
+</section>
+
+<section>
+<title>Headings</title>
+
+<para>Headings are usually indicated by increasing the font size, font weight, or the space around the title, but these visual differences may not be apparent to a person using Assistive Technologies. When the document is ‘strongly structured’ (the document uses grouping elements such as ‘Art’, ‘Sect’, and ‘Div’ to represent the organization of the material) and the heading is always and only the first child of the grouping element, then use ‘H’ on the FO for the heading. When the document is not strongly structured, use the ‘H1’ to ‘H6’ Structure Elements to indicate heading levels.</para>
+<para>When generating PDF/UA:</para>
+<itemizedlist>
+<listitem>
+<para>Heading levels beyond ‘H6’ are allowed: for example, ‘H7’, and so on.</para>
+</listitem>
+<listitem>
+<para>A document may use either only ‘H’ Structure Elements or only ‘H1’ to ‘H6’ Structure Elements (and beyond).</para>
+</listitem>
+<listitem>
+<para>When using numbered heading levels:</para>
+<itemizedlist>
+<listitem>
+<para>The first heading must be ‘H1’.</para>
+</listitem>
+<listitem>
+<para>More than one instance of any heading level may be used.</para>
+</listitem>
+<listitem>
+<para>There cannot be gaps in the descending heading level sequence: for example, ‘H1’ then ‘H2’ then ‘H3’ is a valid sequence, but ‘H1’ then ‘H3’ is not.</para>
+</listitem>
+<listitem>
+<para>The heading level sequence can increment without restarting at ‘H1’ if that reflects the document structure.  For example, ‘H1’, ‘H2’, ‘H3’, ‘H2’, ‘H3’, ‘H4’, ‘H3’ is a valid sequence.</para>
+</listitem>
+</itemizedlist>
+</listitem>
+</itemizedlist>
+</section>
+
+<section>
+<title>Table of Contents</title>
+<para>A Table of Contents is more likely to be generated on output than to be included in source XML. On the other hand, a HTML document that is not transformed before (or during) rendering may include the Table of Contents in the source document.</para>
+<section>
+<title>HTML</title>
+<para>HTML does not include any semantic elements for a Table of Contents.</para>
+</section>
+<section>
+<title>Tagged PDF</title>
+<para>Use ‘TOC’ for a Table of Contents. The structure of a ‘TOC’ is similar to, but more flexible than, the structure of <tag class="element">fo:bookmark-tree</tag>: a ‘TOC’ Structure Element may contain ‘TOCI’ (Table of Contents item) and ‘TOC’ entries. A ‘TOCI’ may contain any combination of ‘Lbl’, ‘Reference’, ‘NonStruct’, ‘P’, and ‘TOC’ Structure Elements.</para>
+<para>Use ‘TOC’ for the block containing the Table of Contents. Use axf:pdftag="TOCI" for each entry in the Table of Contents. When the Table of Contents represents a hierarchy, use a block with ‘TOC’ for each level of the hierarchy. Within each Table of Contents entry, use ‘Lbl’ for the title, ‘NonStruct’ for the leader or other content between the title and the page number, and use ‘Reference’ for the page number.</para>
+</section>
+</section>
+<section>
+<title>Index</title>
+
+<para>Use ‘Index’ for the block containing the index.</para>
+</section>
+
+<section>
+<title>Footnote</title>
+
+<section>
+<title>HTML</title>
+<para>HTML does not have a semantic element for footnotes. <biblioref linkend="idioms"/></para>
+</section>
+<section>
+<title>Tagged PDF</title>
+
+<para>‘Note’is the inline-level Structure Element for explanatory text such as a footnote or an endnote. AH Formatter automatically tags <tag class="element">fo:footnote-body</tag> as ‘Note’. However, ‘Note’ is defined in PDF 1.7 as an inline-level Structure Element, whereas an <tag class="element">fo:footnote-body</tag> contains block-level FOs. As such, PDF/UA that is generated from XSL-FO that contains footnotes will be flagged by a PDF/UA checker.</para>
+<para>Structure Elements for notes have been revised in PDF 2.0 <citation  xl:href="pdf20"/>.  PDF 2.0 has removed‘Note’ and added ‘FENote’, which is allowed at grouping, block, and inline levels.</para>
+</section>
+</section>
+
+<section>
+<title>Endnote</title>
+
+<section>
+<title>HTML</title>
+<para>HTML does not have a semantic element for endnotes.</para>
+</section>
+<section>
+<title>Tagged PDF</title>
+
+<para>‘Note’is the inline-level Structure Element for explanatory text such as a footnote or an endnote. There is no FO specifically for endnotes, so use ‘Note’ for the endnote text.</para>
+</section>
+</section>
+
+<section>
+<title>Tables</title>
+<para>Representing tabular data in XML is awkward enough without also adding accessibility features. Tables seem straightforward when they are just rows that each have the same number of columns, but real-world tables have cells that span rows and/or columns, table head rows, and table cells that act as headers for other cells in the same row or in following rows. Imagine trying to make sense of all of those when you can’t see the formatted table.</para>
+<para>In this contrived example table (shamelessly borrowed from HTML 5.3 <biblioref linkend="th"/>), the bold text (which you might not be able to see) acts as a header for cells below and/or to the right of the header cell:</para>
+<table rules="all">
+<caption>Measurement of legs and tails in Cats and English speakers</caption>
+  <col width="25%"/>
+  <col width="25%"/>
+  <col width="25%"/>
+  <col width="25%"/>
+<thead>
+<tr> <th> ID </th><th> Measurement </th><th> Average</th> <th> Maximum</th></tr>
+</thead>
+<tbody>
+<tr> <td/> <th scope="rowgroup"> Cats</th> <td> </td><td> </td></tr>
+<tr> <td> 93 </td><th scope="row"> Legs </th><td> 3.5 </td><td> 4</td></tr>
+<tr> <td> 10</td> <th scope="row"> Tails </th><td> 1 </td><td> 1</td></tr>
+</tbody>
+<tbody>
+<tr> <td> </td><th scope="rowgroup"> English speakers </th><td> </td><td></td></tr>
+<tr> <td> 32 </td><th scope="row"> Legs </th><td> 2.67 </td><td> 4</td></tr>
+<tr> <td> 35 </td><th scope="row"> Tails </th><td> 0.33 </td><td> 1</td></tr>
+</tbody>
+</table>
+
+<para>The following figure shows the relationships:</para>
+
+<figure>
+<title>Scope in sample table</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="table-scope-diagram.png" />
+</imageobject></mediaobject>
+</figure>
+
+<section>
+<title>HTML</title>
+<para>HTML (since at least HTML 4.01) supports a ‘scope’ attribute for cells to which a header cell applies.  The HTML 5 markup for the table is shown below:</para>
+<programlisting language="xml"><![CDATA[<table>
+  <caption>Measurement of legs and tails in Cats and English
+speakers</caption>
+  <thead>
+    <tr> <th> ID <th> Measurement <th> Average <th> Maximum
+  <tbody>
+    <tr> <td> <th scope=rowgroup> Cats <td> <td>
+    <tr> <td> 93 <th scope=row> Legs <td> 3.5 <td> 4
+    <tr> <td> 10 <th scope=row> Tails <td> 1 <td> 1
+  </tbody>
+  <tbody>
+    <tr> <td> <th scope=rowgroup> English speakers <td> <td>
+    <tr> <td> 32 <th scope=row> Legs <td> 2.67 <td> 4
+    <tr> <td> 35 <th scope=row> Tails <td> 0.33 <td> 1
+  </tbody>
+</table>]]></programlisting>
+<para>HTML also supports a ‘headers’ attribute for indicating the header cell or cells that apply to the current cell.</para>
+</section>
+<section>
+<title>Tagged PDF and PDF/UA</title>
+<para>In Tagged PDF, ‘TH’ structure elements may have a ‘Scope’ attribute, and both ‘TH’ and ‘TD’ structure elements may have a ‘Headers’ attribute.  PDF/UA requires some features in a conforming PDF/UA file that are only optional in ordinary PDF.  This includes ‘Headers’ attributes and, where ‘Headers’ attributes are not clear enough, also ‘Scope’ attributes.</para>
+<para>The good news about accessible table markup is that any XML vocabulary that supports (X)HTML-compatible table markup supports ‘scope’ and ‘headers’ attributes.  For example, ‘scope’ and ‘headers’ are in both JATS and DocBook  as side-effects of their supporting HTML tables.</para>
+<para>The not-so-good news about accessible table markup is that it requires human effort to properly markup the relationships between table cells, especially for convoluted tables.  In practice, the attributes are poorly understood and are often omitted.  For example, the JATS 1.2 tag library currently omits ‘scope’ and ‘headers’ from its ‘Accessibility’ page, notes that ‘scope’ (though not ‘headers’) has not been widely supported, and inaccurately states that ‘headers’ points to rows and columns when it actually points to individual header cells.</para>
+</section>
+</section>
+
+<section>
+<title>Icons, etc.</title>
+
+<section>
+<title>Tagged PDF and PDF/UA</title>
+<para>Use ‘Artifact’ for icons, etc., that do not represent meaningful content.  Artifacts are “graphics objects that are not part of the author’s original content but rather are generated by the conforming writer in the course of pagination, layout, or other strictly mechanical processes.”<citation  xl:href="pdf17"/></para>
+<note><para>NOTE: Artifacts may also be used to describe areas of the document where the author uses a graphical background,
+with the goal of enhancing the visual experience. In such a case, the background is not required for
+understanding the content. <biblioref  linkend="pdf20"/></para></note>
+<para> Use ‘NonStruct’ for any additional FOs that are necessary only to generate the correct visual appearance of a note, etc. A ‘NonStruct’ Structural Element is not interpreted or exported to other document formats but its descendants are processed normally.</para>
+</section>
+</section>
+<section>
+<title>Mathematics</title>
+<section>
+<title>HTML</title>
+<para>HTML 5 supports MathML, but MathJax <biblioref  linkend="mathjax"/> is an increasingly popular JavaScript library for displaying mathematics as a graphic. HTML 5 does not have a standard way to indicate that a graphic represents mathematics. MathJax will, for example, include <markup>role="math"</markup> in generated SVG but in mathematics that is output as HTML markup.</para>
+</section>
+<section>
+<title>Tagged PDF</title>
+<para>PDF 1.7 defines both ‘Figure’ and ‘Formula’ Structure Element types for illustrations (as well as ‘Formula’ for interactive forms).</para>
+<para>AH Formula supports MathML 3, and it automatically tags an <tag class="element">fo:external-graphic</tag> or <tag class="element">fo:instream-foreign-object</tag> that contais MathML as ‘Formula’ and tags every other <tag class="element">fo:external-graphic</tag> or <tag class="element">fo:instream-foreign-object</tag> as ‘Figure’. It is not known what other formatters generate for MathML.</para>
+<para>If you have to use a graphic, and not use MathML, to represent mathematics, then use ‘Formula’ to identify the graphic as a formula. You should also use <tag class="attribute">axf:alttext</tag> (or equivalents) to provide alternate text for the image.</para>
+<!--<para space-before="1em" text-align="center"><fo:external-graphic src="../../img/quadratic-formula.png" axf:pdftag="Formula" axf:alttext="x equals minus b plus or minus square-root of b-squared minus 4 ac over 2 a" /></para>-->
+</section>
+</section>
+
+<section>
+<title>Citation</title>
+<section>
+<title>HTML</title>
+<para>HTML 5 provides the <tag class="element">cite</tag> element for denoting the title of a work. The <tag class="element">blockquote</tag> and <tag class="element">q</tag> elements both have a <tag class="attribute">cite</tag> that is a link to the source of the quotation.</para>
+</section>
+<section>
+<title>Tagged PDF</title>
+<para>Use ‘Reference’ for a citation to content that is elsewhere in the document.</para>
+</section>
+</section>
+
+<section>
+<title>Block quotation</title>
+<section>
+<title>HTML</title>
+<para>HTML 5 provides the <tag class="element">blockquote</tag> and <tag class="element">q</tag> element.</para>
+</section>
+<section>
+<title>Tagged PDF</title>
+<para>Use ‘BlockQuote’ to tag a block quotation. While a block quotation typically has a different appearance to the surrounding text, the visual differences may not be apparent to a person using Assistive Technologies.</para>
+<blockquote><para>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam bibendum tincidunt pharetra. Aenean ultricies molestie ante, sit amet ultricies nunc mollis id. Integer ut porttitor felis, vel tincidunt velit. Duis volutpat, quam quis aliquet tristique, nulla dui malesuada velit, et consectetur tellus ipsum et arcu.</para></blockquote>
+</section>
+</section>
+
+<section>
+<title>Inline quotation</title>
+
+<para>Use ‘Quote’ to tag a quotation, such as “<quote>Lorem ipsum dolor sit amet</quote>”.</para>
+</section>
+<section>
+<title>Inline code</title>
+
+<para>Use ‘Code’ to tag a fragment of computer program text, such as “<code>axf:pdftag="Code"</code>”.</para>
+</section>
+<section>
+<title>Bibliography</title>
+
+<para>There is no Structure Element for a bibliography.  However, use ‘BibEntry’ for an entry in a bibliography. The ‘BibEntry’ may contain a ‘Lbl’ Structure Element, but there are no Structure Element types for the parts of a bibliography entry, such as author, publisher, publication date, and so on.</para>
+</section>
+</section>
+
+<section>
+<title>Conclusion</title>
+<para>Accessibility does matter. There are myriad details that can mastered.  Software can try to “do the right thing” when processing or formatting your data, but it is better, and it will yield a better result, if the effort is made to include accessibility information in your source XML.</para>
+</section>
+
+<bibliography xml:id="tony-references">
+<!--<bibliomixed> <abbrev>DB5SPEC</abbrev> <author>
+<personname><surname>Walsh</surname><firstname>Norman</firstname></personname>
+</author>: <title>The DocBook Schema</title>. Working Draft 5.0a1, <date>29 June
+2005</date>, <orgname>OASIS</orgname>. <bibliomisc><link
+xl:href="http://www.docbook.org/specs/wd-docbook-docbook-5.0a1.html"/></bibliomisc> </bibliomixed>-->
+<bibliomixed xml:id="ang"> <abbrev>Ang</abbrev> <author>
+<personname><surname>Ang</surname><firstname>Trish</firstname></personname>
+</author>: <title>How to Fail at Accessibility</title>, <date>22 February 2019</date>, <orgname>Slack</orgname>. <bibliomisc><link
+xl:href="https://web.archive.org/web/20190426183254/https://slack.engineering/how-to-fail-at-accessibility-99bdf3504f19"/></bibliomisc> </bibliomixed>
+
+<bibliomixed xml:id="fop"><abbrev>FOP</abbrev><title>Apache™ FOP: Accessibility</title> <orgname>The Apache Software Foundation</orgname>, <link xl:href="https://web.archive.org/web/20190522213553/https://xmlgraphics.apache.org/fop/2.3/accessibility.html" /></bibliomixed>
+
+<bibliomixed xml:id="gigo"><abbrev>GIGO</abbrev><citetitle>GIGO</citetitle> in <title>The Jargon File</title>, <editor><personname>Yash Tulsyan</personname></editor>, <link xl:href="https://web.archive.org/web/20130827121341/http://cosman246.com/jargon.html#GIGO" /></bibliomixed>
+
+<bibliomixed xml:id="idioms"><abbrev>IDIOMS</abbrev><citetitle>Common idioms without dedicated elements</citetitle> in <title>HTML 5.3</title>, <edition>Editor’s Draft</edition>, <date>18 October 2018</date>, <orgname>W3C</orgname>, <link xl:href="https://web.archive.org/web/20181124235038/http://w3c.github.io/html/common-idioms-without-dedicated-elements.html" /></bibliomixed>
+
+<bibliomixed xml:id="jats"><abbrev>JATS</abbrev><title>Journal Publishing Tag Library NISO JATS Version 1.2 (ANSI/NISO Z39.96-2019)</title>, <date>May 2019</date>, <orgname>National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM)</orgname>, <link xl:href="https://web.archive.org/web/20190528113513/https://jats.nlm.nih.gov/publishing/tag-library/1.2/index.html" /></bibliomixed>
+
+<bibliomixed xml:id="mathjax"><abbrev>MATHJAX</abbrev><title>MathJax</title>, <date>May 2019</date>, <orgname>MathJax Consortium</orgname>, <link xl:href="https://web.archive.org/web/20190527040208/https://www.mathjax.org/" /></bibliomixed>
+
+<bibliomixed xml:id="matterhorn"><abbrev>Matterhorn</abbrev><title>Matterhorn Protocol</title>, <orgname>PDF Association</orgname>,
+<link xl:href="https://www.pdfa.org/publication/the-matterhorn-protocol-1-02"></link></bibliomixed>
+
+<bibliomixed xml:id="pdf17"><abbrev>PDF1.7</abbrev>ISO 32000-1:2008, <title>Document management — Portable document format — Part 1: PDF 1.7</title></bibliomixed>
+
+<bibliomixed xml:id="pdf20"><abbrev>PDF2.0</abbrev> ISO 32000-2:2017, <title>Document management — Portable document format — Part 2: PDF 2.0</title></bibliomixed>
+
+<bibliomixed xml:id="perera"> <abbrev>Perera</abbrev> <author>
+<personname><surname>Perera</surname><firstname>Chandi</firstname></personname>
+</author>: <title>Accessible Publishing: What is it and how do we get there?</title>, <date>22 March 2018</date>, <orgname>Typefi</orgname>. <bibliomisc><link
+xl:href="https://web.archive.org/web/20190527111115/https://www.typefi.com/typefi-user-conference-2018/presentations-2018/what-is-accessible-publishing/"/></bibliomisc> </bibliomixed>
+
+<bibliomixed xml:id="rosenblum"> <abbrev>Rosenblum</abbrev> <author><personname><surname>Resonblum</surname><firstname>Bruce</firstname></personname></author>: <title>@scope and @headers</title>, <date>9 April 2019</date>, <orgname>Inera</orgname>. <bibliomisc><link
+xl:href="https://web.archive.org/web/20190527120216/https://www.biglist.com/lists/lists.mulberrytech.com/jats-list/archives/201904/msg00004.html"/></bibliomisc> </bibliomixed>
+
+<bibliomixed xml:id="taggedpdf"><abbrev>TaggedPDF</abbrev><citetitle>Tagged PDF</citetitle> in <title>PDF Output</title>, <editor><orgname>Antenna House, Inc.</orgname></editor>, <link xl:href="https://web.archive.org/web/20190527124525/https://www.antennahouse.com/product/ahf66/ahf-pdf.html" /></bibliomixed>
+
+<bibliomixed xml:id="th"><abbrev>TH</abbrev><citetitle>The th element</citetitle> in <title>HTML 5.3</title>, <edition>Editors Draft</edition>, <link xl:href="https://web.archive.org/web/20181020164617/https://w3c.github.io/html/tabular-data.html#the-th-element" /></bibliomixed>
+
+<bibliomixed xml:id="waiaria"><abbrev>WAIARIA</abbrev><title>Accessible Rich Internet Applications (WAI-ARIA) 1.1</title>, <date>14 December 2017</date>, <orgname>W3C</orgname>
+<link xl:href="https://www.w3.org/TR/wai-aria-1.1/" /></bibliomixed>
+
+<bibliomixed xml:id="waiariasuite"><abbrev>WAIARIASUITE</abbrev><title>WAI-ARIA Overview</title>, <date>15 January 2016</date>, <orgname>W3C</orgname>
+<link xl:href="https://web.archive.org/web/20190527024541/http://www.w3.org/WAI/standards-guidelines/aria/#wai-aria-1_1" /></bibliomixed>
+
+<bibliomixed xml:id="wcag21"><abbrev>WCAG2.1</abbrev><title>Web Content Accessibility Guidelines (WCAG) 2.1</title>, <date>5 June 2018</date>, <orgname>W3C</orgname>
+<link xl:href="https://www.w3.org/TR/WCAG21/" /></bibliomixed>
+
+<bibliomixed xml:id="xep"><abbrev>XEP</abbrev><title>XEP User Guide</title>, <orgname>RenderX</orgname>
+<link xl:href="https://web.archive.org/web/20181225121734/http://www.renderx.com/reference.html" /></bibliomixed>
+
+<!--<bibliomixed><author><orgname>Commonwealth Bank of Australia</orgname></author>: <title>Interest Rates on Term Deposits and Investment Accounts</title>, <link xl:href="http://web.archive.org/web/20170206054909/https://www.commbank.com.au/content/dam/commbank/personal/apply-online/download-printed-forms/InvInterestRates_ADB1072.pdf"/></bibliomixed>-->
+
+<!--<bibliomixed> <abbrev><?oxy-placeholder content="Abreviation for references"?></abbrev> <author>
+<personname><surname><?oxy-placeholder content="Surname"?></surname>
+<firstname><?oxy-placeholder content="Firstname"?></firstname></personname>
+</author>: <title><?oxy-placeholder content="Reference title"?></title>.
+<date><?oxy-placeholder content="DD Month Year"?></date>,
+<orgname><?oxy-placeholder content="Organization name"?></orgname>
+<bibliomisc><link/></bibliomisc></bibliomixed>-->
+
+</bibliography>
+
+</article>
