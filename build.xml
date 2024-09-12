@@ -314,6 +314,18 @@
   </exec>
 </target>
 
+<target name="gui.single"
+	depends="fo.single"
+	if="is.windows">
+  <exec executable="${ahfgui.windows}"
+	dir="${basedir.converted}"
+	spawn="yes">
+    <arg value="-s" />
+    <arg value="-d" />
+    <arg value="${xsl.dir}/${single.basename}.fo" />
+  </exec>
+</target>
+
 <!-- Utility targets. -->
 
 <target name="echoproperties">
