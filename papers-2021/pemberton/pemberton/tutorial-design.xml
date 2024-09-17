@@ -182,14 +182,14 @@
       <figure>
 	 <title>A simplified partial dependency graph</title>
         <mediaobject><imageobject>
-          <imagedata fileref="dependency.png" width="100%" scalefit="1" contentdepth="100%" />
+          <imagedata fileref="dependency.png" scale="50" />
         </imageobject></mediaobject>
       </figure>
     </para>
     <para>
       It is worth pointing out that there is some leeway in even the
       partial ordering that the dependency graph generates, because
-      rather than completely covering all the  antecedents of a topic
+      rather than completely covering all the antecedents of a topic
       first, you can use progressive disclosure
       [<link linkend="pd">pd</link>]; for instance you could partially
       cover validity, talking only about types, and then extend it later
@@ -354,7 +354,7 @@
       <screenshot>
       <title>Selecting a chapter</title>
         <mediaobject><imageobject>
-          <imagedata fileref="nav1.png" width="100%" scalefit="1" contentdepth="100%" />
+          <imagedata fileref="nav1.png" scale="50" />
         </imageobject></mediaobject>
       </screenshot>
     </para>
@@ -365,7 +365,7 @@
       <screenshot>
 	 <title>The initial chapter, with no previous</title>
          <mediaobject><imageobject>
-          <imagedata fileref="nav2.png" width="100%" scalefit="1" contentdepth="100%" />
+          <imagedata fileref="nav2.png" scale="50" />
         </imageobject></mediaobject>
       </screenshot>
     </para>
