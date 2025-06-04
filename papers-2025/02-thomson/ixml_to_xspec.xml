@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="../schemas/docbook.v5.0.rnc" type="application/relax-ng-compact-syntax"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
+	<info>
+		<title>From iXML to XSpec</title>
+		<author>
+			<personname>Sheila Thomson</personname>
+			<personblurb>
+				<para>Sheila Thomson is a software developer who has been working with XML technologies since the early 2000s, in domains such as online news and journal publishing, banking and manufacturing, for a variety of organisations but highlights include the BBC, Nature, Lexis Nexis and Sopra Steria. She has a BA(Hons) in Information Studies and Librarianship and an MSc in Computer Science and is honoured to have been a member of a team that won a Webby Award. She is based in London and, when not developing, sings in a local community choir, chauffeurs Basset Hounds for a charity and researches shoemakers in 18th century Glasgow (and other family history-related rabbit holes).</para>
+			</personblurb>
+		</author>
+
+		<keywordset>
+			<keyword>XML</keyword>
+			<keyword>Invisible XML</keyword>
+			<keyword>iXML</keyword>
+			<keyword>XSpec</keyword>
+			<keyword>Software Testing</keyword>
+		</keywordset>
+
+		<abstract>
+			<para>In the autumn of 2024, I attended the XML Summer School and persuaded (it wasn’t difficult) Stephen Pemberton to tack a session on iXML onto the end of his course on XForms. On the bus home, I made a start on my first iXML grammar. Within a week I had encountered a character encoding mystery and whitespace challenges, lost a day naming things and was working on repurposing XSpec for testing iXML grammars.</para>
+			<para>This paper: outlines my learning journey, as a case study; highlights existing methods for tesing iXML; and summarises how I adapted XSpec for testing iXML.</para>
+		</abstract>
+	</info>
+
+	<section>
+		<title>Introduction</title>
+
+		<para>In the autumn of 2024, I attended the XML Summer School and persuaded (it wasn’t difficult) Stephen Pemberton to tack a session on iXML onto the end of his course on XForms. On the bus home, I made a start on my first iXML grammar. Within a week I had encountered a character encoding mystery and whitespace challenges, lost a day naming things and was working on repurposing XSpec for testing iXML grammars.</para>
+		<para>This paper:</para>
+		<itemizedlist>
+			<listitem>
+				<para>outlines my learning journey as a case study</para>
+			</listitem>
+			<listitem>
+				<para>highlights existing methods for testing iXML</para>
+			</listitem>
+			<listitem>
+				<para>summarises how I adapted XSpec for testing iXML</para>
+			</listitem>
+		</itemizedlist>
+
+		<section xml:id="what-is-xml">
+			<title>What is iXML?</title>
+
+			<para>The specification for Invisible XML (iXML) describes it as <quote>a method for treating non-XML documents as if they were XML</quote><citation>IXML</citation>. On <link xl:href="http://invisiblexml.org/">Invisible XML</link>, where the spec is hosted, it expands that definition slightly: <quote>Invisible XML is a language for describing the implicit structure of data, and a set of technologies for making that structure explicit as XML markup.</quote><citation>IMCG</citation></para>
+
+			<para>In practice, this means that if a document or dataset has a regular enough structure that you can write down the rules to parse it (an iXML grammar), then you should be able to use an iXML processor (such as CoffeePot) to apply the grammar to the document or dataset in order to convert it to XML (see <xref linkend="ixml-conversion-overview" />).</para>
+
+			<figure xml:id="ixml-conversion-overview">
+				<title>High-level overview of an iXML conversion</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/ixml_conversion_high_level.formal.drawio.png" width="100%" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+		</section>
+
+		<section xml:id="why-ixml">
+			<title>Why iXML?</title>
+
+			<para>People have been talking about iXML for a few years now and it’s become a re-occurring topic at markup conferences (see <xref linkend="ixml-presentations-frequency" /><footnote>
+					<para>At Balisage, Declarative Amsterdam, Markup UK, XML London and XML Prague. For the full list, see <xref linkend="past-papers-on-ixml" /></para>
+				</footnote>). In my case, I was looking for a new personal project and curious to find out whether iXML would live up to the hype.</para>
+
+			<figure xml:id="ixml-presentations-frequency">
+				<title>Frequency of Presentations on iXML</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/frequency_of_presentations_on_ixml.formal.png" width="100%" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>Also, I suspect that I may be able to use iXML to simplify an existing pipeline that converts family tree data from GEDCOM to XML. GEDCOM itself is a standard, with a grammar, and although it can be used to serialise data as XML or text, it seems that the text option is most common; it’s certainly the only option for exporting from <link xl:href="ancestry.com">Ancestry.com</link>, which is where I maintain my family trees.</para>
+			<para>For an in-depth consideration of why you, or a client, might want to use iXML, see past papers on the topic, particularly Steven Pemberton's original proposal for Invisible XML, that he presented at Balisage in 2013<citation>PEM2013</citation>.</para>
+		</section>
+
+	</section>
+
+	<section xml:id="learning-ixml">
+		<title>Learning iXML</title>
+
+		<para>Steven Pemberton often runs tutorials for learning iXML at markup conferences and, although it wasn’t on the schedule, he very kindly tacked one onto the end of a course I was attending on XForms, during the 2024 <link xl:href="https://xmlsummerschool.org/">XML Summer School</link>, in Oxford.</para>
+
+		<para>If you’re unable to attend one of Steven’s tutorials, Norm Tovey-Walsh has created an online tutorial <link xl:href="https://www.xml.com/articles/2022/03/28/writing-invisible-xml-grammars/"><citetitle>Writing Invisible XML grammars</citetitle></link>. The <citetitle>Invisible XML Specification</citetitle> is published at <link xl:href="https://invisiblexml.org/1.0/" /> and I recommend paying particular attention to the <citetitle pubwork="section">Complete Grammar</citetitle> section so you’re aware of the pre-defined rules; it’s also a great example of what an iXML grammar looks like and immediately after it is an example of the XML that would be generated if you applied the iXML grammar to itself. The spec is developed and maintained by the <link xl:href="https://www.w3.org/community/ixml/">W3C Invisible Markup Community Group</link>, who have a <link xl:href="https://lists.w3.org/Archives/Public/public-ixml/">email discussion group</link> that anyone can message and a
+			public archive that you can search (in case your question has been raised and discussed before). There is a list of grammars on <link xl:href="https://invisiblexml.org/" /> but in general I’ve struggled to find publicly available iXML grammars.</para>
+
+		<para>For my own first attempt at writing an iXML grammar, I chose the DTD document type (DOCTYPE) declaration “string” as the text I wanted to parse. Although DTDs have technically been superseded by more modern schema languages, they’re still fairly commonplace. The DOCTYPE declaration can be used to associate an XML document with an external Document Type Definition (DTD). I chose external because it’s much simpler than internal and the use-cases I had in mind all related to external definitions.</para>
+
+		<para>When working with XML documents, sometimes it’s useful or necessary to know what the exact content model is. In human mode, I can open the document and read the schemas association information; if that’s not there, we’re into a whole other problem that’s out-of-scope for this particular use case. Programmatically, it’s not so easy, as that information is discarded when a DOM object is created.</para>
+
+		<para>Another reason for choosing the DOCTYPE declaration was that the rules for writing one are explicitly defined in the specification for XML<citation>XML1-0</citation> so I wouldn’t have the additional overhead of trying to infer them from sample documents.</para>
+
+		<para>Once I started drafting my iXML grammar, I soon wanted to test it out and “eyeball” what was coming out. We hadn’t been running iXML transformations locally on our laptops during the tutorial (because it was unplanned) so I wasn’t already set up for it. Happily, Google led me to CoffeePot, an Invisible XML processor, developed and maintained by Norm Tovey-Walsh<citation>CPOT</citation>. It’s distributed as a jar file, can easily be run from a command-line and has a useful manual. For a list of alternative implementations, see <link xl:href="invisblexml.org" />.</para>
+
+		<para>Next, I needed a sample input document. This is when I discovered that it wasn’t possible to use iXML itself to find and isolate the DOCTYPE declaration within the XML document; unlike a regular expression, an iXML grammar must match the entirety of the input document. At this point, as I was simply looking for sample input to experiment with, I should have just manually copy and pasted the DOCTYPE declaration string into a file of it’s own. However, I had it stuck in my head that my real-world use-case was to programmatically parse the string and convert it to XML. So I created an ANT macro to load the XML document as text and use a regular expression to find and extract the DOCTYPE declaration. I could have made my regular expression more complex in order to identify the component parts of the DOCTYPE declaration but that would have defeated the point of the learning exercise. Also, one of the advantages of an iXML grammar over a regular expression is readability.
+			Understanding even a slightly complex regular expression written by someone else - or by myself a while ago - can be challenging whereas an iXML grammar is commonly expressed as named components so it’s easier to identify the logical “building blocks” and how they relate to each other.</para>
+
+		<figure xml:id="doctype-declaration-example">
+			<title>Single-line text file containing a DOCTYPE declaration for XHTML</title>
+			<mediaobject>
+				<imageobject>
+					<imagedata fileref="images/xhtml_public_path.txt.png" width="100%" />
+				</imageobject>
+			</mediaobject>
+		</figure>
+
+		<para><link xl:href="#doctype-declaration-example">Figure 3</link> shows an example of a DOCTYPE declaration string after it's been extracted from an XHTML document and saved separately in a text file.</para>
+
+		<para>Now I was ready to test.</para>
+
+	</section>
+
+	<section xml:id="testing-ixml">
+		<title>Testing an iXML grammar</title>
+
+		<para>For general reasons to test, see Sandro Cirulli’s 2017 paper introducing <citetitle>XSpec v0.5.0</citetitle><citation>CIR2017</citation> and <citetitle>Stretching XPath: Three Testing Tales: Beyond Primary Use Cases of Certain XML Functions and Standards</citetitle> by Amanda Galtman<citation>GAL2024</citation>.</para>
+
+		<section xml:id="eyeballing">
+			<title>Eyeballing the output</title>
+
+			<para>An informal term for literally just looking at the output and manually scanning for errors. Unless you’re a hardcore practitioner of Test Driven Development<citation>TDD</citation>, it’s likely that you’ve done this and it’s certainly what I was doing when I first started experimenting with iXML. It’s low risk while you’re learning something new and the inputs and outputs are small and simple - and the software isn’t in production - but as complexity increases, manual checks usually become more time-consuming and risky and the odds are that you will start missing mistakes. Eventually you’re going to need to put something more robust in place.</para>
+		</section>
+
+		<section xml:id="schema-validation">
+			<title>Schema validation</title>
+
+			<para>If there’s a schema for your target XML then you may be able to validate your output against it. In some cases, even though a schema is available this type of testing may not be practical, for example, if your iXML creates content to be inserted into a larger document and the schema is designed to only validate in the context of that larger document.</para>
+
+			<para>Schema validation can alert you to errors such as a misspelt element or attribute name, a missing wrapper element or elements in the wrong order. This is especially pertinent to testing an iXML grammar as this is where many of (sometimes all) the element and attribute names are written.</para>
+
+			<para>However, most schemas check the markup but not the content that is being marked up so, for example, if a word or URL is unintentionally changed during the conversion, a schema is unlikely to detect it.</para>
+
+			<para>A schema also won’t catch content that is unintentionally lost during the conversion unless the lost content is mandatory.</para>
+		</section>
+
+		<section xml:id="diffing">
+			<title>Diff</title>
+
+			<para>Diffing is similar to eyeballing the content but the comparison is executed programmatically, so if you want to use it as a testing method, you need to provide the diff tool with a copy of the output expected (a control document) as well as the content to check. </para>
+
+			<para>This technique is especially useful if you don’t have a schema to validate against and also for spotting lost or unintentionally changed content. However, if the control document is large, it can be very time-consuming to create and maintain.</para>
+		</section>
+
+		<section xml:id="xspec">
+			<title>XSpec</title>
+
+			<para>XSpec is a popular testing framework, originally created in 2008[CIR2017] for testing XSLT but it has since been extended to also support XQuery and Schematron.[WHATXSP] My experiment to use XSpec for testing iXML extended the process for testing XSLT so the scope of this section is limited to the XSpec process for XSLT. However, Amanda Galtman has published an article on how to test iXML using XQuery in BaseX with Markup Blitz.[GALMED]</para>
+
+			<section xml:id="xspec-for-xslt">
+				<title>Using XSpec to test XSLT</title>
+
+				<para><link xl:href="#xspec-xml-for-xslt">Figure 4</link>, shows the XML for a very simple XSpec file (<filename>jumping.xspec</filename>) to test an XSLT file named <filename>jumping.xsl</filename>. The input data is provided inline, wrapped within an <code>x:context</code> element (line 10). This example contains three tests (lines 12-14). </para>
+
+				<figure xml:id="xspec-xml-for-xslt">
+					<title>Simple XSpec test file</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/jumping_xspec.png" width="100%" />
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>XSpec takes the test file as an input and uses <code>/x:description/@stylesheet</code> to locate the XSLT file (see <xref linkend="xspec-inputs-outputs" />). When it’s finished evaluating the tests, it outputs two result documents: one containing a detailed breakdown of the results and showing any errors found (HTML) and the other a simple ANT properties file containing the overall result (pass/fail).</para>
+
+				<figure xml:id="xspec-inputs-outputs">
+					<title>Inputs and outputs when testing XSLT with XSpec (high-level)</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/xspec_xslt_process_high_level.drawio.png" width="100%" />
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>For the purposes of this example, the XSLT hasn’t been updated to change “lazy dog” to “dozy hare” so the second test (line 13) fails. See <link xl:href="xspec-xslt-test-report">Figure 6</link> for an screenshot of the HTML results file. Notice that for the failed test, the report includes a diff visualisation of the actual result returned by the XSLT (on the left) and the “Expected Result” that was specified on line 13 of the XSpec test file.</para>
+
+				<figure xml:id="xspec-xslt-test-report">
+					<title>XSpec results (HTML)</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/jumping_xspec_html_report.png" width="100%" />
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>One of the key advantages of XSpec over other diff tools is the option to use XPath to target and test sub-sections of content. For more in-depth tutorials, see the <citetitle>Getting Started</citetitle> section on the official XSpec wiki.<citation>GETST</citation></para>
+
+			</section>
+
+			<section xml:id="xspec-for-ixml">
+				<title>Using XSpec to test iXML</title>
+
+				<para>One of the maintainers of XSpec, Amanda Galtman, has identified a relatively simple way that this can be done using the <code>invisible-xml</code> function in XPath 4.0<citation>GALMED</citation><citation>XPATH4</citation>. Unfortunately, the specification for XPath 4.0 is still in development and not yet widely supported. However, Amanda’s solution can already be used if you write your XSpec tests as XQuery and run them in BaseX with the Markup Blitz library. Once the <code>invisible-xml</code> function is supported in an XSLT processor, it should also be possible to use it in XSpec tests written for XSLT.</para>
+
+				<para>When I started thinking about how XSpec’s XSLT process might be adapted for testing iXML, the main differences that I identified were:</para>
+
+				<orderedlist>
+					<listitem>
+						<para>the context is text, not XML</para>
+					</listitem>
+					<listitem>
+						<para>the code being tested is an iXML grammar, not an XSLT stylesheet</para>
+					</listitem>
+				</orderedlist>
+
+				<para>I wanted to make as few changes as possible to the way that the XSpec test file would be written<citation>WRITEXSPEC</citation> and realised that this would be possible if I could apply the iXML transformation to the context before the expectations were evaluated. So that the XSpec would be able to easily differentiate a test file written for iXML from one written for XSLT, XQuery or Schematron, I added a new attribute to the root element of the test file, named <code>grammar</code>, the value of which is expected to be a path to a file containing the iXML grammar being tested.</para>
+
+				<figure xml:id="xspec-xml-for-ixml">
+					<title>An example of an XSpec test file for iXML</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/changes_for_ixml.png" width="100%" />
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>In <xref linkend="xspec-xml-for-ixml" />, the iXML grammar is specified on line 3 and the text to be converted to XML is stored in a separate file and specified using the <code>href</code> attribute on <code>x:context</code> (line 7). This is a standard option in XSpec that’s very useful if you’re re-using the same text in multiple scenarios. The contents of <filename>xhtml_public_path.txt</filename> can be seen in <xref linkend="doctype-declaration-example" />. The expected result is specified, as per usual, via the <code>x:expect</code> element (lines 9-16). Similar though it is, this test file is not a valid XSpec file so I also changed the namespace URI (line 2). During the iXML pre-processing step, when a valid XSpec file is created, the namespace URI is changed back to <code>http://www.jenitennison.com/xslt/xspec</code>.</para>
+
+				<para>Under the hood of the XSpec testing process, there are four main steps: compile, evaluate, report and summarise.</para>
+
+				<figure xml:id="xspec-standard-steps">
+					<title>Steps in the XSpec process, with inputs and outputs</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/xspec_stages_of_processing.drawio.png" width="100%" />
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>I decided to add the iXML transformation as an extra step, immediately before Compile; it’s not unprecedented, as XSpec already includes a pre-processing step when testing Schematron. I implemented this step using XProc, mostly so that I could take advantage of its support for iXML (<code>p:ixml</code><footnote>
+						<para>The name of this function has since changed to <code>p:invisible-xml</code><citation>XPROCIXML</citation></para>
+					</footnote>)<citation>XPROCIXML</citation> but also, if I’m honest, in part because it was a personal project and I enjoy working with XProc. This custom XProc step:</para>
+
+				<orderedlist>
+					<listitem>
+						<para>changes the namespace URI from <code>http://xylarium.org/ns/xspec/utils/ixspec</code> to <code>http://www.jenitennison.com/xslt/xspec</code></para>
+					</listitem>
+					<listitem>
+						<para>replaces <code>/x:description/@grammar</code> with <code>/x:description/@stylesheet</code> which references an XSLT identity transform stylesheet</para>
+					</listitem>
+					<listitem>
+						<para>uses <code>p:viewport</code> to iterate over all the <code>x:context</code> elements and, for each:</para>
+						<orderedlist>
+							<listitem>
+								<para>uses <code>p:ixml</code> to transform the input (<code>x:context/@href</code>) into XML using the grammar (<code>/x:description/@grammar</code>) and stores the result as a temporary file</para>
+							</listitem>
+							<listitem>
+								<para>changes <code>x:context/@href</code> to reference the temporary file containing the result of the iXML transformation</para>
+							</listitem>
+						</orderedlist>
+					</listitem>
+					<listitem>
+						<para>uses <code>resolve-uri()</code> and <code>p:xslt</code> to change any <code>x:expect/@href</code> URIs that are relative to absolute.</para>
+					</listitem>
+				</orderedlist>
+
+				<para><xref linkend="xspec-for-ixml-preprocessed" />, shows what the output of this step would be if it were applied to the example XSpec file shown in <xref linkend="xspec-xml-for-ixml" />.</para>
+
+				<figure xml:id="xspec-for-ixml-preprocessed">
+					<title>XSpec test file for iXML after pre-processing</title>
+					<mediaobject>
+						<imageobject>
+							<imagedata fileref="images/changes_for_ixspec_preprocessed.png" width="100%" />
+						</imageobject>
+					</mediaobject>
+				</figure>
+
+				<para>If the iXML grammar is correct then the contents of <filename>1.ixml-output.xml</filename> (the results of the iXML transformation) will now be the same as the contents of the <code>x:expect</code> element in <link xl:href="#">Figure 7</link>. This (temporary) XSpec file can now progress through the normal XSpec steps: compile, evaluate, report and summarise. If the result of the iXML transformation isn’t as expected then the differences will be displayed side-by-side in XSpec’s HTML report.</para>
+			</section>
+
+		</section>
+
+		<section xml:id="revelations">
+			<title>What testing revealed</title>
+
+			<para>Initially, the errors were caused by a fairly equal mix of syntax errors in my grammar, eg. forgetting to add a full-stop at the end of each rule, and incomplete grammar rules. On the syntax errors front, I resolved this with a more throrough reading of the iXML spec and comparing other iXML grammars with each other, as well as my own. The incomplete grammar rules were inevitable as I was testing it before it was complete.</para>
+			
+			<para>Whitespace was a problem.  Michael Sperberg-McQueen wrote about this in 2023, in his paper on <citetitle>Keyboarding Frege's concept writing</citetitle><citation>CMS2023</citation>:</para>
+			
+			<blockquote>
+				<attribution>Michael Sperberg-McQueen</attribution>
+				<para>The handling of whitespace is one of the trickiest and least expected problems confronted by the writer of invisible-XML grammars. Even those with long experience using and writing context-free grammars may be tripped up by it, partly because most practical tools for parser generation assume an upstream lexical analyser or tokenizer which can handle whitespace rules, and most published context-free grammars accordingly omit all mention of whitespace. Because ixml does not assume any upstream lexical analyser, whitespace must be handled by the grammar writer.</para>
+				<para>If care is not taken, then either whitespace will not be allowed in places where it should be allowed, or it will be allowed by multiple rules, introducing ambiguity into the grammar. (In this case, the ambiguity is usually harmless, since the position of whitespace seldom affects the intended meaning of the input. But there is no way for the parser to know when ambiguity is harmless, so it will warn the user.) On the other hand, if care is taken, then whitespace handling can begin to consume all too much of the grammar writer’s thoughts.</para>
+			</blockquote>
+			
+			<para>That was exactly my experience: finding that whitespace wasn't allowed where it should and then was allowed where it shouldn't. Similarly, before I started writing the grammar, I hadn't really thought about the source including content I might want to drop, for example, delimiters and other punctuation. However, with each new scenario I discovered, I was able to create a new test and if the fix for this new problem unintentionally broke a scenario that was previously working, I knew about it straight away.</para>
+
+			<para>Another white-space challenge was understanding what <code>Zs</code> is shorthand for. Although it is referenced in the iXML grammar, it's not also defined there, unlike <code>tab</code>, <code>lf</code> and <code>cr</code> which are all defined as well as referenced (see <xref linkend="ixml-whitespace-rules" />.</para>
+
+			<figure xml:id="ixml-whitespace-rules">
+				<title>iXML definition of whitespace, including Zs</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/ixml_whitespace_definition.png" width="200px" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>However, the iXML specification mentions Unicode character classes and, sure enough, <code>Zs</code> is defined in <citetitle>Table 4.4</citetitle> of the <citetitle>Character Properties</citetitle> chapter of the core specification of the Unicode Standard<citation>UNIGEN</citation> (see figure 11). This isn’t the only Unicode character class code that’s used in the iXML spec so, unless you’re familiar with them all, you may also find this table useful.</para>
+
+			<figure xml:id="unicode-general-category">
+				<title>Excerpt from the Unicode Standard showing the definition of Zs</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/unicode_general_characters.png" width="100%" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>As I got towards the end of writing my grammar and I started to try to make sure that it exactly implemented the rules for a DOCTYPE declaration, as defined for XML 1.0 (fifth edition)<citation>XML1-0</citation> and 1.1<citation>XML1-1</citation> (the rules are the same in both specs).</para>
+
+			<figure xml:id="xml-doctypedecl-definition">
+				<title>Excerpts from the XML 1.0 Specification showing the rules for a DOCTYPE declaration</title>
+				<mediaobject>
+					<imageobject>
+						<imagedata fileref="images/xml_doctypedecl.png" width="100%" />
+					</imageobject>
+				</mediaobject>
+			</figure>
+
+			<para>I copied the character ranges from the XML spec and pasted them into my iXML grammar but when I tested the changes, an error was thrown, complaining that character <code>#EFFFF</code> wasn’t allowed. A quick search revealed that <code>#EFFFF</code> is one of 66 Unicode code points confusingly labelled <emphasis>Noncharacter</emphasis><citation>WIKINON</citation><citation>UNINON</citation><citation>UNIGEN</citation>. This prompted me to post a question in the <citetitle>xml.com</citetitle> space on <link xl:href="https://slack.com">Slack.com</link>. The conversation this triggered is now lost because messages in that Space are hidden after 90 days (I should have, instead, emailed the question to the iXML mailing list where the discussion would have been preserved) however the kind people of XML Slack helped me understand that:</para>
+
+			<itemizedlist>
+				<listitem>
+					<para>the problematic character was in the rule for a Name Start Character</para>
+				</listitem>
+				<listitem>
+					<para>the iXML definition for a Name Start Character isn't the same as the XML definition for Name Start Character</para>
+				</listitem>
+			</itemizedlist>
+
+			<para>This isn't the only difference between iXML and XML when it comes to names and the archive for the iXML mailing list includes quite a long discussion about this<citation>CHARDISCUSS</citation>. Norm Tovey-Walsh has also investigated the differences and documented his detailed findings and some history in <citetitle>Understanding (i)XML names</citetitle><citation>IXMLNAMES</citation>. My temporary workaround was to fallback to using the more restrictive iXML definition: <code>-xml-name-start-character: ["_"; L].</code></para>
+
+			<para>Another whitespace-related challenge manifested when I configured CoffeePot to pretty print the XML output and XSpec started failing my tests because of whitespace differences. I had already updated the expected result so that it was also pretty printed and the actual result looked identical in the side-by-side diff but on closer examination I discovered that CoffeePot was indenting with spaces, whereas I had used tabs to indent the expected result. The samples are much easier to work with if pretty printed, so I didn’t want to remove the indentation but as I believe that tabs are superior to spaces (#religious-war), I wasn’t about to change the settings in my text editor to replace tabs with spaces and the odds were low that I would remember to use spaces instead of tabs in just those files. Instead, I created an XSLT identity transform that strips whitespace and added it to my XSpec file as a helper.</para>
+
+			<para>The final noteworthy test failure was also XSpec related. Both <code>x:context</code> and <code>x:expect</code> were set to source their content from external files (<code>@href</code>), with no <code>select</code> attribute. And it looked as though the result matched the expected, but the tests were failing because the result was an <code>element()</code> but expected was a <code>document-node()</code>. My workaround for this was to set each of the expects to select the root <code>element()</code>, instead of the <code>document-node()</code>.</para>
+		</section>
+
+	</section>
+
+	<section xml:id="automation">
+		<title>Automation</title>
+
+		<para>I used ANT to connect together the XProc pre-processing step and XSpec's standard steps (compile, evaluate, report, summarise), which are already written in ANT.  XSpec actually includes an XProc 1.0 pipeline for running tests (as an alternative to ANT) but my pre-processing step was written using XProc 3.1 - and XProc 1.0 steps are incompatible with XProc 3.0+ steps. It wasn’t possible to downgrade the pre-processing step to version 1.0 because it doesn’t support the <code>p:ixml</code> step, which the pre-processing step depends on.</para>
+
+		<para>I used XProc instead of ANT for the pre-processing step because it's usually easier to make changes to an XML file using XProc or XSLT. MorganaXProc-III SE supports the XProc 3.1 <code>p:ixml</code> step, for carrying out the iXML transformation, whereas the <code>invisible-xml</code> function in XSLT 4.0 isn't yet supported by an XSLT processor. However, the pre-processing step does still include two XSLT transformations. It’s so easy to use XSLT within XProc that when writing XProc, if I already know how to achieve something using XSLT, I tend to mix the two together rather than checking to see if a more efficient approach is possible simply using out-of-the-box XProc. Although, once something is working, given time and opportunity, I do often review and reflect on my code and explore whether there are other potentially more suitable options available and refactor to use them instead, eg. <code>p:add-attribute</code> and <code>p:namespace-rename</code>.</para>
+
+	</section>
+
+	<section xml:id="conclusion">
+		<title>Conclusion</title>
+
+		<para>In my opinion, learning to write an Invisible XML grammar is no more difficult that learning any other schema language and is worth the effort if you have a use-case where it would be useful. Although I would recommend that for your first grammar you too seek out a textual input that already has a very clearly defined, simple, stable and small content model.</para>
+		
+		<para>It was a relief to confirm that there are viable options other than eyeballing for testing an iXML grammar during development, not least because the notation for an iXML grammar is quite symbol-heavy which can make typos tricky to spot.  Tests are also important in the maintenance of a grammar though, so that developers can fix bugs or extend the content model with greater confidence that their changes haven't introduced unintended side-effects. Especially if the person making the change wasn't involved in writing the grammar originally  - or even if they were but it's been a long time since they worked on it.</para>
+		
+		<para>Once the invisible-xml() XPath/XQuery function is more widely supported it will be trivially easy to use XSpec to test an iXML grammar, per the approach proposed by Amanda Galtman.  And if you already have the option to do so using XQuery, BaseX and Markup Blitz then you should try it out; it's not complicated.</para>
+		
+		<para>While my own project has served it's purpose of helping me to learn to write and work with iXML grammars - and better understand how XSpec works under-the-hood - I believe it will be redundant as soon as the invisible-xml() XPath/XQuery function is more widely supported.</para>
+		
+	</section>
+
+	<bibliography xml:id="references">
+
+		<bibliomixed>
+			<abbrev>IXML</abbrev> <title>Invisible XML Specification 1.0</title>, 20 Jun 2022. W3C Invisible Markup Community Group. <bibliomisc><link xl:href="https://invisiblexml.org/1.0/" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>IMCG</abbrev> W3C Invisible Markup Community Group. <title>Invisible XML</title>. <bibliomisc><link xl:href="https://invisiblexml.org/" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>PEM2013</abbrev> Pemberton, Steven. <title>Invisible XML</title>. Presented at Balisage: The Markup Conference 2013, Montréal, Canada, August 6 - 9, 2013. In Proceedings of Balisage: The Markup Conference 2013. Balisage Series on Markup Technologies, vol. 10 (2013). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol10.Pemberton01" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>XML1-0</abbrev>
+			<title>Extensible Markup Language (XML) 1.0 (Fifth Edition)</title>, 26 Nov 2008. W3C. <bibliomisc><link xl:href="https://www.w3.org/TR/xml/" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>CPOT</abbrev> Tovey-Walsh, Norm. <title>CoffeePot: An Invisible XML processor</title>, version 3.2.9. NineML. <bibliomisc><link xl:href="https://docs.nineml.org/current/coffeepot/" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>CIR2017</abbrev> Cirulli, Sandro. <title>XSpec v0.5.0</title>. Presented at XML London 2017, London, England, June 10 - 11, 2017. In XML London 2017 Conference Proceedings. <bibliomisc><link xl:href="https://xmllondon.com/2017/xmllondon-2017-proceedings.pdf" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>GAL2024</abbrev> Galtman, Amanda. <title>Stretching XPath: Three Testing Tales: Beyond Primary Use Cases of Certain XML Functions and Standards</title>. Presented at Balisage: The Markup Conference 2024, Washington, DC, July 29 - August 2, 2024. In Proceedings of Balisage: The Markup Conference 2024. Balisage Series on Markup Technologies, vol. 29 (2024). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol29.Galtman01" /></bibliomisc>. </bibliomixed>
+		<bibliomixed>
+			<abbrev>TDD</abbrev> Wikipedia contributors. <title>Test-driven development</title>. Wikipedia, The Free Encyclopedia. <bibliomisc><link xl:href="https://en.wikipedia.org/wiki/Test-driven_development" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>WHATXSP</abbrev> XSpec wiki contributors. <title>What is XSpec</title>. XSpec Wiki. <bibliomisc><link xl:href="https://github.com/xspec/xspec/wiki/What-is-XSpec" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>GALMED</abbrev> Galtman, Amanda. <title>Testing Invisible XML using XSpec: XPath 4.0 and BaseX Pave the Way</title>. Medium, 7 Aug 2024. <bibliomisc><link xl:href="https://medium.com/@xspectacles/testing-invisible-xml-using-xspec-e2b11b24b486" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>GETST</abbrev> XSpec wiki contributors. <title>Getting Started</title>. XSpec Wiki.<bibliomisc><link xl:href="https://github.com/xspec/xspec/wiki/Getting-Started" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>XPATH4</abbrev> <title>XPath and XQuery Functions and Operators 4.0, W3C Editor’s Draft</title>, 27 May 2025. W3C. <bibliomisc><link xl:href="https://qt4cg.org/specifications/xpath-functions-40/" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>WRITEXSPEC</abbrev> XSpec wiki contributors. <title>Writing Scenarios</title>. XSpec Wiki. <bibliomisc><link xl:href="https://github.com/xspec/xspec/wiki/Writing-Scenarios" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>XPROCIXML</abbrev> <title>XProc 3.1: Invisible XML, Community Group Report</title>, 16 March 2024. W3C. <bibliomisc><link xl:href="https://spec.xproc.org/master/head/ixml/" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>CMS2023</abbrev> Sperberg-McQueen, C.M. <title>Keyboarding Frege's concept writing: A case study in the use of invisible XML</title>.  Presented at Balisage: The Markup Conference 2023, Washington DC, July 31 - August 4, 2023. In Proceedings of Balisage: The Markup Conference 2023.  Balisage Series on Markup Technologies, vol. 28 (2023). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol28.Sperberg-McQueen01" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>UNIGEN</abbrev> <title>Table 4-4. General_Category Values</title> in <title>Chapter 4: Character Properties</title> in <title>The Unicode Standard Version 16.0 – Core Specification</title>, 10 Sept 2024. The Unicode Consortium. <bibliomisc><link xl:href="https://www.unicode.org/versions/Unicode16.0.0/core-spec/chapter-4/#G134153" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>XML1-1</abbrev> <title>Extensible Markup Language (XML) 1.1 (Second Edition)</title>, 29 Sep 2006. W3C. <bibliomisc><link xl:href="https://www.w3.org/TR/xml11/" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>WIKINON</abbrev> Wikipedia contributors. <title>Noncharacters</title> section in <title>Universal Character Set Characters</title>. Wikipedia, The Free Encyclopedia. <bibliomisc><link xl:href="https://en.wikipedia.org/wiki/Universal_Character_Set_characters#Non-characters" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>UNINON</abbrev> <title>Corrigendum #9: Clarification About Noncharacters</title>. The Unicode Consortium. <bibliomisc><link xl:href="https://www.unicode.org/versions/corrigendum9.html" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>CHARDISCUSS</abbrev> Tovey-Walsh, Norm. <title>An easy-to-miss-error</title>. W3C Invisible XML Community Group Mailing List. 4 Nov 2023. Archive of discussion thread available at: <bibliomisc><link xl:href="https://lists.w3.org/Archives/Public/public-ixml/2023Nov/0001.html" /></bibliomisc>
+		</bibliomixed>
+		<bibliomixed>
+			<abbrev>IXMLNAMES</abbrev> Tovey-Walsh, Norm. <title>Understanding (i)XML names</title>. Github.com. <bibliomisc><link xl:href="https://github.com/invisibleXML/ixml/blob/master/misc/understanding-names.md" /></bibliomisc>
+		</bibliomixed>
+
+	</bibliography>
+	
+	<appendix>
+		<title>Invisible XML Grammar for a DOCTYPE declaration</title>
+		<mediaobject>
+			<imageobject>
+				<imagedata fileref="images/ixml_grammar_doctypedecl.png" width="100%" />
+			</imageobject>
+		</mediaobject>
+	</appendix>
+	
+	<appendix xml:id="past-papers-on-ixml">
+		<title>Chronological List of Past Papers on Invisible XML</title>
+		<subtitle>Presented at Balisage, Declarative Amsterdam, Markup UK, XML London and XML Prague</subtitle>
+		<bibliolist>
+			<bibliomixed>Pemberton, Steven. <title>Invisible XML</title>. Presented at Balisage: The Markup Conference 2013, Montréal, Canada, August 6 - 9, 2013. In Proceedings of Balisage: The Markup Conference 2013. Balisage Series on Markup Technologies, vol. 10 (2013). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol10.Pemberton01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Pemberton, Steven. <title>Data Just Wants to Be Format-Neutral</title>. Presented at XML Prague 2016, Prague, Czech Republic, February 11-13, 2016. In XML Prague 2016 Conference Proceedings. <bibliomisc><link xl:href="https://archive.xmlprague.cz/2016/files/xmlprague-2016-proceedings.pdf#d6e2656" /></bibliomisc></bibliomixed>
+			<bibliomixed>Pemberton, Steven. <title>Parse Earley, Parse Often: How to Parse Anything to XML</title>. Presented at Presented at XML London 2017, London, England, June 4 - 10, 2016. In XML London 2016 Conference Proceedings. <bibliomisc><link xl:href="https://xmllondon.com/2016/xmllondon-2016-proceedings.pdf" /></bibliomisc></bibliomixed>
+			<bibliomixed>Pemberton, Steven. <title>On the Descriptions of Data</title>. Presented at XML Prague 2017, Prague, Czech Republic, February 9-11, 2017. In XML Prague 2017 Conference Proceedings. <bibliomisc><link xl:href="https://archive.xmlprague.cz/2017/files/xmlprague-2017-proceedings.pdf#d6e3022" /></bibliomisc></bibliomixed>
+			<bibliomixed>Pemberton, Steven. <title>On the Specification of Invisible XML</title> Presented at XML Prague 2019, Prague, Czech Republic, February 7-9, 2019. In XML Prague 2019 Conference Proceedings. <bibliomisc><link xl:href="https://archive.xmlprague.cz/2019/files/xmlprague-2019-proceedings.pdf#page=425" /></bibliomisc></bibliomixed>
+			<bibliomixed>Mason, James David. <title>Do we really want to see markup?</title>. Presented at Balisage: The Markup Conference 2019, Washington, DC, July 30 - August 2, 2019. In Proceedings of Balisage: The Markup Conference 2019. Balisage Series on Markup Technologies, vol. 23 (2019). <bibliomisc><link xl:href="https://www.balisage.net/Proceedings//vol23/html/Mason01/BalisageVol23-Mason01.html" /></bibliomisc>
+			</bibliomixed>
+			<bibliomixed>Sperberg-McQueen, C. M. <title>Aparecium: An XQuery / XSLT library for invisible XML</title>. Presented at Balisage: The Markup Conference 2019, Washington, DC, July 30 - August 2, 2019. In Proceedings of Balisage: The Markup Conference 2019. Balisage Series on Markup Technologies, vol. 23 (2019). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol23.Sperberg-McQueen01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Hillman, Tom. <title>JayParser: an Invisible XML implementation in XSLT</title>. Presented at Declarative Amsterdam 2020, Amsterdam, Netherlands, October 8-9, 2020. <bibliomisc><link xl:href="https://declarative.amsterdam/presentations/da.2020.hillman.jayparser" /></bibliomisc></bibliomixed>
+			<bibliomixed>Sperberg-McQueen, C.M. <title>Aparecium, an XQuery / XSLT parser library for invisible XML</title>. Presented at Declarative Amsterdam 2021, Amsterdam, Netherlands, November 4-5, 2021. <bibliomisc><link xl:href="https://declarative.amsterdam/presentations/da.2021.sperberg-mcqueen.aparecium" /></bibliomisc></bibliomixed>
+			<bibliomixed>Pemberton, Steven. <title>A Pilot Implementation of ixml</title>. Presented at XML Prague 2022, Prague, Czech Republic, June 9-11, 2022. In XML Prague 2022 Conference Proceedings. <bibliomisc><link xl:href="https://archive.xmlprague.cz/2022/files/xmlprague-2022-proceedings.pdf#page=51" /></bibliomisc></bibliomixed>
+			<bibliomixed>Hillman, Tomos, John Lumley, Steven Pemberton, C. M. Sperberg-McQueen, Bethan Tovey-Walsh and Norm Tovey-Walsh. <title>Invisible XML coming into focus: Status report from the community group</title>. Presented at Balisage: The Markup Conference 2022, Washington, DC, August 1 - 5, 2022. In Proceedings of Balisage: The Markup Conference 2022. Balisage Series on Markup Technologies, vol. 27 (2022). <bibliomisc><link xl:href="https://www.balisage.net/Proceedings//vol27/html/Eccl01/BalisageVol27-Eccl01.html" /></bibliomisc></bibliomixed>
+			<bibliomixed>Hillman, Tomos, C. M. Sperberg-McQueen, Bethan Tovey-Walsh and Norm Tovey-Walsh. <title>Designing for change: Pragmas in Invisible XML as an extensibility mechanism</title>. Presented at Balisage: The Markup Conference 2022, Washington, DC, August 1 - 5, 2022. In Proceedings of Balisage: The Markup Conference 2022. Balisage Series on Markup Technologies, vol. 27 (2022). <bibliomisc><link xl:href="https://www.balisage.net/Proceedings//vol27/html/Sperberg-McQueen01/BalisageVol27-Sperberg-McQueen01.html" /></bibliomisc></bibliomixed>
+			<bibliomixed>Sperberg-McQueen, C. M. <title>Keyboarding Frege's concept writing: A case study in the use of invisible XML</title>. Presented at Balisage: The Markup Conference 2023, Washington, DC, July 31 - August 4, 2023. In Proceedings of Balisage: The Markup Conference 2023. Balisage Series on Markup Technologies, vol. 28 (2023). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol28.Sperberg-McQueen01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Tovey-Walsh, Norm. <title>Ambiguity in iXML: And How to Control It</title>. Presented at Balisage: The Markup Conference 2023, Washington, DC, July 31 - August 4, 2023. In Proceedings of Balisage: The Markup Conference 2023. Balisage Series on Markup Technologies, vol. 28 (2023). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol28.Tovey-Walsh01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Conrad, Kurt. <title>Word processing is so last century: Formalizing internal narratives using internal declarations and making them look pretty</title>. Presented at Markup UK 2023, London, England, June 1-3. In Markup UK 2023 Proceedings. <bibliomisc><link xl:href="https://markupuk.org/2023/pdf/Markup-UK-2023-proceedings.pdf#d5e2236" /></bibliomisc></bibliomixed>
+			<bibliomixed>Pemberton, Steven. <title>A Declarative Code Browser with iXML and XForms</title>. Presented at Declarative Amsterdam, Amsterdam, Netherlands, November 2-3, 2023. <bibliomisc><link xl:href="https://declarative.amsterdam/presentations/da.2023.pemberton.declarative-code-browser" /></bibliomisc></bibliomixed>
+			<bibliomixed>Nordström, Ari. <title>It’s Useful After All – VIN Numbers, DITA, and iXML</title>. Presented at XML Prague 2024, Prague, Czech Republic, June 6-8, 2024. In XML Prague 2024 Conference Proceedings. <bibliomisc><link xl:href="https://archive.xmlprague.cz/2024/files/xmlprague-2024-proceedings.pdf#page=305" /></bibliomisc></bibliomixed>
+			<bibliomixed>Courtney, Joseph Michael, and Michael Robert Gryk. <title>Pulse, Parse, and Ponder: Using Invisible XML to Dissect a Scientific Domain Specific Language</title>. Presented at Balisage: The Markup Conference 2024, Washington, DC, July 29 - August 2, 2024. In Proceedings of Balisage: The Markup Conference 2024. Balisage Series on Markup Technologies, vol. 29 (2024). <bibliomisc><link xl:href="https://www.balisage.net/Proceedings//vol29/html/Courtney01/BalisageVol29-Courtney01.html" /></bibliomisc></bibliomixed>
+			<bibliomixed>Holstege, Mary. <title>Invisible Fish: API Experimentation with InvisibleXML</title>. Presented at Balisage: The Markup Conference 2024, Washington, DC, July 29 - August 2, 2024. In Proceedings of Balisage: The Markup Conference 2024. Balisage Series on Markup Technologies, vol. 29 (2024). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol29.Holstege01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Lumley, John. <title>Variations on an Invisible Theme: Using iXML to produce XML to produce iXML to produce …</title>. Presented at Balisage: The Markup Conference 2024, Washington, DC, July 29 - August 2, 2024. In Proceedings of Balisage: The Markup Conference 2024. Balisage Series on Markup Technologies, vol. 29 (2024). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol29.Lumley01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Nordström, Ari. <title>Adventures in Mainframes, Text-based Messaging, and iXML</title>. Presented at Balisage: The Markup Conference 2024, Washington, DC, July 29 - August 2, 2024. In Proceedings of Balisage: The Markup Conference 2024. Balisage Series on Markup Technologies, vol. 29 (2024). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol29.Nordstrom01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Sperberg-McQueen, C. M. <title>From Word to XML via iXML: a Word-first XML workflow in the TLRR 2e project</title>. Presented at Balisage: The Markup Conference 2024, Washington, DC, July 29 - August 2, 2024. In Proceedings of Balisage: The Markup Conference 2024. Balisage Series on Markup Technologies, vol. 29 (2024). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol29.Sperberg-McQueen01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Tovey-Walsh, Bethan. <title>When women do algorithms: a semi-generative approach to overlay crochet with iXML and XSLT</title>. Presented at Balisage: The Markup Conference 2024, Washington, DC, July 29 - August 2, 2024. In Proceedings of Balisage: The Markup Conference 2024. Balisage Series on Markup Technologies, vol. 29 (2024). <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol29.Tovey-Walsh01" /></bibliomisc></bibliomixed>
+			<bibliomixed>Pemberton, Steven. <title>Banking with iXML and XForms</title>. Presented at Declarative Amsterdam 2024, Amsterdam, Netherlands, November 7-8, 2024. <bibliomisc><link xl:href="https://declarative.amsterdam/presentations/da.2024.pemberton.banking" /></bibliomisc></bibliomixed>
+			<bibliomixed>Verwer, Nico and Lamers, Pieter. <title>Syntax highlighting for code blocks using iXML</title>. Presented at Declarative Amsterdam 2024, Amsterdam, Netherlands, November 7-8, 2024. <bibliomisc><link xl:href="https://declarative.amsterdam/presentations/da.2024.verwer.syntax-highlighting-using-ixml" /></bibliomisc></bibliomixed>
+		</bibliolist>
+	</appendix>
+
+</article>

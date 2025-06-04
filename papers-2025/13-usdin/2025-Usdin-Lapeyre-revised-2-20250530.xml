@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook"
+	 xmlns:xl="http://www.w3.org/1999/xlink"
+	 version="5.0" xml:lang="en">
+<info>
+<title>Adding new Cars to a Running Train</title>
+<subtitle>Adding markup for multilingual documents to JATS</subtitle>
+
+<author>
+<personname>Deborah Aleyne Lapeyre</personname>
+<email>dalapeyre@mulberrytech.com </email>
+<uri>http://mulberrytech.com</uri>
+<personblurb><para>Debbie Aleyne Lapeyre serves (with Tommie Usdin) as the Secretariat and principal architects for JATS (ANSI NISO Z39.96-2021 Journal Article Tag Suite), as well as for two JATS-based vocabularies: BITS (Book Interchange Tag Suite) and NISO STS (American National Standard, STS: Standards Tag Suite, ANSI/NISO Z39.102-2022). Ms. Lapeyre was on the initial design team for JATS, and is a JATS design expert. She currently works as a Senior XML/XSLT Consultant for Mulberry Technologies, Inc., a consulting firm specializing in helping their clients toward better publishing through XML, XSLT, and Schematron solutions, primarily for JATS, BITS, and STS implementations. She is on the organizing Committee for Balisage: The Markup Conference. She has been developing systems that manipulate tagged documents since 1980, working with SGML since before it became an international standard, and with XML and XSLT since their inceptions. Hobbies include pumpkin carving parties and many too many books.</para></personblurb>
+<affiliation>
+<jobtitle>Senior XML/XSLT/Schematron Consultant</jobtitle>
+<orgname>Mulberry Technologies, Inc.</orgname>
+</affiliation>
+</author>
+
+<author>
+<personname>B. Tommie Usdin</personname>
+<email>btusdin@mulberrytech.com</email>
+<uri>http://mulberrytech.com</uri>
+<personblurb><para>B. Tommie Usdin is President of Mulberry Technologies, Inc., a consultancy specializing in markup of textual documents. She is co-chair of the JATS Standing Committee, a member of NISO&apos;s Standards Tag Suite Standing Committee, a member of the Book Interchange Tag Suite committee, and chairs Balisage: The Markup Conference. Ms. Usdin has developed DTDs, Schemas, and XML/SGML application frameworks for applications in government and industry. Projects include reference materials in medicine, science, engineering, and law; semiconductor documentation; historical and archival materials. Distribution formats have included print books, magazines, and journals, and both web- and media-based electronic publications. You can read more about her at http://www.mulberrytech.com/people/usdin/index.html</para></personblurb>
+<affiliation>
+<jobtitle>President/Senior XML/XSLT/Consultant</jobtitle>
+<orgname>Mulberry Technologies, Inc.</orgname>
+</affiliation>
+</author>
+<keywordset>
+<keyword>JATS</keyword>
+<keyword>journal articles</keyword>
+<keyword>Multilingual</keyword>
+<keyword>Multi-language</keyword>
+<keyword>language group</keyword>
+<keyword>translation</keyword>
+<keyword>transcription</keyword>
+</keywordset>
+
+<abstract>
+<para>The Journal Article Tag Suite (JATS) is the ANSI/NISO standard that is defines the tag set used to archive, exchange, and publish journal articles worldwide. JATS 1.4 was approved (as JATS version 1.4 ANSI/NISO Z39.96-2024) on October 31, 2024. The most exciting new capability added in JATS 1.4 is a way to encode multi-language journal articles. JATS defines a <quote>multi-language</quote> article not merely as an article written in English or German with a couple of quotations in Latin or French. A true multilingual article contains substantial portions of the content written and presented in more than one language or contains some parts in one language and other parts in a different language or languages. The JATS tag set has always been able to encode articles in any language and to identify portions of an article that are in a different language from the containing article (using @xml:lang). However, JATS has not, until version 1.4, been able to encode (in a graceful way) articles that are in whole or large-part multilingual.</para>
+<para>The JATS multi-language mechanism harks back to Architectural Forms, and is implemented mostly using attributes, which can identify: <itemizedlist
+mark="bullet">
+<listitem>
+<para>an entire article in 2 or more languages</para>
+</listitem>
+<listitem>
+<para>substantial portions of content (paragraphs and sections) replicated in 2 or more languages</para>
+</listitem>
+<listitem>
+<para>block structures (such as figures, tables, and equations) replicated in 2 or more languages</para>
+</listitem>
+<listitem>
+<para>articles where some of the content is in one language and some in another, and </para>
+</listitem>
+<listitem>
+<para>article metadata (such as the article title or abstract) in multiple languages.</para>
+</listitem>
+</itemizedlist></para>
+<para>This paper describes the encoding available for many styles of multi-language
+functionality, provides examples, lists useful resources to learn more, and gives a few reasons why
+this mechanism may be of interest to you, even if you or your clients do not code in JATS or work with journal
+articles.</para>
+</abstract>
+</info>
+
+<section>
+<title>What is JATS?</title>
+<para>The Journal Article Tag Suite (hereafter JATS) is an ANSI/NISO standard (JATS version 1.4 ANSI/NISO Z39.96-2025)  designed to capture the content and metadata of journal articles. JATS is only a tag set, unlike TEI, DITA, and Akoma Ntoso, which provide extensive software/processing components. JATS provides semantic tags for the parts of journals (particularly in the metadata) that have traditionally been used for discovery and to manage journal articles. The JATS tagging for body structures is quite generic (paragraphs, tables, figures, lists, footnotes, etc.). The metadata and bibliographic elements are typically semantic and divide many elements into logical components (for example: multiple parts of a personal name, extensive information on collaborations, elaborate article funding metadata, and over 60 elements within a bibliographic citation).</para>
+
+<para>Journal articles are <emphasis outputformat="italic">not</emphasis> typically authored in JATS: they may be, for example, written in Microsoft Word or encoded in a bespoke journal article tag set. But at some stage in their lifecycle  nearly all the world&apos;s journal articles are translated into JATS. JATS is the tag set publishers and archives use to communicate and exchange; JATS can be input to a wide variety of hosting platforms; JATS is the archival format of choice for many large-scale archives such as PubMed Central, UK PubMed Central, JSTOR, the British National Library, the Australian National Library, and the US Library of Congress. JATS is international; in 2018 it was used in more than 30 countries, and that number grows over time.</para>
+</section>
+
+<section>
+<title>Requirements and Constraints</title>
+<para>Historically, publishing in general, and journal publishing in particular, has been dominated by a relatively small portion of the world and by European languages and English in particular. This is changing; there are not only increasing numbers of journals in other languages, there is a growing need to support multilingual journal articles. Multilingual content is much more than block quotes in French or Latin inside a article in English. Familiar examples from current publishing practice include an article in two original languages (the Canadian author wrote both French and English versions) or in an original language and one or more translations (a French/English article was also translated into Spanish).</para>
+
+<section>
+<title>How Multi-language Documents are Presented and Stored</title>
+<para>Both the presentation styles and the order of storing components are widely variable for current multi-language documents. When substantial portions of document content are in more than one language, the same structures are often repeated, once in each language. For example: alternate sections could repeat the same content in Spanish and Portuguese. As another, a paragraph could be repeated, first in Greek, then in Romanian, and then in Italian. Sometimes an article will be almost entirely in one language with selected structures in both (or only) another language, as article written in Korean with both metadata and table content provided in English. [<citation>JATSMultilang</citation>]</para>
+<para>In such a multilingual document, when there are two or more <quote>same-content</quote> structures (sections, figures, boxed-texts, tables, etc.), differing only in language, few assumptions can be made about the locations of and the interrelationships between these same-content objects within the document.<itemizedlist>
+<listitem>
+<para>content objects written in a single language need not be contiguous, and</para>
+</listitem>
+<listitem>
+<para>equivalent structures (the same content, differing only by language) need not be located anywhere near each other in the document</para>
+</listitem>
+</itemizedlist></para>
+<para>For these reasons, a JATS multi-language mechanism could not simply enclose (wrap up) all the
+same-content objects, unless the entire article was presented, in order, twice. This
+wrapper-approach has been the mechanism of the long-standing JATS element
+<code>&lt;block-alternatives></code>, which was created to hold multiple copies of a block object
+such as a figure or table in multiple languages. Users tried to use <code>&lt;block-alternatives></code> for multilingual documents and found that it did not meet real-life needs. For true interspersed multilingualism, a wrapper-style
+mechanism is not sufficient. [<citation>JATSMultilang</citation>]</para>
+</section>
+<section>
+<title>Requirements and Non-Requirements</title>
+<para>The scope and culture of JATS impose some requirements and constraints on the ways in which JATS can or should grow. The most important of these are that within the 1.X line strict backwards compatibility is essential, inconvenience to current users should be minimized, and JATS is a source format for storage and interchange rather than a display format. </para>
+<section>
+<title>Backwards Compatibility</title>
+<para>The current version of JATS is 1.4. Like all versions in the 1.X line, it is fully backwards compatible with all previous versions of JATS. This means that any document valid to one of the JATS profiles (Archiving, Publishing, Authoring) in any of the previous versions of JATS will be valid to the current version. The JATS Committee has further committed to the position that all previous valid JATS 1.X documents will be valid to future 1.x versions of that profile of JATS. </para>
+<para>While there has been discussion of what a 2.0 version of JATS might look like, and what
+infelicities in JATS might be fixed if /when we can tidy up by removing structures that are no
+longer optimal, JATS 2.0 is in the indefinite future.  So, accommodation of multilingual articles
+had to be built into JATS 1.X, and thus in a way that articles that were created before this was
+developed would be valid and would have no changes to their meanings when used with a schema that
+included the multi-language mechanism. </para>
+</section>
+<section>
+<title>The Needs of the Few Must Not Burden the Many</title>
+<para>Most journal publishers do not publish multilingual articles, most journal articles are not multilingual, and most JATS users have not been uncomfortable because JATS did not accommodate multilingual articles. It was important that, in adding a mechanism to enable a small but growing community to use JATS, we not impose a burden on established users. (The JATS Standing Committee was told, in no uncertain terms, that <quote>NOBODY NEEDS THAT #*($!</quote>. We interpreted that to mean that the speaker didn&apos;t need it, wasn&apos;t interested in people who might need it, and was concerned about the burden that might be imposed on existing users if it were added.) </para>
+<para>It was the hope of the JATS Standing Committee that the JATS multi-language mechanism be neither bulky nor intrusive. Ideally, any mechanism should enable users to create true multilingual documents while not requiring changes to the tagging of mono-lingual documents. Ideally, any multi-language mechanisms should be completely ignorable by creators/users of mono-lingual documents. In other words, if you do not publish multilingual documents, nothing in your JATS-world should change.</para>
+<para>The JATS 1.4 multi-language structures were designed to be TOTALLY IGNORABLE. Users who have no need for multiple languages in one document can simply not use any of them. Some users make their own subsets of the JATS model that do not include <emphasis outputformat="italic">any</emphasis> of these attributes. They can continue to do so and to leave the multi-language structures out of their working versions. Documents that are valid to such a subset will be valid to the published models and will be indistinguishable from documents that were created using the whole model that happen not to use the Multi-Language structures. [<citation>JATSMLExamples</citation>]</para>
+<para>Further, it is highly unlikely that any user will ever use <emphasis>all</emphasis> of the multi-language attributes at all, and never within a single article (with the possible exception of articles created to demonstrate use of the mechanism). The multi-language attributes can and should be used only when appropriate and useful, and when the information is available. A user should use the multi-language attributes, like everything else in JATS, to encode information that they desire to provide to users of the articles. There is no virtue, and significant cost, in encoding information in the XML that is unimportant, redundant, or of questionable accuracy. In other words, if: <itemizedlist>
+<listitem>
+<para>you don&apos;t know, or</para>
+</listitem>
+<listitem>
+<para>you don&apos;t care and don&apos;t think your users will either</para>
+</listitem>
+</itemizedlist>don&apos;t clutter your XML. The multi-language mechanism is a tool for communicating multilingual information that matters rather than a requirement that creators fill their documents with guesses or information that is irrelevant to the intended use/users of the articles. [<citation>JATSMLExamples</citation>]</para>
+</section>
+<section>
+<title>JATS Should Stay In It&apos;s Lane</title>
+<subtitle>JATS is a source for many presentations, not a display format.</subtitle>
+<para>It is the goal of JATS to enable users to encode the information that will be needed to create
+a variety of interchange and presentation formats from the markup in the JATS-encoded document. It is not
+the intent for JATS-encoded articles to be directly ingested by typesetting, voice-synthesis, or web
+displays. So, for example, JATS provides tagging for both short/unstructured and longer/structured
+annotations (to a graphic, for example) to enhance accessibility. It does not position this information in the locations that
+are appropriate for end user display; the assumption is that the application creating the display
+will put the information where it is needed for display. (For example, some guidelines suggest
+that HTML&apos;s <quote>Long Description</quote> should be on a separate HTML page from the content. That content is
+embedded in the JATS-encoded article but can be separated when creating a web version of the
+document.) </para>
+<para>Similarly, many page layout tools require heading levels be explicit in their input source;
+first level heads must have a different tag from second- and third-level heads. JATS uses a
+containment hierarchy to store this information: the <quote>title</quote> of a <quote>section</quote> that is inside only one
+other <quote>section</quote> would be displayed as a second-level head. It is the assumption behind the design of
+JATS that the application providing the JATS-encoded content to that typesetting system will convert
+the tagging to the style required by that system.</para>
+<para>The JATS multi-language tagging includes some of the information described in the W3C&apos;s
+<quote>Internationalization Tag Set (ITS)</quote>. For example, JATS enables users to encode information that can
+be converted to ITS&apos;:
+<itemizedlist>
+<listitem><para>translate,</para></listitem>
+<listitem><para>language information, and</para></listitem>
+<listitem><para>provenance.</para></listitem>
+
+</itemizedlist>
+JATS does not provide tagging for information that is specific to display tools or that is unlikely
+to appear in published journal articles, such as: 
+<itemizedlist>
+<listitem><para>localization note,</para></listitem>
+<listitem><para>localization quality,</para></listitem>
+<listitem><para>allowed characters, and</para></listitem>
+<listitem><para>storage size.</para></listitem>
+</itemizedlist></para>
+</section>
+</section>
+
+</section>
+<section>
+<title>I Don&apos;t Use JATS; Why Should I
+Care?</title>
+<para>There are two things a non-JATS user might find of interest in how we addressed this new
+requirement in JATS: 
+<itemizedlist>
+<listitem><para>a mechanism for adding significant functionality to a existing tag set without burdening
+existing users, and</para></listitem>
+<listitem><para>some of the requirements for multilingual documents.</para></listitem>
+</itemizedlist></para>
+<para>The days when every markup project started with the development of a bespoke vocabulary are far behind us. Shared vocabularies dominate markup applications, often vocabularies that are long lived and used by a wide variety of users. The proponents of many of these vocabularies have evangelical tendencies; they want more and more users to adopt their vocabulary, and in order to make that possible they continually enrich the vocabulary both to better meet the needs of current users and to meet the needs of possible future users. It is important to do this is in ways that do not sabotage the utility of the vocabulary for current users. </para>
+<para>Writers in so-called <quote>minority languages</quote>, writers who often find that it is useful to use multiple languages to communicate, are gaining traction. More and more of them are rejecting the premise that in order to publish they must use one of the majority languages as must their readers.</para>
+<para>While it seems unlikely that other communities will find that the structures JATS developed to meet this need will be exactly what they need, we hope that others will find our analysis helpful as you figure out how to accommodate these new requirements and new users.</para>
+</section>
+
+
+<section>
+<title>JATS Multi-language Mechanism (<code>@lang-group</code>)</title>
+<para> The basic idea is to enable JATS creators to encode structural and metadata components of their document (sections, paragraphs, figures, quotations, tables, etc.) as being the same content, differing only in language. JATS can also encode the relationship between the same content in different languages. (For example: The original author wrote the same content in two or more languages. This section is present twice: one is the original and the second is its translation by a human translator. This section is present twice: one is the original and the second was translated by computer translation.)</para>
+
+<para>In the JATS 1.4, same-content structures in different languages can be flagged as belonging to the 
+same <quote>language group</quote>. JATS defines <quote>language group</quote> as the collection of objects that are the same in content and vary in language. JATS calls alternate language versions of the same content <quote>variants</quote>, and they are collected into a language group by the values of the <code>@lang-group</code> attribute. [<citation>JATSMultilang</citation>] The members of a language group may appear in widely separated places within a document.</para>
+<para>Functionality dealing with language groups in an online environment might include: allowing the user to choose whether to see only a particular language version or all the variants, and allowing a user to find an article in a search using a filter specifying the language(s). For example, in an article in both English and Spanish, a user could opt to see only the Spanish, only the English, or both. This would be a function of the display application supported by the JATS markup. [<citation>JATSMultilang</citation>]</para>
+<para>How an attribute builds language groups: [<citation>JATSMultilang</citation>] <itemizedlist>
+<listitem>
+<para>The value of the <code>@lang-group</code> attribute is an <code>IDREF</code>, and the attribute uses that value to logically tie the members of a language group (all the variants) together. The variant content objects in the language groups are bound together only by the <code>IDREF</code> value.</para>
+</listitem>
+<listitem>
+<para>The value of the <code>@lang-group</code> must be the same for all members of a language group to support processing.</para>
+</listitem>
+<listitem>
+<para>The value of the <code>@lang-group</code> must be the <code>@id</code> attribute value of one of the variant objects in the group. (It does not matter which object, and there is no significance to the selection of which <code>@id</code> is used.)</para>
+</listitem>
+</itemizedlist></para>
+<para>Once the objects in the language group are identified the creator can provide a variety of
+information about each of them. It would be surprising if the language of each were not provided,
+although it is not required. In addition, information about the source of the content and the expected uses may be
+provided.</para>
+<section><title>Influence of SGML&apos;s <quote>Architectural Forms</quote>: Giving Credit where Credit is Due</title>
+<para>This mechanism will look very familiar to old-timers in the markup community. Using a bundle of attributes to attach information to document structures that can govern processing is at the heart of SGML&apos;s 
+<quote>architectural forms</quote>. Architectural forms are key to HyTime and DITA, and have been used in many other markup environments.</para>
+<para>While the JATS multi-language structures do not use architectural forms as defined in the 1990s, their design was heavily influenced by them. (Most of the publications about SGML architectural forms are no longer available. The best reference we have found that is available is <quote>A Reader&apos;s Guide to the HyTime Standard</quote> [<citation>HyTime</citation>].</para>
+</section>
+</section>
+
+<section>
+<title>A Few Examples</title>
+<para>These examples are provided to show the reader a few of the types of information that can be encoded using the JATS multi-language mechanism. See the information sources discussed below in <quote>Documentation for All This</quote> for more detail.</para>
+
+<section>
+<title>Simple Example of a Language Group</title>
+<para>Here is the same product note three times (In English, in French, and in Canadian French): [<citation>JATSMLExamples</citation>]
+<programlisting language="xml">&lt;p id="mug-665" lang-group="mug-665" xml:lang="en">Portable
+     battery life varies by product. Enjoy
+     all-day battery life by regularly placing mug on its
+     included charging coaster.&lt;/p>
+     
+     &lt;p lang-group="mug-665" xml:lang="fr">L'autonomie de la
+     batterie varie en fonction des produits.
+     Prolongez l'autonomie de votre mug en le plaçant
+     régulièrement sur son support de chargement
+     inclus.&lt;/p>
+     
+     &lt;p lang-group="mug-665" xml:lang="fr-CA">L'autonomie de la
+     pile portable varie selon les produits.
+     Profitez d'une pile qui dure toute la journée en plaçant
+     régulièrement la tasse sur le sous-verre de
+     recharge inclus.&lt;/p></programlisting></para>
+</section>
+
+<section>
+<title>Did a Person or an Algorithm Translate This?</title>
+<para>Three short paragraphs are part of a language group. Note the differences in the treatment of the onomatopoeia (the speech of the hen). The paragraph in English is the original variant: [<citation>JATSMLExamples</citation>]
+<programlisting language="xml">&lt;p xml:lang="en" 
+     id="LRH-4011" lang-group="LRH-4011" lang-source="author" 
+     lang-variant="original">Carrying the sack of Wheat, she trudged 
+     off to the distant mill. There she ordered the Wheat ground into 
+     beautiful white flour. When the miller brought her the flour 
+     she walked slowly back all the way to her own barnyard in her 
+     own &lt;named-content content-type="quote">
+     picketty-pecketty&lt;/named-content> fashion.&lt;/p></programlisting>
+</para>
+<para>The the same paragraph was translated into Welsh by a human translator: [<citation>JATSMLExamples</citation>] <programlisting language="xml">&lt;p lang-group="LRH-4011" xml:lang="cy"  
+     lang-source="translator"  lang-variant="translation">
+     Dan gario'r sach Gwenith, trampiodd i ffwrdd i'r felin bell.
+     Yna, gofynnodd am falu'r Gwenith yn flawd gwyn, hyfryd. Pan
+     ddaeth y melinwr â'r blawd iddi, cerddodd yn araf yn ei hôl
+     i'w beudy ei hun, yn ei ffordd &lt;named-content 
+     content-type="quote">piceti-peceti&lt;/named-content> 
+     ei hun.&lt;/p></programlisting> </para>
+<para>The the same paragraph was also translated into Welsh by Google Translate: [<citation>JATSMLExamples</citation>] <programlisting language="xml">&lt;p lang-group="LRH-4011"  xml:lang="cy"
+     lang-source="custom" lang-source-custom="GoogleTranslate" 
+     lang-variant="translation">
+     Gan gario'r sach Gwenith, ymlwybrodd i'r felin bell. Yno hi
+     a orchmynnodd y tir Gwenith yn flawd gwyn hardd. Pan y daeth
+     melinydd â'r blawd iddi cerddodd yn araf yn ôl yr holl
+     ffordd iddi iard ysgubor ei hun yn ei ffasiwn 
+     &lt;named-content 
+     content-type="quote">piced-pecedi&lt;/named-content> 
+     ei hun.&lt;/p></programlisting></para>
+</section>
+
+<section>
+<title>Not Everything <emphasis>Should</emphasis> be Translated</title>
+<para>Sometimes some text should not be translated at all, even when the entire containing structure is translated, for example, a discussion (in multiple languages) of a phrase in a specific language or a localization concern. This is an editorial, not a technical decision, and must be flagged by the creator.</para>
+<para>Here is the original, with the <code>@translate</code> attribute set to <quote>no</quote> to block translation of the  onomatopoeia: [<citation>JATSMLExamples</citation>]
+<programlisting language="xml">&lt;p xml:lang="en" id="LRH-4011" lang-group="LRH-4011"  
+     lang-variant="original">Carrying the sack of Wheat, she trudged 
+     off to the distant mill. There she ordered the Wheat ground into 
+     beautiful white flour. When the miller brought her the flour 
+     she walked slowly back all the way to her own barnyard in her 
+     own &lt;named-content content-type="quote" translate="no">
+     picketty-pecketty&lt;/named-content> fashion.&lt;/p></programlisting></para>
+<para>Here is the translation, following that instruction: [<citation>JATSMLExamples</citation>]
+<programlisting language="xml">&lt;p lang-group="LRH-4011"  xml:lang="cy" 
+     lang-variant="translation">Dan gario'r sach Gwenith,
+     trampiodd i ffwrdd i'r felin bell. Yna, gofynnodd am falu'r
+     Gwenith yn flawd gwyn, hyfryd. Pan ddaeth y melinwr â'r
+     blawd iddi, cerddodd yn araf yn ei hôl i'w beudy ei hun, yn
+     ei ffordd &lt;named-content xml:lang="en"
+     content-type="quote">picketty-pecketty&lt;/named-content>
+     ei hun.&lt;/p></programlisting></para>
+</section>
+</section>
+
+<section>
+<title>Doesn&apos;t This Mechanism Entail a Lot of Overhead?</title>
+<para>Well, it <emphasis role="bold"
+>can</emphasis> entail a lot of overhead, or none at all; that depends on the needs and inclinations of the user. Users creating content can totally ignore it. Content creators who have multilingual content, <emphasis>that they want to encode as multilingual content</emphasis>, are <quote>required</quote> (which means encouraged) to include one metadata attribute (<code>@lang-grouping</code>) to flag that they are using this mechanism. In addition to the <code>@lang-grouping</code> attribute, users are expected to use as much, and only as much, of this infrastructure as is appropriate to their content and expected use. The minimum would be tagging all language groups with the <code>@lang-group</code> and <code>@xml:lang</code> attributes. Content receivers are not required to accept documents that use the multi-language mechanism, and can easily identify documents that use it tagging by looking for the <code>@lang-grouping</code> flag on the <code>&lt;processing-meta></code> element. Content receivers that do accept and process multilingual documents using the JATS multi-language mechanism can use the <code>@lang-grouping</code> flag to identify those documents that need this additional level of processing.</para>
+</section>
+
+
+<section>
+<title>Documentation for All This</title>
+<para>JATS is well documented. In fact, we have been told that JATS is <emphasis role="bold">over
+documented</emphasis> (we disagree). The official documentation of JATS is the JATS standard, which
+states the rules of the vocabulary. Like most standards, it does not contain explanations, advice to
+the user, or examples. In our opinion, the main value in the standard is the fact that it exists.</para>
+<para>The JATS multi-language mechanism is clearly and helpfully described both in the JATS non-normative documentation (Tag Libraries) and in several articles and conference papers:<itemizedlist>
+<listitem>
+<para>The most complete introduction is the discussion called <quote>Multiple Languages/scripts</quote> inside the <quote>Common Tagging Practice</quote> section of each of the JATS Tag Libraries. This essay includes: discussion of the requirements for multiple language encoding, a description of the basic JATS 1.4 attribute and element mechanism, definitions and restrictions for all the multilingual attributes, an explanation of other JATS changes that were made to accommodate multilingual encoding, and numerous examples. [<citation>JATSMultilang</citation>]</para>
+</listitem>
+<listitem>
+<para>The <quote>Attribute</quote> Chapter of each JATS 1.4 Tag Library documents each of the multi-language attributes individually (with definition, values, and examples). [<citation>JATSTaglib</citation>]</para>
+</listitem>
+<listitem>
+<para>Encoding multilingual bibliographic references is described in <quote>Multiple Language Citations</quote> subsection of the <quote>References</quote> subsection of the <quote>Common Tagging Practice</quote> section of each of the JATS Tag Libraries. [<citation>JATSMLCit</citation>]</para>
+</listitem>
+<listitem>
+<para>Many additional multi-language attribute examples are provided by B. Tommie Usdin in her JATS-Con 2025 paper <quote>Tagging multi-lingual documents in JATS 1.4: Some Examples</quote>. [<citation>JATSMLExamples</citation>]</para>
+</listitem>
+<listitem>
+<para>There have been presentations on the JATS multi-language mechanism at JATS-Con ([<citation>NewinJATS1.4</citation>, <citation>ImproveMLJATCon</citation>, <citation>JATSMLExamples</citation>]), in the NISO Update series [<citation>JATSUpdt</citation>], and a paper about it was published in <quote>Science Editing</quote> [<citation>ImproveML</citation>]. </para>
+</listitem>
+</itemizedlist></para>
+
+<para>For full technical details, examples, and discussions of usage we refer the reader to these
+sources.</para>
+
+</section>
+
+<section>
+<title>Acknowledgements</title>
+<para>The authors thank Bethan Tovey-Walsh for the translations into Welsh and her very helpful
+discussion of the issues in translating literary texts in general and onomatopoeia in
+specific.</para>
+</section>
+
+<bibliography xml:id="references">
+
+<bibliomixed>
+<abbrev>JATSTaglib</abbrev>
+National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM): <title>Journal Archiving and Interchange Tag Library NISO JATS Version 1.4 (ANSI/NISO Z39.96-2024)</title>. October 2024. <bibliomisc>Archiving: <link xl:href="https://jats.nlm.nih.gov/archiving/tag-library/1.4/">https://jats.nlm.nih.gov/archiving/tag-library/1.4/</link>, 
+ Publishing: <link xl:href="https://jats.nlm.nih.gov/publishing/tag-library/1.4/">https://jats.nlm.nih.gov/publishing/tag-library/1.4/</link>,
+Authoring: <link xl:href="https://jats.nlm.nih.gov/articleauthoring/1.4/">https://jats.nlm.nih.gov/articleauthoring/1.4/</link>
+</bibliomisc></bibliomixed>
+
+<bibliomixed>
+<abbrev>JATSMultilang</abbrev>
+National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM): <title>Journal Archiving and Interchange Tag Library
+NISO JATS Version 1.4 (ANSI/NISO Z39.96-2024) Multiple Languages/scripts</title>. October 2024.  <bibliomisc>Archiving: <link xl:href="https://jats.nlm.nih.gov/archiving/tag-library/1.4/chapter/tag-multi-lang-articles.html">https://jats.nlm.nih.gov/archiving/tag-library/1.4/chapter/tag-multi-lang-articles.html</link>, Publishing: <link xl:href="https://jats.nlm.nih.gov/publishing/tag-library/1.4/chapter/tag-multi-lang-articles.html">https://jats.nlm.nih.gov/publishing/tag-library/1.4/chapter/tag-multi-lang-articles.html</link>, Authoring: <link xl:href="https://jats.nlm.nih.gov/articleauthoring/tag-library/1.4/chapter/tag-multi-lang-articles.html">https://jats.nlm.nih.gov/articleauthoring/tag-library/1.4/chapter/tag-multi-lang-articles.html</link>
+</bibliomisc></bibliomixed>
+
+<bibliomixed>
+<abbrev>JATSMLCit</abbrev>
+National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM): <title>Journal Archiving and Interchange Tag Library
+NISO JATS Version 1.4 (ANSI/NISO Z39.96-2024) Multiple Language Citations</title>. October 2024.  <bibliomisc>Archiving: <link xl:href="https://jats.nlm.nih.gov/archiving/tag-library/1.4/chapter/tag-cite-multi-lang.html">https://jats.nlm.nih.gov/archiving/tag-library/1.4/chapter/tag-cite-multi-lang.html"></link>, Publishing: <link xl:href="https://jats.nlm.nih.gov/publishing/tag-library/1.4/chapter/tag-cite-multi-lang.html">https://jats.nlm.nih.gov/publishing/tag-library/1.4/chapter/tag-cite-multi-lang.html</link>, Authoring: <link xl:href="https://jats.nlm.nih.gov/articleauthoring/tag-library/1.4/chapter/tag-cite-multi-lang.html"
+>https://jats.nlm.nih.gov/articleauthoring/tag-library/1.4/chapter/tag-cite-multi-lang.html</link></bibliomisc>
+</bibliomixed>
+
+<bibliomixed>
+<abbrev>JATSStd</abbrev>
+American National Standards Institute/National Information Standards Organization (ANSI/NISO): ANSI/NISO Z39.96-2024. <title>JATS: Journal Article Tag Suite, version 1.4</title>. Baltimore: National Information Standards Organization.  <bibliomisc><link xl:href="https://groups.niso.org/higherlogic/ws/public/download/31415/ANSI-NISO-z39.96-2024.pdf">https://groups.niso.org/higherlogic/ws/public/download/31415/ANSI-NISO-z39.96-2024.pdf</link>
+</bibliomisc></bibliomixed>
+
+
+<bibliomixed>
+<abbrev>HyTime</abbrev> The Editors of ISO/IEC 10744:1992 2nd Edition:
+Charles Goldfarb, Information Management Consulting, 
+Steven R. Newcomb, TechnoTeacher Inc., 
+W. Eliot Kimber, ISOGEN International Corp., and
+Peter J. Newcomb, TechnoTeacher Inc.
+<title>A Reader&apos;s Guide to the HyTime Standard</title>.   <bibliomisc><link xl:href="https://www.hytime.org/papers/htguide.html">https://www.hytime.org/papers/htguide.html</link></bibliomisc>
+</bibliomixed>
+
+<bibliomixed>
+<abbrev>ITS2.0</abbrev>
+Internationalization Tag Set (ITS) Version 2.0, 
+W3C Recommendation 29 October 2013<bibliomisc><link xl:href="http://www.w3.org/TR/2013/REC-its20-20131029/">http://www.w3.org/TR/2013/REC-its20-20131029/</link>   
+</bibliomisc></bibliomixed>
+
+<bibliomixed>
+<abbrev>NewinJATS1.4</abbrev>D.A. Lapeyre:
+<title>What’s New in JATS 1.4</title>. In: Journal Article Tag Suite Conference (JATS-Con) Proceedings 2025 [Internet]. Bethesda (MD): National CentNational Center for Biotechnology Information (US); 2025. <bibliomisc><link xl:href="https://www.ncbi.nlm.nih.gov/books/NBK611601/">https://www.ncbi.nlm.nih.gov/books/NBK611601/</link></bibliomisc>
+</bibliomixed>
+
+<bibliomixed>
+<abbrev>ImproveML</abbrev>Vincent Lizzie: <title>Improving Journal Article Tag Suite for Multilingual Articles</title>. Sci Ed. 2022; 9: 2:169&#x2013;178. DOI:<link xl:role="doi"  xl:href="https://doi.org/10.6087/kcse.285">https://doi.org/10.6087/kcse.285</link>. <bibliomisc><link xl:href="https://www.escienceediting.org/journal/view.php?number=291">https://www.escienceediting.org/journal/view.php?number=291</link>   
+</bibliomisc></bibliomixed>
+
+<bibliomixed>
+<abbrev>ImproveMLJATCon</abbrev>
+ Vincent Lizzi: <title>Improving JATS for Multilingual Articles</title>. Journal Article Tag Suite Conference (JATS-Con) Proceedings 2022 [Internet]. Bethesda (MD): National Center for Biotechnology Information (US); 2022. <bibliomisc><link xl:href="https://www.ncbi.nlm.nih.gov/books/NBK579699/">https://www.ncbi.nlm.nih.gov/books/NBK579699/</link>   
+</bibliomisc></bibliomixed>
+
+<bibliomixed>
+<abbrev>JATSUpdt</abbrev>
+ Tommie Usdin: Open Teleconference: JATS (Journal Article Tag Suite Update, November 18, 2024. NISO. Audio recording (discussion with NISO&#8217;s Keondra Bailey), <bibliomisc><link xl:href="https://niso.org/events/2024/11/opentelecon-jats">https://niso.org/events/2024/11/opentelecon-jats</link>
+</bibliomisc></bibliomixed>   
+
+<bibliomixed>
+<abbrev>JATSMLExamples</abbrev>B.T. Usdin: 
+<title>Tagging multi-lingual documents in JATS 1.4: Some Examples</title>. In: Journal Article Tag Suite Conference (JATS-Con) Proceedings 2025 [Internet]. Bethesda (MD): National CentNational Center for Biotechnology Information (US); 2025. <bibliomisc><link xl:href="https://www.ncbi.nlm.nih.gov/books/NBK611124/">https://www.ncbi.nlm.nih.gov/books/NBK611124/</link></bibliomisc>
+</bibliomixed>
+
+
+</bibliography>
+
+
+
+
+</article>

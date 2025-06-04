@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
+<info>
+    <title>XForms Extended</title>
+    <subtitle>for XSLTForms</subtitle>
+    <author>
+      <personname>Charafeddine Cheraa</personname>
+      <email>ccheraa@gmail.com</email>
+      <email>ccheraa@muthabr.com</email>
+      <personblurb>
+        <para><?oxy_insert_start author="ari" timestamp="20250602T094814+0200"?>For
+          <?oxy_insert_end?>Charafeddine Cheraa,
+          <?oxy_delete author="ari" timestamp="20250602T094818+0200" content="a "?>programming
+          <?oxy_insert_start author="ari" timestamp="20250602T094820+0200"?>is <?oxy_insert_end?>a
+          passion for learning and exploring different development stacks and programming languages.
+          He first started programming for fun using QBasic, and over time, he gained experience
+          with various technologies, especially XML and web
+          development<?oxy_delete author="ari" timestamp="20250602T094944+0200" content=" "?><?oxy_insert_start author="ari" timestamp="20250602T094944+0200"?>-<?oxy_insert_end?>related,
+          <?oxy_delete author="ari" timestamp="20250602T094955+0200" content="with the willingness"?><?oxy_insert_start author="ari" timestamp="20250602T094955+0200"?>always
+          eager<?oxy_insert_end?> to improve and learn more.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Senior frontend developer</jobtitle>
+        <orgname>Muthabr</orgname>
+      </affiliation>
+    </author>
+    <keywordset>
+      <keyword>XML</keyword>
+      <keyword>XForms</keyword>
+      <keyword>XSLTForms</keyword>
+      <keyword>JavaScript</keyword>
+    </keywordset>
+    <abstract>
+      <para>The web scene has exploded in the last couple of decades, transitioning from static web
+        pages to dynamic, responsive web applications.
+        <?oxy_delete author="ari" timestamp="20250602T095041+0200" content="And f"?><?oxy_insert_start author="ari" timestamp="20250602T095041+0200"?>F<?oxy_insert_end?>acilitating
+        that
+        <?oxy_delete author="ari" timestamp="20250602T095044+0200" content="is"?><?oxy_insert_start author="ari" timestamp="20250602T095044+0200"?>are<?oxy_insert_end?>
+        frameworks like React, Vue, Svelte, and Angular
+        <?oxy_delete author="ari" timestamp="20250602T095054+0200" content="which"?><?oxy_insert_start author="ari" timestamp="20250602T095054+0200"?>that<?oxy_insert_end?>
+        prioritize user experience, component-based architecture, and seamless integration with
+        modern APIs, without sacrificing the developer experience.</para>
+      <para>Meanwhile, XForms, while powerful for data-centric applications, has for the most part
+        <?oxy_delete author="ari" timestamp="20250602T095116+0200" content="remained "?>fallen
+        behind. Its development
+        <?oxy_delete author="ari" timestamp="20250602T095129+0200" content="is"?><?oxy_insert_start author="ari" timestamp="20250602T095129+0200"?>has<?oxy_insert_end?>
+        not
+        <?oxy_delete author="ari" timestamp="20250602T095132+0200" content="catching"?><?oxy_insert_start author="ari" timestamp="20250602T095132+0200"?>caught<?oxy_insert_end?>
+        up with these rapid changes, leaving a growing gap in terms of modern UI/UX capabilities,
+        component flexibility, and integration with the wider web development ecosystem. This
+        disparity is not just a matter of preference; it risks XForms becoming irrelevant.</para>
+      <para>While the development of XForms 2.0 is
+        <?oxy_delete author="ari" timestamp="20250602T095250+0200" content="still "?>ongoing, the
+        progress has been undeniably slow,
+        <?oxy_delete author="ari" timestamp="20250602T095346+0200" content="which makes taking"?><?oxy_insert_start author="ari" timestamp="20250602T095346+0200"?>inviting<?oxy_insert_end?>
+        a different approach to <?oxy_delete author="ari" timestamp="20250602T095409+0200" content="fix this"?><?oxy_insert_start author="ari" timestamp="20250602T095409+0200"?>address<?oxy_insert_end?>
+        <?oxy_insert_start author="ari" timestamp="20250602T095411+0200"?>these <?oxy_insert_end?>issue<?oxy_insert_start author="ari" timestamp="20250602T095414+0200"?>s<?oxy_insert_end?>
+        <?oxy_delete author="ari" timestamp="20250602T095422+0200" content="sound better"?><?oxy_insert_start author="ari" timestamp="20250602T095422+0200"?>rather<?oxy_insert_end?>
+        than
+        <?oxy_delete author="ari" timestamp="20250602T095431+0200" content="anticipating"?><?oxy_insert_start author="ari" timestamp="20250602T095431+0200"?>waiting
+        for<?oxy_insert_end?> the eventual arrival of XForms 2.0. The web is not waiting for XForms,
+        and the momentum behind competing
+        technol<?oxy_insert_start author="ari" timestamp="20250602T095229+0200"?>o<?oxy_insert_end?>gies
+        continues to build.</para>
+      <para>We think that leveraging existing web technologies to address the most pressing
+        limitations of current
+        XForms<?oxy_delete author="ari" timestamp="20250602T095507+0200" content=","?> might be a
+        more beneficial approach.</para>
+      <para>The idea we came up with is to use a syntax similar to XForms (let's call it Extended
+        XForms for now), which then will be converted to XForms code. This syntax will extend the
+        original one in three ways:<orderedlist>
+          <listitem>
+            <para><emphasis role="bold">Style extension</emphasis> this
+              <?oxy_delete author="ari" timestamp="20250602T095647+0200" content="will "?>make<?oxy_insert_start author="ari" timestamp="20250602T095649+0200"?>s<?oxy_insert_end?>
+              minor
+              <?oxy_delete author="ari" timestamp="20250602T095624+0200" content="to"?><?oxy_insert_start author="ari" timestamp="20250602T095624+0200"?>or<?oxy_insert_end?>
+              no changes to the XML code, but
+              <?oxy_delete author="ari" timestamp="20250602T095655+0200" content="will "?>introduce<?oxy_insert_start author="ari" timestamp="20250602T095656+0200"?>s<?oxy_insert_end?>
+              new CSS styles, mostly for layouts, but also for theming when needed.</para>
+          </listitem>
+          <listitem>
+            <para><emphasis role="bold">Basic extension</emphasis>: the simple and concise syntax
+              of Extended XForms is converted to regular XForms, which then can be used as any other
+              XForms document.</para>
+            <para> These extra functionalities can be done in pure XForms but will be complex and
+              difficult to implement and maintain.</para>
+            <para>This may also introduce extra JavaScript code for extra functionalities.</para>
+          </listitem>
+          <listitem>
+            <para><emphasis role="bold">Functional extension</emphasis> this <?oxy_delete author="ari" timestamp="20250602T095751+0200" content="will be used to "?>provide<?oxy_insert_start author="ari" timestamp="20250602T095754+0200"?>s<?oxy_insert_end?>
+              <?oxy_delete author="ari" timestamp="20250602T095818+0200" content="special"?><?oxy_insert_start author="ari" timestamp="20250602T095818+0200"?>additional<?oxy_insert_end?> functionalit<?oxy_delete author="ari" timestamp="20250602T095845+0200" content="ies"?><?oxy_insert_start author="ari" timestamp="20250602T095845+0200"?>y<?oxy_insert_end?>
+              <?oxy_delete author="ari" timestamp="20250602T095851+0200" content="that don&apos;t exist"?><?oxy_insert_start author="ari" timestamp="20250602T095851+0200"?>not
+              currently<?oxy_insert_end?> in
+              XForms<?oxy_delete author="ari" timestamp="20250602T095931+0200" content=". These functionalities usually need"?><?oxy_insert_start author="ari" timestamp="20250602T095931+0200"?>,
+              commonly<?oxy_insert_end?> to read data directly from XForms models, write data, and
+              <?oxy_delete author="ari" timestamp="20250602T100004+0200" content="also "?>listen to
+              changes.</para>
+            <para><?oxy_delete author="ari" timestamp="20250602T100032+0200" content="This will"?><?oxy_insert_start author="ari" timestamp="20250602T100032+0200"?>Functional
+              extensions<?oxy_insert_end?> depend on the XForms
+              renderer<?oxy_delete author="ari" timestamp="20250602T100052+0200" content=", so it"?><?oxy_insert_start author="ari" timestamp="20250602T100052+0200"?>
+              and<?oxy_insert_end?> will not work
+              <?oxy_insert_start author="ari" timestamp="20250602T100056+0200"?>in
+              <?oxy_insert_end?>the same way for all XForms implementations.</para>
+          </listitem>
+        </orderedlist></para>
+    </abstract>
+  </info>
+
+<section>
+    <title>Introduction</title>
+    <?oxy_comment_start author="ari" timestamp="20250602T100433+0200" comment="Seeing that the Introduction section is a copy of the abstract, sans the list of extension types, I&apos;d consider copying the abstract as-is to replace the current Introduction - including the list - and shortening the abstraxt."?>
+    <para><?oxy_comment_end?>The web scene has exploded in the last couple of decades, transitioning
+      from static web pages to dynamic, responsive web applications. And facilitating that is
+      frameworks like React, Vue, Svelte, and Angular which prioritize user experience,
+      component-based architecture, and seamless integration with modern APIs, without sacrificing
+      the developer experience.</para>
+    <para>Meanwhile, XForms, while powerful for data-centric applications, has for the most part
+      remained fallen behind. Its development is not catching up with these rapid changes, leaving a
+      growing gap in terms of modern UI/UX capabilities, component flexibility, and integration with
+      the wider web development ecosystem. This disparity is not just a matter of preference; it
+      risks XForms becoming irrelevant.</para>
+    <para>While the development of XForms 2.0 is still ongoing, the progress has been undeniably
+      slow, which makes taking a different approach to fix this issue sound better than anticipating
+      the eventual arrival of XForms 2.0. The web is not waiting for XForms, and the momentum behind
+      competing technolgies continues to build.</para>
+    <para>We think that leveraging existing web technologies to address the most pressing
+      limitations of current XForms, might be a more beneficial approach.</para>
+  </section>
+
+<section>
+    <title>The problem</title>
+    <para>XForms is a W3C standard for creating powerful, XML-based web forms that separate data,
+      logic, and presentation. It allows developers to build dynamic, interactive forms with
+      built-in features like data validation, calculations, and conditional logic, all without
+      scripting. XForms is best used in data-intensive applications such as enterprise systems,
+      government portals, and document processing workflows, especially where structured data and
+      XML integration are important.</para>
+    <para>However, if you try to use it for other applications, issues will start to pop<?oxy_insert_start author="ari" timestamp="20250602T100528+0200"?>
+      <?oxy_insert_end?>up<?oxy_delete author="ari" timestamp="20250602T100547+0200" content=","?><?oxy_insert_start author="ari" timestamp="20250602T100547+0200"?>.<?oxy_insert_end?>
+      <?oxy_delete author="ari" timestamp="20250602T100554+0200" content="and i"?><?oxy_insert_start author="ari" timestamp="20250602T100554+0200"?>Usually,
+      i<?oxy_insert_end?>t's either something missing
+      <?oxy_delete author="ari" timestamp="20250602T100610+0200" content="that"?><?oxy_insert_start author="ari" timestamp="20250602T100610+0200"?>so<?oxy_insert_end?>
+      you can't simply implement it, or something that can be done, but it clearly could be much
+      easier.</para>
+    <para><?oxy_delete author="ari" timestamp="20250602T100626+0200" content="We will take this"?><?oxy_insert_start author="ari" timestamp="20250602T100626+0200"?>Consider
+      the following<?oxy_insert_end?> screenshot as an example to better understand
+      the<?oxy_delete author="ari" timestamp="20250602T100640+0200" content="se"?> issues:</para>
+  <para>
+    <figure annotations="source: https://webframe.xyz/products/stripe">
+        <title>Concept design of a SaaS
+          <?oxy_comment_start author="ari" timestamp="20250602T100725+0200" comment="What does this mean?"?>amdin<?oxy_comment_end?>
+          dashboard</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/ui-concept.png" width="100%"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+  </para>
+    <para>Can we make this in XForms? Yes.</para>
+    <para>Will it be in XForms alone? Most likely not.</para>
+    <para>Will it be easy? Definitely not.</para>
+    <para>Will the code be straightforward and easy to maintain? No, and it will definitely get more complicated when you need two of the same complex
+      element.</para>
+    <para>Why is that? And can we avoid it?</para>
+    <section>
+      <title>Issue #1: Cumbersome layouts</title>
+      <para>Let's first talk about the layout. We have a side navigation bar, a top bar, and the
+        page content. Both of the sidebar and the top bar are common UI elements that are widely
+        used, as well as the general layout.</para>
+      <para>This layout can be easily achieved with
+        css:<programlisting language="xml">&lt;head>
+  &lt;style>
+    #app {
+      display: flex;
+      gap: 4px;
+      flex-direction: row;
+      height: 100vh;
+    }
+    #body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #sidebar {
+      width: 200px;
+    }
+    #topbar {
+      height: 60px;
+    }
+    #content {
+      flex: 1;
+    }
+    #sidebar, #topbar, #content {
+      font-size: 32px;
+      border: 1px solid black;
+      padding: 10px;
+      line-height: 60px;
+    }
+  &lt;/style>
+&lt;/head>
+&lt;body>
+  &lt;div id="app">
+    &lt;div id="sidebar">
+      &lt;div>Sidebar&lt;/div>
+    &lt;/div>
+    &lt;div id="body">
+      &lt;div id="topbar">
+        &lt;div>Topbar&lt;/div>
+      &lt;/div>
+      &lt;div id="content">
+        &lt;div>Content&lt;/div>
+      &lt;/div>
+    &lt;/div>
+  &lt;/div>
+&lt;/body></programlisting></para>
+      <para>Then, depending on our use case we may need to add some XForms code to control some
+        aspects of the layout, i.e. the sidebar's
+        width:<programlisting language="xml">&lt;div id="sidebar" style="width:{if (instance('app')/sidebar-collapsed = 'true', 40, 200)}px"></programlisting></para>
+      <para>This will work,
+        but<?oxy_delete author="ari" timestamp="20250602T100825+0200" content=","?> wouldn't be
+        better if we could write something like:<programlisting language="xml">&lt;body>
+  &lt;app-layout>
+    &lt;sidebar collapsed="instance('app')/sidebar-collapsed = 'true'">
+      &lt;div>Sidebar&lt;/div>
+    &lt;/sidebar>
+    &lt;topbar height="60">
+      &lt;div>Topbar&lt;/div>
+    &lt;/topbar>
+    &lt;main>
+      &lt;div>Content&lt;/div>
+    &lt;/main>
+  &lt;/app-layout>
+&lt;/body></programlisting></para>
+      <para><?oxy_delete author="ari" timestamp="20250602T100903+0200" content="Again, t"?><?oxy_insert_start author="ari" timestamp="20250602T100903+0200"?>T<?oxy_insert_end?>his
+        <?oxy_delete author="ari" timestamp="20250602T100906+0200" content="code "?>does not
+        introduce anything that we don't already
+        have<?oxy_delete author="ari" timestamp="20250602T100917+0200" content=","?><?oxy_insert_start author="ari" timestamp="20250602T100917+0200"?>;<?oxy_insert_end?>
+        its only appeal is that it is much simpler than the
+        origin<?oxy_delete author="ari" timestamp="20250602T100923+0200" content="n"?>al
+        XHTML/XForms code.</para>
+    </section>
+    <section>
+      <title>Issue #2: Complex logic</title>
+      <para>Let's now look at the content of the page. We can see some charts, which also can be
+        made with XForms<?oxy_delete author="ari" timestamp="20250602T101014+0200" content=" like this"?><?oxy_insert_start author="ari" timestamp="20250602T101014+0200"?>.<?oxy_insert_end?>
+        <?oxy_delete author="ari" timestamp="20250602T101016+0200" content="f"?><?oxy_insert_start author="ari" timestamp="20250602T101016+0200"?>F<?oxy_insert_end?>or
+        example:<programlisting language="xml">&lt;div class="chart">
+  &lt;svg width="430" height="290" xmlns="http://www.w3.org/2000/svg">
+    &lt;rect width="100%" height="100%" fill="#f8f9fa" />
+    &lt;line x1="10" y1="10" x2="10" y2="260" stroke="#333" />
+    &lt;line x1="10" y1="260" x2="420" y2="260" stroke="#333" />
+    &lt;g fill="#4a90e2">
+      &lt;xf:repeat ref="instance('chart')/bars/entry" id="bar">
+        &lt;rect x="{-20 + position() * 40}" y="{10 + (100 - .) * 2.5}" width="30" height="{. * 2.5}" />
+      &lt;/xf:repeat>
+    &lt;/g>
+    &lt;g font-size="10" fill="#000" text-anchor="middle">
+      &lt;xf:repeat ref="instance('chart')/bars/entry" id="bar">
+        &lt;text x="{-5 + position() * 40}" y="275">
+          &lt;xf:output value="."/>
+        &lt;/text>
+      &lt;/xf:repeat>
+    &lt;/g>
+  &lt;/svg>
+&lt;/div></programlisting></para>
+      <para>Again, this code works as intended, but what if we could use this
+        instead:<programlisting language="xml">&lt;chart type="bar" data="instance('chart')/bars/entry" /></programlisting></para>
+      <para>Once
+        again<?oxy_insert_start author="ari" timestamp="20250602T101030+0200"?>,<?oxy_insert_end?>
+        the appeal of this syntax is its simplicity.
+        <?oxy_delete author="ari" timestamp="20250602T101038+0200" content="And w"?><?oxy_insert_start author="ari" timestamp="20250602T101038+0200"?>W<?oxy_insert_end?>hat
+        makes it even more appealing is that the chart appears multiple times on this page alone,
+        and this concise syntax will not create a mess when repeated.</para>
+    </section>
+      <section>
+        <title>Issue #3: The need for advanced JavaScript code</title>
+        <para>Now imagine<?oxy_insert_start author="ari" timestamp="20250602T101057+0200"?>
+        that<?oxy_insert_end?> we need to make the previous charts show live data. We simply
+        can<?oxy_delete author="ari" timestamp="20250602T101145+0200" content=" "?>not do it. We can
+        set a JavaScript interval to poll new data from the server, every, let's say, 5 seconds, but
+        then, how are we going to let XForms know what the newly pooled data
+        is<?oxy_insert_start author="ari" timestamp="20250602T101159+0200"?>?<?oxy_insert_end?><?oxy_delete author="ari" timestamp="20250602T101159+0200" content="."?></para>
+        <para>We can instead use a submission to refresh the data, but how are we going to trigger
+        it from a JavaScript interval?</para>
+        <para>Actually, we can do both, but it depends on the renderer. For
+        XSLTForms<?oxy_insert_start author="ari" timestamp="20250602T101220+0200"?>,<?oxy_insert_end?>
+        for example, we can
+        <?oxy_delete author="ari" timestamp="20250602T101315+0200" content="find"?><?oxy_insert_start author="ari" timestamp="20250602T101315+0200"?>locate<?oxy_insert_end?>
+        the <code>xforms-model</code> element<?oxy_delete author="ari" timestamp="20250602T101228+0200" content=","?>
+        <?oxy_delete author="ari" timestamp="20250602T101324+0200" content="and"?> dispatch an
+        <?oxy_delete author="ari" timestamp="20250602T101238+0200" content="E"?><?oxy_insert_start author="ari" timestamp="20250602T101238+0200"?>e<?oxy_insert_end?>vent
+        from JavaScript, listen for it on XForms, and refresh whenever it's triggered.
+        <?oxy_delete author="ari" timestamp="20250602T101341+0200" content="Remember that t"?><?oxy_insert_start author="ari" timestamp="20250602T101341+0200"?><?oxy_comment_start author="ari" timestamp="20250602T101417+0200" comment="Consider redoing this as a footnote."?>T<?oxy_insert_end?>his
+        works with XSLTForms 1.7 but not with previous versions because they don't build the HTML
+        page in the same
+        way.<?oxy_comment_end?><programlisting language="javascript">// javascript code
+setInterval(function () {
+  document.querySelector('xforms-model').dispatchEvent(new CustomEvent('on-refresh'));
+}, 5000);</programlisting><programlisting language="xml">&lt;!-- xforms code -->
+&lt;xf:submission id="refresh" method="get" action="/refresh" replace="instance" instance="test-data">&lt;/xf:submission>
+&lt;xf:send submission="refresh" ev:event="on-refresh" /></programlisting></para>
+        <para>However, what if we
+        want<?oxy_delete author="ari" timestamp="20250602T101504+0200" content="ed"?> a better
+        solution?
+        <?oxy_delete author="ari" timestamp="20250602T101507+0200" content="w"?><?oxy_insert_start author="ari" timestamp="20250602T101507+0200"?>W<?oxy_insert_end?>hat
+        if we want<?oxy_delete author="ari" timestamp="20250602T101510+0200" content="ed"?> to use
+        sockets instead? How
+        complex<?oxy_insert_start author="ari" timestamp="20250602T101516+0200"?>
+        would<?oxy_insert_end?> implementing that
+        <?oxy_delete author="ari" timestamp="20250602T101524+0200" content="would "?>be?
+        <?oxy_delete author="ari" timestamp="20250602T101534+0200" content="Will"?><?oxy_insert_start author="ari" timestamp="20250602T101534+0200"?>Is<?oxy_insert_end?>
+        it <?oxy_delete author="ari" timestamp="20250602T101536+0200" content="be "?>worth the
+        trouble, or would
+        <?oxy_delete author="ari" timestamp="20250602T101607+0200" content="we just be satisfied with"?><?oxy_insert_start author="ari" timestamp="20250602T101607+0200"?>it
+        just be<?oxy_insert_end?> a half-baked solution
+        <?oxy_delete author="ari" timestamp="20250602T101619+0200" content="just because it&apos;s"?><?oxy_insert_start author="ari" timestamp="20250602T101619+0200"?>that
+        is<?oxy_insert_end?> slightly easier to implement?</para>
+        <para><?oxy_delete author="ari" timestamp="20250602T101654+0200" content="We can safely assume that we all agree that it would"?><?oxy_insert_start author="ari" timestamp="20250602T101654+0200"?>Wouldn't
+        it<?oxy_insert_end?> be much better if we could write something like the following
+        instead:<programlisting language="xml">&lt;chart type="bar" data-url="/load-data/bar-chart" refresh-interval="5" /></programlisting>or<programlisting language="xml">&lt;chart type="bar" data-socket="bars-chart" /></programlisting></para>
+      </section>
+  </section>
+  <section>
+    <title>The proposed solution:</title>
+    <para>We came up with Extended XForms to avoid the
+      <?oxy_delete author="ari" timestamp="20250602T101723+0200" content="mentioned"?><?oxy_insert_start author="ari" timestamp="20250602T101723+0200"?>above<?oxy_insert_end?>
+      issues<?oxy_delete author="ari" timestamp="20250602T101752+0200" content=","?> and try to end
+      up with the best possible XForms user and developer experience.</para>
+    <para>The idea of Extended XForms is simple: an XSLT stylesheet that transforms the
+      easy<?oxy_delete author="ari" timestamp="20250602T101806+0200" content=" "?><?oxy_insert_start author="ari" timestamp="20250602T101806+0200"?>-<?oxy_insert_end?>to<?oxy_delete author="ari" timestamp="20250602T101807+0200" content=" "?><?oxy_insert_start author="ari" timestamp="20250602T101807+0200"?>-<?oxy_insert_end?>understand
+      Extended XForms code to
+      <?oxy_delete author="ari" timestamp="20250602T101814+0200" content="the "?>regular XForms so
+      the developer does not need to do everything themselves.</para>
+    <section>
+      <title>XForms code</title>
+      <remark>This is still experimental and will most likely change later</remark>
+      <para>We have a main
+        stylesheet<?oxy_delete author="ari" timestamp="20250602T101836+0200" content=","?> that
+        <?oxy_comment_start author="ari" timestamp="20250602T101915+0200" comment="I assume you mean &quot;reads&quot;?"?>crawls<?oxy_comment_end?>
+        the whole source of Extended XForms
+        documents.<programlisting language="xml">&lt;xsl:template match="node()|@*">
+  &lt;xsl:copy>
+    &lt;xsl:apply-templates select="@*|node()"/>
+  &lt;/xsl:copy>
+&lt;/xsl:template></programlisting></para>
+      <para><?oxy_delete author="ari" timestamp="20250602T101931+0200" content="This"?><?oxy_insert_start author="ari" timestamp="20250602T101931+0200"?>The<?oxy_insert_end?>
+        main stylesheet
+        <?oxy_delete author="ari" timestamp="20250602T101935+0200" content="itself "?>does not alter
+        the actual code except for <code>&lt;xhtml:head></code>. We output its existing content, and
+        then we add a link to our CSS
+        stylesheet<?oxy_delete author="ari" timestamp="20250602T101950+0200" content=","?> and our
+        JavaScript
+        file<?oxy_delete author="ari" timestamp="20250602T101959+0200" content=" as well"?>.</para>
+      <para><?oxy_delete author="ari" timestamp="20250602T102006+0200" content="After that, w"?><?oxy_insert_start author="ari" timestamp="20250602T102006+0200"?>W<?oxy_insert_end?>e<?oxy_insert_start author="ari" timestamp="20250602T102008+0200"?>
+        then<?oxy_insert_end?> find the main
+        model<?oxy_delete author="ari" timestamp="20250602T102013+0200" content=","?> and append a
+        new instance to it
+        <?oxy_delete author="ari" timestamp="20250602T102026+0200" content="which"?><?oxy_insert_start author="ari" timestamp="20250602T102026+0200"?>that<?oxy_insert_end?>
+        will hold data managed by Extended XForms.</para>
+      <para><remark>In the future, we will probably add a separate model specifically for Extended
+          XForms</remark></para>
+      <para>We also apply templates with specific modes, more on this
+        later.<programlisting language="xml">&lt;!-- html -->
+&lt;xsl:template match="xh:head">
+  &lt;xsl:copy>
+    &lt;xsl:apply-templates select="@*"/>
+    &lt;xh:script src="/res/xx-forms.js" type="text/javascript" />
+    &lt;xh:link href="/res/xx-forms.css" type="text/css" rel="StyleSheet"/>
+    &lt;xsl:apply-templates select="node()"/>
+    &lt;xsl:apply-templates select="/" mode="head" />
+    &lt;xsl:apply-templates select="/" mode="style" />
+  &lt;/xsl:copy>
+&lt;/xsl:template>
+&lt;!-- model -->
+&lt;xsl:template match="xf:model[1]">
+  &lt;xsl:copy>
+    &lt;xsl:apply-templates select="@*"/>
+    &lt;xsl:apply-templates select="node()"/>
+    &lt;xf:instance id="xxforms">
+      &lt;data>
+        &lt;xsl:apply-templates select="/" mode="model" />
+      &lt;/data>
+    &lt;/xf:instance>
+    &lt;xsl:apply-templates select="/" mode="events" />
+  &lt;/xsl:copy>
+&lt;/xsl:template></programlisting></para>
+      <para>This alone
+        <?oxy_delete author="ari" timestamp="20250602T102148+0200" content="will "?>provide<?oxy_insert_start author="ari" timestamp="20250602T102150+0200"?>s<?oxy_insert_end?>
+        custom CSS classes that can be used directly by the developer<?oxy_delete author="ari" timestamp="20250602T102059+0200" content=","?><?oxy_insert_start author="ari" timestamp="20250602T102059+0200"?>.<?oxy_insert_end?>
+        <?oxy_delete author="ari" timestamp="20250602T102101+0200" content="h"?><?oxy_insert_start author="ari" timestamp="20250602T102101+0200"?>H<?oxy_insert_end?>o<?oxy_insert_start author="ari" timestamp="20250602T102103+0200"?>w<?oxy_insert_end?>ever,
+        most of these classes are meant to be used by Extended XForms. The rest of CSS classes are
+        mostly for theming.</para>
+      <para>It also
+        provide<?oxy_insert_start author="ari" timestamp="20250602T102200+0200"?>s<?oxy_insert_end?>
+        low<?oxy_delete author="ari" timestamp="20250602T102203+0200" content=" "?><?oxy_insert_start author="ari" timestamp="20250602T102205+0200"?>-<?oxy_insert_end?>level
+        JavaScript functions allowing:<itemizedlist>
+          <listitem>
+            <para>Setting XForms data, nodes and attributes.</para>
+          </listitem>
+          <listitem>
+            <para>Reading XForms data, also nodes or attributes.</para>
+          </listitem>
+          <listitem>
+            <para>Listening to data changes.</para>
+          </listitem>
+        </itemizedlist></para>
+      <para>The main stylesheet
+        <?oxy_delete author="ari" timestamp="20250602T102215+0200" content="will "?>include<?oxy_insert_start author="ari" timestamp="20250602T102217+0200"?>s<?oxy_insert_end?>
+        other stylesheets, each for a specific task (a feature, a component, a style, etc.). These
+        stylesheets <?oxy_delete author="ari" timestamp="20250602T102228+0200" content="can "?>use
+        the special modes to add their own styles, data, and events.</para>
+      <para><?oxy_delete author="ari" timestamp="20250602T102239+0200" content="After that, i"?><?oxy_insert_start author="ari" timestamp="20250602T102239+0200"?>I<?oxy_insert_end?>f
+        needed, the stylesheet can also add a template that matches a specific Extended XForms
+        syntax and replace it with XForms
+        code.<programlisting language="xml">&lt;xsl:template match="xxf:sidebar">
+...
+&lt;/xsl:template></programlisting></para>
+    </section>
+    <section>
+      <title>JavaScript and CSS code</title>
+      <para><remark>This is still experimental and will most likely change later</remark></para>
+      <para>E<?oxy_delete author="ari" timestamp="20250602T102258+0200" content="c"?>xtended XForms
+        has its own JavaScript
+        code<?oxy_delete author="ari" timestamp="20250602T102307+0200" content=","?> that provides
+        the following functionalities:<itemizedlist>
+          <listitem>
+            <para>Retrieve a model</para>
+          </listitem>
+          <listitem>
+            <para>Retrieve an instance</para>
+          </listitem>
+          <listitem>
+            <para>Retrieve a specific data node in an instance</para>
+          </listitem>
+          <listitem>
+            <para>Retrieve an attribute</para>
+          </listitem>
+          <listitem>
+            <para>Update a data node</para>
+          </listitem>
+          <listitem>
+            <para>Track a specific data node's changes. </para>
+          </listitem>
+        </itemizedlist></para>
+      <para>Unfortunately,
+        <?oxy_delete author="ari" timestamp="20250602T102350+0200" content="all "?>these
+        <?oxy_delete author="ari" timestamp="20250602T102353+0200" content="functionalities "?>rely
+        heavily on <?oxy_insert_start author="ari" timestamp="20250602T102329+0200"?>the specific
+        <?oxy_insert_end?>XSLTForms
+        implementation<?oxy_delete author="ari" timestamp="20250602T102359+0200" content=","?> and
+        will not work with XSLTForms versions that use a different implementation, let alone other
+        XForms frameworks.</para>
+      <para>Even though these functions can be used directly by the developer, they were implemented
+        to be used by the JavaScript code from other Extended XForms stylesheets.</para>
+    </section>
+    <section>
+      <title>Extended XForms Components</title>
+      <para>The real extension of XForms happens here. The main stylesheet
+        <?oxy_delete author="ari" timestamp="20250602T102442+0200" content="will "?>include<?oxy_insert_start author="ari" timestamp="20250602T102446+0200"?>s<?oxy_insert_end?>
+        different stylesheets for different extended component, such as tabs, menus, charts,
+        etc.</para>
+      <para>These components
+        <?oxy_delete author="ari" timestamp="20250602T102453+0200" content="will "?>mainly replace
+        their Extended XForms code with proper XForms code<?oxy_delete author="ari" timestamp="20250602T102514+0200" content=","?><?oxy_insert_start author="ari" timestamp="20250602T102514+0200"?>.<?oxy_insert_end?>
+        <?oxy_delete author="ari" timestamp="20250602T102516+0200" content="take f"?><?oxy_insert_start author="ari" timestamp="20250602T102516+0200"?>F<?oxy_insert_end?>or
+        example<?oxy_insert_start author="ari" timestamp="20250602T102520+0200"?>,
+        for<?oxy_insert_end?> a video component,
+        <?oxy_delete author="ari" timestamp="20250602T102545+0200" content="in "?>the main
+        stylesheet we
+        <?oxy_delete author="ari" timestamp="20250602T102628+0200" content="will"?><?oxy_insert_start author="ari" timestamp="20250602T102628+0200"?>would<?oxy_insert_end?>
+        have:<programlisting language="xml">&lt;xsl:include href="xx-video.xsl"/></programlisting></para>
+      <para>And in
+        <code>xx-video.xsl</code><?oxy_delete author="ari" timestamp="20250602T102639+0200" content=" we will have"?>:<programlisting language="xml">&lt;xsl:template match="xx:video">
+  &lt;xhtml:video controls="controls">
+    &lt;xsl:attribute name="src">{&lt;xsl:value-of select="@src" />}&lt;/xsl:attribute>
+  &lt;/xhtml:video>
+&lt;/xsl:template></programlisting></para>
+      <para>This
+        <?oxy_delete author="ari" timestamp="20250602T102657+0200" content="will "?>convert<?oxy_insert_start author="ari" timestamp="20250602T102659+0200"?>s<?oxy_insert_end?>
+        this Extended XForms
+        code:<programlisting language="xml">&lt;xx:video src="instance('test-data')/video" /></programlisting></para>
+      <para>To XForms
+        code:<programlisting language="xml">&lt;xhtml:video controls="controls" src="{instance('test-data')/video}" /></programlisting></para>
+      <para>The component stylesheet can also hook to the template modes applied by the main
+        stylesheet as needed<?oxy_delete author="ari" timestamp="20250602T102716+0200" content=","?><?oxy_insert_start author="ari" timestamp="20250602T102716+0200"?>.<?oxy_insert_end?>
+        <?oxy_delete author="ari" timestamp="20250602T102717+0200" content="f"?><?oxy_insert_start author="ari" timestamp="20250602T102717+0200"?>F<?oxy_insert_end?>or
+        example, we can use the <code>model</code> mode to add data specific to video
+        components<?oxy_delete author="ari" timestamp="20250602T102727+0200" content=", for example"?>:<programlisting language="xml">&lt;xsl:template match="/" mode="model" priority="10">
+  &lt;video>
+    &lt;curtently-playing>none&lt;/curtently-playing>
+  &lt;/video>
+  &lt;xsl:next-match />
+&lt;/xsl:template></programlisting></para>
+      <para>The same can be done with the other <?oxy_delete author="ari" timestamp="20250602T102906+0200" content="used "?>modes:<itemizedlist>
+          <listitem>
+            <para><code>model</code> to add component-specific data.</para>
+          </listitem>
+          <listitem>
+            <para><code>head</code> to add component-specific script.</para>
+          </listitem>
+          <listitem>
+            <para><code>style</code> to add component-specific CSS.</para>
+          </listitem>
+          <listitem>
+            <para><code>events</code> to listen to events.</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+  </section>
+  <section>
+    <title>Weaknesses and Limitations</title>
+    <para>This whole idea of extending XForms, as good as it sounds, still has many <?oxy_delete author="ari" timestamp="20250602T102915+0200" content="flows"?><?oxy_insert_start author="ari" timestamp="20250602T102915+0200"?>flaws<?oxy_insert_end?>:<itemizedlist>
+        <listitem>
+          <para><?oxy_delete author="ari" timestamp="20250602T103023+0200" content="The best part"?><?oxy_insert_start author="ari" timestamp="20250602T103023+0200"?>Much<?oxy_insert_end?>
+            of
+            <?oxy_delete author="ari" timestamp="20250602T103001+0200" content="this"?><?oxy_insert_start author="ari" timestamp="20250602T103001+0200"?>the<?oxy_insert_end?>
+            project relies heavily on
+            <?oxy_delete author="ari" timestamp="20250602T103037+0200" content="the actual"?><?oxy_insert_start author="ari" timestamp="20250602T103037+0200"?>a
+            specific<?oxy_insert_end?> implementation of XForms,
+            <?oxy_delete author="ari" timestamp="20250602T103047+0200" content="in this case it&apos;s "?>XSLTForms
+            1.7,
+            <?oxy_delete author="ari" timestamp="20250602T103056+0200" content="that&apos;s"?><?oxy_insert_start author="ari" timestamp="20250602T103056+0200"?>which
+            is<?oxy_insert_end?> why it will not work with other frameworks (like Orbeon).</para>
+          <para>The same principle may or may not be applicable to other implementations. Even if it
+            is, it will need a complete rewrite of the JavaScript code.</para>
+        </listitem>
+        <listitem>
+          <para>The idea of Extended XForms is to fill the gap between current XForms and the rest
+            of the web, meaning that getting a new version of XForms will heavily affect the
+            project. Most of the code will need to be rewritten, some completely scrapped, and when
+            XForms<?oxy_insert_start author="ari" timestamp="20250602T103239+0200"?>
+            2.0<?oxy_insert_end?> gets
+            <?oxy_delete author="ari" timestamp="20250602T103249+0200" content="so good "?>to the
+            point that this project is no longer needed,
+            <?oxy_delete author="ari" timestamp="20250602T103347+0200" content="which is, good for XForms bad for the project, "?>it
+            <?oxy_delete author="ari" timestamp="20250602T103359+0200" content="will"?><?oxy_insert_start author="ari" timestamp="20250602T103359+0200"?>can<?oxy_insert_end?>
+            be put away for good.</para>
+        </listitem>
+        <listitem>
+          <para>Although this project helps developers write less code, the final XForms code is
+            still large and complex, and unfortunately we can do
+            <?oxy_delete author="ari" timestamp="20250602T103438+0200" content="nothing"?><?oxy_insert_start author="ari" timestamp="20250602T103438+0200"?>little<?oxy_insert_end?>
+            to improve its performance when it starts to decline.</para>
+        </listitem>
+        <listitem>
+          <para>Extended XForms syntax is very
+            opinionated<?oxy_delete author="ari" timestamp="20250602T103459+0200" content=","?><?oxy_insert_start author="ari" timestamp="20250602T103459+0200"?>;<?oxy_insert_end?>
+            it may look good to some, but for others, it may seem like an extra step rather than a
+            shortcut.</para>
+        </listitem>
+        <listitem>
+          <para>The current implementation uses many CSS and JavaScript
+            files,<?oxy_insert_start author="ari" timestamp="20250602T103523+0200"?>
+            and<?oxy_insert_end?> although small, they add a bit of a burden on the page's first
+            load. Not to mention that
+            <?oxy_delete author="ari" timestamp="20250602T103555+0200" content="it"?><?oxy_insert_start author="ari" timestamp="20250602T103555+0200"?>the
+            implementation<?oxy_insert_end?> includes even code that might not be needed in the form
+            being rendered.</para>
+        </listitem>
+      </itemizedlist></para>
+  </section>
+  <section>
+    <title>What's next</title>
+    <para><?oxy_delete author="ari" timestamp="20250602T103656+0200" content="There are many improvements we can do to make "?>Extended
+      XForms<?oxy_insert_start author="ari" timestamp="20250602T103701+0200"?> can be improved in a
+      number of ways<?oxy_insert_end?><?oxy_delete author="ari" timestamp="20250602T103730+0200" content=" much better, although we still haven&apos;t planned a roadmap for them. What we need to do is"?>:<?oxy_comment_start author="ari" timestamp="20250602T103829+0200" comment="No need to say that there&apos;s no roadmap yet since you are outlining your thoughts here."?><itemizedlist><?oxy_comment_end?>
+        <listitem>
+          <para>Somehow rewrite the layer connecting JavaScript and XForms entirely in XForms code.
+            If
+            <?oxy_delete author="ari" timestamp="20250602T103856+0200" content="we manage to do it"?><?oxy_insert_start author="ari" timestamp="20250602T103856+0200"?>doable<?oxy_insert_end?>,
+            Extended XForms will
+            <?oxy_delete author="ari" timestamp="20250602T103912+0200" content="not be dependant"?><?oxy_insert_start author="ari" timestamp="20250602T103912+0200"?>no
+            longer depend<?oxy_insert_end?> on a specific
+            implementation<?oxy_delete author="ari" timestamp="20250602T103922+0200" content=" anymore"?>,
+            opening it up to be used by a larger group of developers.</para>
+        </listitem>
+        <listitem>
+          <para>Improve the transformation to account for what needs to be included (CSS and
+            JavaScript code)<?oxy_delete author="ari" timestamp="20250602T103942+0200" content=","?>
+            to reduce the the extra footprint. Also bundle the code in one file, rather than loading
+            multiple files.</para>
+        </listitem>
+        <listitem>
+          <para>Streamline the way we write components, allowing for easy updates,
+            <?oxy_delete author="ari" timestamp="20250602T104013+0200" content="as well as "?>easily
+            removing <?oxy_insert_start author="ari" timestamp="20250602T104018+0200"?>unneeded
+            <?oxy_insert_end?>components<?oxy_delete author="ari" timestamp="20250602T104023+0200" content=" we no longer need"?>,
+            and adding new components.
+            Also<?oxy_insert_start author="ari" timestamp="20250602T104042+0200"?>,<?oxy_insert_end?>
+            allow the users to write their own components to use in their
+            projects<?oxy_delete author="ari" timestamp="20250602T104049+0200" content=","?> or
+            share with
+            others<?oxy_delete author="ari" timestamp="20250602T104052+0200" content=" as well"?>.
+            This will bring faster
+            updates<?oxy_delete author="ari" timestamp="20250602T104059+0200" content=","?> and help
+            the project not fall behind the rapid growth we are trying to match.</para>
+        </listitem>
+        <listitem>
+          <para>As for the performance issue, there's only so much we can do. The only way to work
+            around that is to write a new XForms preprocessor/renderer from scratch, which is not a
+            somple task by any means.… but doable... maybe?</para>
+        </listitem>
+      </itemizedlist></para>
+  </section>
+
+  <bibliography xml:id="references">
+    
+    <bibliomixed>W3C: <title>XForms 1.1 W3C Recommendation</title>. 20 October 2009.
+          <bibliomisc><link xl:href="https://www.w3.org/TR/xforms11/"/></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed>XForms Users Community Group: <title>XForms 2.0</title>. <bibliomisc><link
+          xl:href="https://www.w3.org/community/xformsusers/wiki/XForms_2.0"/></bibliomisc>
+    </bibliomixed>
+
+    <bibliomixed>Alain Couthures: <title>XSLTForms</title>. GitHub repository. <bibliomisc><link
+          xl:href="https://github.com/AlainCouthures/xsltforms"/></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed>Alain Couthures: <title>XSLTForms</title>. SourceForge repository.
+          <bibliomisc><link xl:href="https://sourceforge.net/projects/xsltforms/"/></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed><title>Orbeon Forms</title>. <bibliomisc><link xl:href="https://www.orbeon.com/"
+        /></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed>Webframe: <title>Concept designs</title>. used for demonstration. <bibliomisc><link
+          xl:href="https://webframe.xyz/"/></bibliomisc>
+    </bibliomixed>
+
+</bibliography>
+
+</article>
+<?oxy_options track_changes="on"?>
