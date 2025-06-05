@@ -1,0 +1,1205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article SYSTEM "docbook.dtd">
+<?xml-stylesheet href="docbook.css" type="text/css"?>
+<article xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         version="5.0-subset Balisage-1.5" xml:id="modular-ixml">
+   <title>Modular ixml</title>
+   <info>
+      <abstract>
+         <para>
+            Most current ixml grammars are small. However there are examples
+            of large grammars, and it is likely that in the future more large
+            grammars will emerge as ixml usage increases.
+         </para>
+         <para>
+            To make large grammars more manageable, and to enable reuse, it
+            would be useful to have a way to modularise them.
+         </para>
+         <para>
+            One of the requirements of modularisation for reuse in any
+            notation is to have a method of specifying the contractual
+            interface, such that it is possible for the producers of the
+            modules to change their internal structure without breaking any
+            existing usage of the module.
+         </para>
+         <para>
+            This paper describes a proposal for an ixml preprocessor that
+            permits an ixml grammar to invoke other modules of ixml grammars,
+            specifying their linkage. This involves the renaming of rules with
+            name clashes in the modules, using ixml renaming, resulting in a
+            single ixml grammar with no rule-name clashes, and so that the
+            resultant XML serialisations remain the same. The invoking grammar
+            remains unchanged.
+         </para>
+         <para>
+            There is no change to the syntax or semantics of ixml proper.
+         </para>
+      </abstract>
+      <author>
+         <personname>
+            <firstname>Steven</firstname>
+            <surname>Pemberton</surname>
+         </personname>
+         <personblurb>
+            <para>
+               Steven Pemberton is a researcher affiliated with CWI,
+               Amsterdam. His research is in interaction, and how the
+               underlying software architecture can support users.
+            </para>
+            <para>
+               He co-designed the ABC programming language that formed
+               the basis for Python and was one of the first handful of
+               people on the open internet in Europe, when the CWI set it up
+               in 1988. Involved with the Web from the beginning, he
+               organised two workshops at the first Web Conference in
+               1994. For the best part of a decade he chaired the W3C HTML
+               working group, and has co-authored many web standards,
+               including HTML, XHTML, CSS, XForms and RDFa. He now chairs
+               the W3C XForms and Invisible Markup groups.
+               In 2022, ACM SIGCHI awarded him the Lifetime Practice Award.
+               More details at http://www.cwi.nl/~steven
+            </para>
+         </personblurb>         
+         <affiliation>
+            <jobtitle>Researcher</jobtitle>
+            <orgname>CWI, Amsterdam</orgname>
+         </affiliation>
+         <email>steven.pemberton@cwi.nl</email>
+         <uri>http://cwi.nl/~steven/</uri>
+      </author>
+      <keywordset role="author">
+         <keyword>ixml</keyword>
+         <keyword>parsing</keyword>
+         <keyword>context-free grammars</keyword>
+         <keyword>XML</keyword>
+         <keyword>modularisation</keyword>
+      </keywordset>
+   </info>
+   <section xml:id="L46">
+      <title>Contents</title>
+      <itemizedlist spacing="compact">
+         <listitem>
+            <para>
+               <link linkend="L48">Introduction</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L112">Requirements</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L96">Naming and renaming</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L150">The Structure of a Module</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L1040">Semantics</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L218">Processing</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L256">Example</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L312">Example</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L403">Example</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L469">A Larger Example</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L507">Conclusion</link>
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               <link linkend="L648">References</link>
+            </para>
+         </listitem>
+      </itemizedlist>
+   </section>
+   <section xml:id="L48">
+      <title>Introduction</title>
+      <para>
+         Invisible XML, ixml for short [<link linkend="ixml">ixml</link>],
+         is a notation and process that uses context-free grammars to
+         describe the format of textual documents, allowing documents to be
+         parsed into an abstract parse-tree, which can be processed in
+         various ways, but principally serialised into an XML document,
+         thus making the implicit structure of the textual document
+         explicit in the XML.
+      </para>
+      <para>
+         While most current ixml grammars are small (the grammar for ixml
+         itself for example is around 70 lines), it can be envisaged that
+         in the future large grammars will emerge containing subparts that
+         are authored by different people. As an example, there is an ixml
+         grammar for XPath 4 at around 350 lines
+         [<link linkend="jwl">jwl</link>] which could be used by grammars
+         for languages that use XPath 4.
+      </para>
+      <para>
+         In [<link linkend="vdb">vdb</link>], van den Brand <emphasis>et
+         al.</emphasis> note the advantage of context-free generalised
+         parsing, which is used by ixml, over other restricted forms:
+      </para>
+      <blockquote>
+         <para>
+            <emphasis>&quot;the class of context-free grammars is closed
+            under union, in contrast with all proper subclasses of
+            context-free grammars. [...] The compositionality of
+            context-free grammars opens up the possibility of developing
+            modular syntax definition formalisms. Modularity in programming
+            languages and other formalisms is one of the key beneficial
+            software engineering concepts.&quot;</emphasis>
+         </para>
+      </blockquote>
+      <para>
+         What this is saying, is that if you have, for instance, two LL1
+         grammars and merge them, the result may not still be LL1, but if
+         you merge two general context-free grammars, the result will still
+         be context-free, and this is one of the advantages of context-free
+         generalised parsing, that you can modularise them.
+      </para>
+   </section>
+   <section xml:id="L112">
+      <title>Requirements</title>
+      <para>
+         The main problem with merging two independent context-free
+         grammars is that grammars have no inherent scoping, and grammar
+         rules in different component grammars may have the same name, thus
+         causing a clash. Modularisation has then to be designed so as to
+         prevent these name clashes. While this is the central functional
+         design need for modularisation, a number of other requirements and
+         desiderata were formulated for the design:
+      </para>
+      <itemizedlist spacing="compact">
+         <listitem>
+            <para>
+               It should be designed as a preprocessor that takes modules and
+               an invoking grammar, and produces a single ixml grammar as
+               output; in this way it will work with all existing ixml
+               processors without change.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Consequently, there should be no change required to ixml
+               proper: just use the existing syntax and semantics.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Modules should be able to invoke other modules.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Modules should have a visible contract of use, on both the
+               producer's as the user's side, so that it is obvious what each
+               module uses and shares, and that if there are different
+               implementations of a particular module they can be swapped in
+               and out.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               The internals of a module should be protected, so that a
+               module owner can change the implementation of a module, as
+               long as the interface contract is maintained.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               It should be possible to independently check modules for
+               completeness and consistency, so that modules can be checked
+               before they are combined.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Although modules may be transformed to prevent name clashes,
+               no changes should be made to the invoking grammar, so that
+               error messages are in the user's terms, and not using renamed
+               terms.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Despite rules being renamed, the resultant serialisation
+               should not change.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               Modularisation should be kept as simple and easy-to-use as
+               possible while meeting the requirements.
+            </para>
+         </listitem>
+      </itemizedlist>
+   </section>
+   <section xml:id="L96">
+      <title>Naming and renaming</title>
+      <para>
+         The modularisation proposed here uses a new feature of ixml:
+         <emphasis>renaming</emphasis>, a feature agreed by the working
+         group, but not yet part of the official specification; it is
+         specified in the current working draft
+         [<link linkend="wd">wd</link>] and already present in several
+         implementations. It allows you to specify for a rule a different
+         name than the default to be used on serialisation.
+      </para>
+      <para>
+         To illustrate: an ixml rule has a name. Up to now in ixml, this
+         specifies a name both for the allowable input syntax, as for the
+         name used in the output serialisation for that rule. If two input
+         forms have different syntaxes, it is therefore necessary to give
+         them different names, even if the intention is to have the same
+         output serialisation.
+      </para>
+      <para>
+         For instance, consider a grammar that accepts both
+         <literal>31/12/1999</literal> and <literal>31</literal>
+         <literal>December</literal> <literal>1999</literal> forms of
+         dates:
+      </para>
+      <programlisting>
+             date: numeric; textual.
+         -numeric: day, -"/", month, -"/", year.
+         -textual: day, -" "+, tmonth, -" "+, year.
+              day: d, d?.
+            month: d, d?.
+             year: d, d, d, d.
+           tmonth: -"January",  +"1";
+                   -"February", +"2";
+                   ...
+                   -"December", +"12".
+               -d: ["0"-"9"].
+      </programlisting>
+      <para>
+         What you will see is that the serialisation of these are nearly
+         identical, except that while <literal>31/12/1999</literal>
+         produces
+      </para>
+      <programlisting>
+         &lt;date>
+            &lt;day>31&lt;/day>
+            &lt;month>12&lt;/month>
+            &lt;year>1999&lt;/year>
+         &lt;/date>
+      </programlisting>
+      <para>
+         <literal>31</literal> <literal>December</literal>
+         <literal>1999</literal> produces
+      </para>
+      <programlisting>
+         &lt;date>
+            &lt;day>31&lt;/day>
+            &lt;tmonth>12&lt;/tmonth>
+            &lt;year>1999&lt;/year>
+         &lt;/date>
+      </programlisting>
+      <para>
+         where the difference is because it is produced from a different
+         input syntax. Using renaming, you can specify that both have the
+         same serialised name:
+      </para>
+      <programlisting>
+         tmonth > month:
+            -"January",  +"1";
+            -"February", +"2";
+            ...
+            -"December", +"12".
+      </programlisting>
+      <para>
+         This says that while <literal>tmonth</literal> is the name used in
+         the grammar, and represents the textual form of a month in the
+         input, it should be serialised as <literal>month</literal>, thus
+         in this case making the two date serialisations identical.
+      </para>
+      <para>
+         Incidentally, since the allowable ixml names are not exactly the
+         same set as the allowable XML names, you can also specify the
+         renaming as a string. For instance since ixml names may not end
+         with a dot, but XML names may, you can write:
+      </para>
+      <programlisting>
+         abc > "abc.": ...
+      </programlisting>
+      <para>
+         The syntax of the start of a rule like this is called a
+         <literal>naming</literal>, and can consist either of a
+         <literal>name</literal>, as currently in ixml, or a
+         <literal>renaming</literal>, which consists of a name, a greater
+         than, and an <emphasis>alias</emphasis>, which can either be a
+         name or a string.
+      </para>
+      <para>
+         Also in passing, it is worth noting that this has consequences for
+         round-tripping, as presented in [<link linkend="rt">rt</link>],
+         since this introduces a roundtripping ambiguity. Because an output
+         form such as
+      </para>
+      <programlisting>
+         &lt;date>
+            &lt;day>31&lt;/day>
+            &lt;month>12&lt;/month>
+            &lt;year>1999&lt;/year>
+         &lt;/date>
+      </programlisting>
+      <para>
+         can have been produced by two different input syntaxes, the
+         roundtripping process has to choose one of them. Where necessary
+         this can be overcome with a technique such as:
+      </para>
+      <programlisting>
+         tmonth > month:
+            style, 
+            (-"January",  +"1";
+             -"February", +"2";
+             ...
+             -"December", +"12").
+         @style: +"text".
+      </programlisting>
+      <para>
+         which would produce for the <literal>31</literal>
+         <literal>December</literal> <literal>1999</literal> style of input
+      </para>
+      <programlisting>
+         &lt;date>
+            &lt;day>31&lt;/day>
+            &lt;month style='text'>12&lt;/month>
+            &lt;year>1999&lt;/year>
+         &lt;/date>
+      </programlisting>
+      <para>
+         which can be uniquely round-tripped.
+      </para>
+      <para>
+         With this background explained, we can now proceed to the design
+         of modularisation.
+      </para>
+   </section>
+   <section xml:id="L150">
+      <title>The Structure of a Module</title>
+      <para>
+         A module consists of an otherwise normal ixml grammar, preceded by
+         specifications of rules used from other modules and what is shared
+         for use from this module.
+      </para>
+      <para>
+         A specification of what to use from another module lists the rules
+         needed from each module it uses. Such a specification should be
+         recognisable as different from an ixml rule.
+      </para>
+      <para>
+         The character to signal such a specification has been chosen as
+         "+", though any character that doesn't start the first
+         ixml rule in a grammar could have been used in the design; ixml
+         rules can start with namestart characters, "-",
+         "^" (and "@" but it is not possible to start
+         the first rule of a grammar with that character):
+      </para>
+      <programlisting>
+         +uses css from css.ixml
+      </programlisting>
+      <para>
+         and
+      </para>
+      <programlisting>
+         +uses iri, url, uri, urn from uri.ixml
+      </programlisting>
+      <para>
+         This specifies which module to use, and which rules from that
+         module are intended to be used.
+      </para>
+      <para>
+         It is possible to combine them
+      </para>
+      <programlisting>
+         +uses css from css.ixml; iri, url, uri, urn from uri.ixml
+      </programlisting>
+      <para>
+         The specification of what is allowable to be used from a module is
+         similar:
+      </para>
+      <programlisting>
+         +shares iri, url, uri, urn
+      </programlisting>
+      <para>
+         There are two main choices for a grammar for these. The first
+         literally recognises the structure as it is specified above:
+      </para>
+      <programlisting>
+         module: s, (uses; shares)*, ixml.
+           uses: -"+uses", rs, from++(-";", s).
+         shares: -"+shares", rs, entries.
+           from: entries, rs, -"from", rs, location, s.
+       -entries: share++(-",", s).
+          share: @name, s.
+        @source: iri.
+      </programlisting>
+      <para>
+         where <literal>s</literal> is the regular ixml rule for optional
+         whitespace, <literal>rs</literal> for required whitespace,
+         <literal>name</literal> the rule for a rule name,
+         <literal>ixml</literal> the rule for an ixml grammar, and
+         <literal>iri,</literal> not defined here, representing an
+         internationalised URI [<link linkend="iri">iri</link>], allowing
+         the use of grammars from external sources, such as:
+      </para>
+      <programlisting>
+         +uses iri from https://example.com/ixml/modules/iri.ixml
+      </programlisting>
+      <para>
+         For a specification like
+      </para>
+      <programlisting>
+         +uses css from css.ixml; iri, url, uri, urn from uri.ixml
+      </programlisting>
+      <para>
+         this produces a resulting structure like
+      </para>
+      <programlisting>
+         &lt;uses>
+            &lt;from source='css.ixml'>
+               &lt;share name='css'/>
+            &lt;/from>
+            &lt;from source='iri.ixml'>
+               &lt;share name='iri'/>
+               &lt;share name='url'/>
+               &lt;share name='uri'/>
+               &lt;share name='urn'/>
+            &lt;/from>
+         &lt;/uses>
+      </programlisting>
+      <para>
+         Alternatively, the grammar could look like:
+      </para>
+      <programlisting>
+            module: s, (multiuse; shares)*, ixml.
+         -multiuse: -"+uses", rs, uses++(-";", s).
+            shares: -"+shares", rs, entries.
+              uses: entries, rs, -"from", rs, from.
+          -entries: share++(-",", s).
+             share: @name, s.
+             @from: iri, s.
+      </programlisting>
+      <para>
+         where the resulting structure then looks like:
+      </para>
+      <programlisting>
+         &lt;uses from='css.ixml'>
+            &lt;share name='css'/>
+         &lt;/uses>
+         &lt;uses from='uri.ixml'>
+            &lt;share name='iri'/>
+            &lt;share name='url'/>
+            &lt;share name='uri'/>
+            &lt;share name='urn'/>
+         &lt;/uses>
+      </programlisting>
+      <para>
+         The advantage of the latter version is that processing is slightly
+         easier, since shallower, with a slight disadvantage with respect
+         to round-tripping, since the two forms
+      </para>
+      <programlisting>
+         +uses css from css.ixml; iri, url, uri, urn from uri.ixml
+      </programlisting>
+      <para>
+         and
+      </para>
+      <programlisting>
+         +uses css from css.ixml
+         +uses iri, url, uri, urn from uri.ixml
+      </programlisting>
+      <para>
+         are no longer distinguishable on roundtripping, since they produce
+         the same serialisation.
+      </para>
+   </section>
+   <section xml:id="L1040">
+      <title>Semantics</title>
+      <para>
+         There are some semantic requirements:
+      </para>
+      <itemizedlist spacing="compact">
+         <listitem>
+            <para>
+               all modules used must exist;
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               a module must share the rules mentioned to be used from that
+               module;
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               all names in <literal>uses</literal> and
+               <literal>shares</literal> specifications in a module must be
+               unique;
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               a module must not define a rule for any name that it
+               <literal>uses</literal>;
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               a module must define rules for all names it
+               <literal>shares</literal>.
+            </para>
+         </listitem>
+      </itemizedlist>
+      <para>
+         Modules are allowed to invoke each other: consider a programming
+         language where declarations can include procedures, and procedures
+         can include declarations, then the module for procedures would
+         have:
+      </para>
+      <programlisting>
+         +uses declaration from declaration.ixml
+         +shares procedure
+      </programlisting>
+      <para>
+         and the module for declarations would have:
+      </para>
+      <programlisting>
+         +uses procedure from procedure.ixml
+         +shares declaration
+      </programlisting>
+      <para>
+         This illustrates that a <literal>uses</literal> specification is
+         different from, for instance, a <literal>#include</literal>
+         statement in C preprocessing, since <literal>uses</literal> only
+         ensures that the module will be present in the final grammar.
+      </para>
+      <para>
+         Note that a module can only share rules it defines; it is not
+         permitted to share a rule from a different module like this:
+      </para>
+      <programlisting>
+         +uses x, y from z.ixml
+         +shares x
+      </programlisting>
+      <para>
+         So, having defined what a module looks like, we can now use it to
+         define itself:
+      </para>
+      <programlisting>
+         +uses ixml, name, s, rs from ixml.ixml; iri from iri.ixml
+         +shares module
+
+            module: s, (multiuse; shares)*, ixml.
+         -multiuse: -"+uses", rs, uses++(-";", s).
+            shares: -"+shares", rs, entries.
+              uses: entries, rs, -"from", rs, from.
+          -entries: share++(-",", s).
+             share: @name, s.
+             @from: iri, s.
+      </programlisting>
+   </section>
+   <section xml:id="L218">
+      <title>Processing</title>
+      <para>
+         The set of the invoking module and all invoked modules is
+         collected, including modules in turn invoked by those modules.
+         These modules are going to be concatenated, but any name clashes
+         are resolved first.
+      </para>
+      <para>
+         If any two invoked modules contain the definition of a rule of the
+         same name, one of the rules is renamed:
+      </para>
+      <itemizedlist spacing="compact">
+         <listitem>
+            <para>
+               If either of the pair is a rule that is not used in any other
+               of the set of modules (whether shared or not), then that rule
+               is renamed.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               If both are used in other modules, then if one of the pair is
+               a rule defined by the original invoking module, the other is
+               renamed; otherwise either may be renamed.
+            </para>
+         </listitem>
+      </itemizedlist>
+      <para>
+         A rule is renamed by generating a new unique name, different from
+         all other rule names in the set of modules:
+      </para>
+      <itemizedlist spacing="compact">
+         <listitem>
+            <para>
+               If the rule is defined with a <literal>naming</literal> (i.e.
+               it has a name and an alias), the rule is redefined with a
+               <literal>naming</literal> consisting of the new unique name
+               and the existing alias.
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               If the rule is defined using just a name (i.e. without an
+               alias), the rule is redefined with a <literal>naming</literal>
+               formed of the new unique name as name, and the old name as
+               alias.
+            </para>
+         </listitem>
+      </itemizedlist>
+      <para>
+         All applications of the old name in the module grammar, and any of
+         the other modules that use that rule are replaced with the new
+         name.
+      </para>
+      <para>
+         Once all naming conflicts are resolved, all invoked modules are
+         appended to the invoking module, with the <literal>uses</literal>
+         and <literal>shares</literal> specifications removed.
+      </para>
+      <para>
+         What these rules ensure is that:
+      </para>
+      <itemizedlist spacing="compact">
+         <listitem>
+            <para>
+               there are no name clashes in the resulting grammar;
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               the original invoking grammar is not changed in any way, so
+               that error messages about that grammar are given in terms the
+               author expects;
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               changes within a module are preferred over changes that extend
+               to other modules;
+            </para>
+         </listitem>
+         <listitem>
+            <para>
+               any resulting serialisation remains the same.
+            </para>
+         </listitem>
+      </itemizedlist>
+   </section>
+   <section xml:id="L256">
+      <title>Example</title>
+      <para>
+         As a simple example, imagine a language of identity statements of
+         the style
+      </para>
+      <programlisting>
+         total=price+tax+shipping
+         tax=price×10÷100
+         shipping=5
+      </programlisting>
+      <para>
+         expressed by this grammar that uses the definition of
+         <literal>expr</literal> from another module:
+      </para>
+      <programlisting>
+         +uses expr from expr.ixml
+             data: identity+.
+         identity: id, -"=", expr, -#a.
+               id: [L]+.
+      </programlisting>
+      <para>
+         The only problem is that the <literal>expr</literal> module has a
+         clashing rule for <literal>id</literal>:
+      </para>
+      <programlisting>
+         +shares expr
+         expr: id++op.
+           id: [L; Nd]+.
+           op: ["+-×÷"].
+      </programlisting>
+      <para>
+         Since the invoking grammar never gets changed, the rule in the
+         module gets renamed, resulting in the following complete grammar:
+      </para>
+      <programlisting>
+             data: identity+.
+         identity: id, -"=", expr, -#a.
+               id: [L]+.
+
+             expr: id_++op.
+           id_>id: [L; Nd]+.
+               op: ["+-×÷"].
+      </programlisting>
+      <para>
+         If the module's rule for <literal>id</literal> had instead been a
+         <emphasis>renaming</emphasis>, it could have looked like this:
+      </para>
+      <programlisting>
+         id>ident: [L; Nd]+.
+      </programlisting>
+      <para>
+         and the renaming would have ended up as:
+      </para>
+      <programlisting>
+         id_>ident: [L; Nd]+.
+      </programlisting>
+   </section>
+   <section xml:id="L312">
+      <title>Example</title>
+      <para>
+         Making the example slightly more complex, with rules like
+      </para>
+      <programlisting>
+         result[1]=a1+b1+c1
+         result[2]=a2+b2+c2
+      </programlisting>
+      <para>
+         using this grammar:
+      </para>
+      <programlisting>
+         +uses expr from expr.ixml; identity from id.ixml
+         rules: rule+.
+          rule: identity, -"=", expr, -#a.
+      </programlisting>
+      <para>
+         Module <literal>expr.ixml</literal>
+      </para>
+      <programlisting>
+         +shares expr
+            expr: operand++op.
+         operand: id; number.
+              id: [L], [L; Nd]*.
+              op: ["+-×÷"].
+          number: ["0"-"9"]+.
+      </programlisting>
+      <para>
+         Module <literal>identity.ixml</literal> has a clash with both
+         <literal>id</literal> and <literal>number</literal> from
+         <literal>expr.ixml</literal>:
+      </para>
+      <programlisting>
+         +shares identity
+         identity: id; id, -"[", number, -"]".
+               id: [L]+.
+           number: digits, (".", digits)?.
+          -digits: [Nd]+.
+      </programlisting>
+      <para>
+         The invoking grammar never changes:
+      </para>
+      <programlisting>
+         rules: rule+.
+          rule: identity, -"=", expr.
+      </programlisting>
+      <para>
+         In module <literal>expr.ixml</literal> nothing needs changing
+      </para>
+      <programlisting>
+            expr: operand++op.
+         operand: id; number.
+              id: [L], [L; Nd]*.
+              op: ["+-×÷"].
+          number: ["0"-"9"]+.
+      </programlisting>
+      <para>
+         In <literal>identity.ixml</literal> both <literal>id</literal> and
+         <literal>number</literal> are renamed:
+      </para>
+      <programlisting>
+               identity: id_; id_, -"[", number_, -"]".
+                 id_>id: -"@", [L]+.
+         number_>number: digits, ".", digits.
+                -digits: [Nd]+.
+      </programlisting>
+      <para>
+         The rules allow either or both to be renamed in
+         <literal>expr.ixml</literal> instead.
+      </para>
+   </section>
+   <section xml:id="L403">
+      <title>Example</title>
+      <para>
+         The invoking grammar:
+      </para>
+      <programlisting>
+         +uses id from ident.ixml; expr from expr.ixml
+         rules: rule+.
+          rule: id, -"=", expr.
+      </programlisting>
+      <para>
+         Module <literal>ident.ixml</literal>
+      </para>
+      <programlisting>
+         +shares id
+         id: [L]+.
+      </programlisting>
+      <para>
+         Module <literal>expr.ixml</literal>
+      </para>
+      <programlisting>
+         +uses id, number from id.ixml
+         +shares expr
+            expr: operand++op.
+         operand: id; number.
+              op: ["+-×÷"].
+      </programlisting>
+      <para>
+         Module id.ixml
+      </para>
+      <programlisting>
+         +shares id, number
+             id: [L], [L; Nd]*.
+         number: [Nd]+.
+      </programlisting>
+      <para>
+         Here there are two rules called <literal>id</literal> both shared
+         and used by two different modules.
+      </para>
+      <para>
+         The invoking grammar is never changed:
+      </para>
+      <programlisting>
+         rules: rule+.
+          rule: id, -"=", expr.
+      </programlisting>
+      <para>
+         and since the <literal>id</literal> rule is used from
+         <literal></literal>module <literal>ident.ixml</literal>, the rule
+         may not be renamed there:
+      </para>
+      <programlisting>
+         id: [L]+.
+      </programlisting>
+      <para>
+         This means that the <literal>id</literal> rule in module
+         <literal>id.ixml</literal> has to be renamed:
+      </para>
+      <programlisting>
+         id_>id: [L], [L; Nd]*.
+         number: [Nd]+.
+      </programlisting>
+      <para>
+         and in module <literal>expr.ixml</literal> that uses it
+      </para>
+      <programlisting>
+            expr: operand++op.
+         operand: id_; number.
+              op: ["+-×÷"].
+      </programlisting>
+   </section>
+   <section xml:id="L469">
+      <title>A Larger Example</title>
+      <para>
+         Imagine you were defining a textual format for XForms
+         [<link linkend="xf">xf</link>]:
+      </para>
+      <programlisting>
+         Example XForm
+         style xform.css
+
+         model M
+            instance data data.xml
+            submission save put:data.xml replace:none 
+
+         input name "What is your name?"
+         submit "OK"
+      </programlisting>
+      <para>
+         This is going to need definitions for CSS, URIs, XPath, and a lot
+         more. Furthermore, it would be worth modularising it into several
+         parts that are effectively independent, reflecting the
+         model-view-controller aspect of XForms: the model, the content,
+         and actions. This might result in a grammar like this (this is not
+         a complete example).
+      </para>
+      <para>
+         The top-level:
+      </para>
+      <programlisting>
+         +uses form from form.ixml
+         +uses content from content.ixml
+
+         xform>html: h, form, content.
+           @h>xmlns: +"http://www.w3.org/1999/xhtml".
+      </programlisting>
+      <para>
+         Module <literal>form.ixml</literal>:
+      </para>
+      <programlisting>
+         +shares form
+         +uses css from css.ixml;
+         model from model.ixml;
+         iri from iri.ixml;
+         s from xforms-basics.ixml
+         
+              form>head: title, styling?, model*.
+                  title: ~[" "; #a], ~[#a]+, -#a.
+               -styling: -"style", s, (style; stylelink).
+         stylelink>link: csstype, cssrel, href.
+                  style: csstype, css.
+          @csstype>type: +"text/css".
+            @cssrel>rel: +"stylesheet".
+                  @href: -iri, s.
+      </programlisting>
+      <para>
+         Module <literal>model.ixml</literal>:
+      </para>
+      <programlisting>
+         +shares model
+         +uses s, ref, xf from xforms-basics.ixml;
+         id, name from xml.ixml;
+         Action from action.ixml;
+         iri from iri.ixml
+
+              model: -"model", s, id, s, xf, -#a, 
+                        s, (instance; bind; submission; Action)+.
+
+           instance: -"instance", s, id, s, resource, s.
+          @resource: -iri.
+
+               bind: "bind", s, (id, s)?, ref, s, property*.
+           property: type {; readonly; relevant; required; etc}.
+               type: "type:", name, s.
+         
+         submission: -"submission", s, id, s, 
+                        (method, -":", resource, s)?, replace?.
+            @method: "get"; "put".
+           @replace: -"replace:", name, s.
+         {etc}
+      </programlisting>
+      <para>
+         Module <literal>content.ixml</literal>:
+      </para>
+      <programlisting>
+         +shares content
+         +uses IDREF from xml.ixml;
+         xf, ref, string, s from xforms-basics.ixml
+
+         content>body: group.
+
+                group: xf, control*.
+             -control: input; submit {more}.
+
+                input: -"input", s, ref, label.
+                label: string.
+
+               submit: -"submit", s, subid?, label?.
+    @subid>submission: -"submission:", IDREF, s.
+      </programlisting>
+      <para>
+         and so on. Giving output like:
+      </para>
+      <programlisting>
+	 &lt;html xmlns='http://www.w3.org/1999/xhtml'>
+            &lt;head>
+               &lt;title>Example XForm&lt;/title>
+               &lt;link type='text/css' rel='stylesheet' href='xform.css'/>
+               &lt;model id='M' xmlns='http://www.w3.org/2002/xforms'>
+		  &lt;instance id='data' resource='data.xml'/>
+		  &lt;submission id='save' method='put' resource='data.xml' replace='none'/>
+               &lt;/model>
+            &lt;/head>
+            &lt;body>
+               &lt;group xmlns='http://www.w3.org/2002/xforms'>
+		  &lt;input ref='name'>
+		     &lt;label>What is your name?&lt;/label>
+		  &lt;/input>
+		  &lt;submit>
+		     &lt;label>OK&lt;/label>
+		  &lt;/submit>
+               &lt;/group>
+            &lt;/body>
+         &lt;/html>
+      </programlisting>
+   </section>
+   <section xml:id="other-possible-approaches">
+      <title>Other Possible Approaches</title>
+      <para>
+         This proposal introduces a modularisation that allows modules to
+         be combined while only requiring minimal changes to avoid
+         name-clashes. Other approaches would include introducing scoping
+         into ixml, (but this would just move responsibility for renaming
+         to the implementations), or renaming all rules, for instance by in
+         some way including the module 'name' (=source) in each rule name.
+         This would involve more changes during processing, but might
+         result in less analysis of rule names.
+      </para>
+   </section>
+   <section xml:id="L507">
+      <title>Conclusion</title>
+      <para>
+         What this proposal has shown is that you can introduce
+         modularisation in ixml by imitating scoping in a simple and direct
+         manner, allowing a pre-processor to produce a complete ixml
+         grammar that produces an identical serialisation of the parsed
+         input, without having to change the syntax or semantics of ixml
+         proper.
+      </para>
+   </section>
+   <bibliography xml:id="L648">
+      <title>References</title>
+      <biblioentry xml:id="iri">
+         <abbrev>iri</abbrev>
+         <authorgroup>
+            <author>
+               <personname>
+                  <firstname>M.</firstname>
+                  <surname>Duerst</surname>
+               </personname>
+            </author>
+            <author>
+               <personname>
+                  <firstname>M.</firstname>
+                  <surname>Suignard</surname>
+               </personname>
+            </author>
+         </authorgroup>
+         <title>RFC 3987: Internationalized Resource Identifiers (IRIs)</title>
+         <publisher>
+            <publishername>IETF</publishername>
+         </publisher>
+         <pubdate>2005</pubdate>
+         <bibliomisc>
+            <link xlink:href='https://datatracker.ietf.org/doc/html/rfc3987'/>
+         </bibliomisc>
+      </biblioentry>
+      <biblioentry xml:id="ixml">
+         <abbrev>ixml</abbrev>
+         <editor>
+            <personname>
+               <firstname>Steven</firstname>
+               <surname>Pemberton</surname>
+            </personname>
+         </editor>
+         <title>Invisible XML Specification</title>
+         <publisher>
+            <publishername>Invisible XML Organisation</publishername>
+         </publisher>
+         <pubdate>2022</pubdate>
+         <bibliomisc>
+            <link xlink:href='https://invisiblexml.org/1.0/'/>
+         </bibliomisc>
+      </biblioentry>
+      <biblioentry xml:id="jwl">
+         <abbrev>jwl</abbrev>
+         <author>
+            <personname>
+               <firstname>John</firstname>
+               <surname>Lumley</surname>
+            </personname>
+         </author>
+         <title>Invisible XML workbench</title>
+         <publisher>
+            <publishername>Github</publishername>
+         </publisher>
+         <pubdate>2024</pubdate>
+         <bibliomisc>
+            <link xlink:href='https://johnlumley.github.io/jwiXML.xhtml'/>
+         </bibliomisc>
+      </biblioentry>
+      <biblioentry xml:id="rt">
+         <abbrev>rt</abbrev>
+         <author>
+            <personname>
+               <firstname>Steven</firstname>
+               <surname>Pemberton</surname>
+            </personname>
+         </author>
+         <title>Round-tripping Invisible XML</title>
+         <publisher>
+            <publishername>Proc. XML Prague 2024</publishername>
+         </publisher>
+         <pubdate>2024</pubdate>
+         <artpagenums>153-164</artpagenums>
+         <biblioid class='isbn'>978-80-907787-2-6</biblioid>
+         <bibliomisc>
+            <link xlink:href='https://archive.xmlprague.cz/2024/files/xmlprague-2024-proceedings.pdf#page=163'/>
+         </bibliomisc>
+      </biblioentry>
+      <biblioentry xml:id="vdb">
+         <abbrev>vdb</abbrev>
+         <author>
+            <personname>
+               <firstname>M.G.J.</firstname>
+               <surname>van den Brand et al.</surname>
+            </personname>
+         </author>
+         <title>Disambiguation Filters for Scannerless Generalized LR Parsers</title>
+         <publisher>
+            <publishername>Compiler Construction</publishername>
+         </publisher>
+         <pubdate>2002</pubdate>
+         <artpagenums>143–158</artpagenums>
+         <bibliomisc>
+            <link xlink:href='https://doi.org/10.1007/3-540-45937-5_12'/>
+         </bibliomisc>
+         <bibliomisc>
+            <link xlink:href='https://cwi.nl/~jurgenv/papers/CC-2002.pdf'/>
+         </bibliomisc>
+      </biblioentry>
+      <biblioentry xml:id="wd">
+         <abbrev>wd</abbrev>
+         <editor>
+            <personname>
+               <firstname>Steven</firstname>
+               <surname>Pemberton</surname>
+            </personname>
+         </editor>
+         <title>Invisible XML Specification - Community Group Editorial Draft</title>
+         <publisher>
+            <publishername>Invisible XML Community Group</publishername>
+         </publisher>
+         <pubdate>2025</pubdate>
+         <bibliomisc>
+            <link xlink:href='https://invisiblexml.org/current/'/>
+         </bibliomisc>
+      </biblioentry>
+      <biblioentry xml:id="xf">
+         <abbrev>xf</abbrev>
+         <editor>
+            <personname>
+               <firstname>Erik</firstname>
+               <surname>Bruchez et al.</surname>
+            </personname>
+         </editor>
+         <title>XForms 2.0</title>
+         <publisher>
+            <publishername>W3C</publishername>
+         </publisher>
+         <pubdate>2025</pubdate>
+         <bibliomisc>
+            <link xlink:href='https://www.w3.org/community/xformsusers/wiki/XForms_2.0'/>
+         </bibliomisc>
+      </biblioentry>
+   </bibliography>
+</article>
