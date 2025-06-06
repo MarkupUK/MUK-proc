@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.1/rng/docbook.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="http://docbook.org/xml/5.1/sch/docbook.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" 
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  version="5.1">
+  <info>
+    <title>PrintCSS Meets LaTeX</title>
+    <subtitle>Implementation of a PrintCSS Renderer Prototype 
+      Using a CSS Parser, an XML-to-TeX Conversion Framework, 
+      and a LuaTeX-Based Framework</subtitle>
+    <author>
+      <personname><firstname>Martin</firstname> <surname>Kraetke</surname></personname>
+      <email>martin.kraetke@le-tex.de</email>
+      <uri>https://xporc.net</uri>
+      <personblurb>
+        <para>Martin Kraetke graduated as engineer for print production and is Lead Content Engineer at le-tex in Leipzig where he works on the transpect framework and the <emphasis><emphasis>xerif</emphasis></emphasis> typesetting system. He teaches XML and XSLT at the Leipzig University of Applied Sciences.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Lead Content Engineer</jobtitle>
+        <orgname>le-tex publishing services GmbH</orgname>
+      </affiliation>
+    </author>
+    <author>
+      <personname>
+        <firstname>Christine</firstname> <surname>Windeln</surname></personname>
+      <personblurb>
+        <para>Christine Windeln holds a degree in publishing technology and currently works as a student intern at le-tex in Leipzig. She studied at Leipzig University of Applied Sciences, where she wrote her bachelor’s thesis on rendering PrintCSS with TeX.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Student Intern</jobtitle>
+        <orgname>le-tex publishing services GmbH</orgname>
+      </affiliation>
+    </author>
+  </info>
+  <sect1>
+    <title>Introduction</title>
+    <para>At Markup UK 2023, I discussed various methods for converting XML to TeX and presented our own approach using the transpect library xml2tex, which can be configured to convert arbitrary XML into TeX <footnote xml:id="fn-0">
+        <para>1 Martin Kraetke (2023): Bridging the Gaps Between XML and TEX. Available at <link xlink:href="https://markupuk.org/2023/webhelp/index.html">https://markupuk.org/2023/webhelp/index.html</link> (Accessed: May 15, 2025)</para>
+    </footnote>. xml2tex and its associated libraries are based on XProc and XSLT and are used at le-tex for several applications, such as a converter for converting Word to TeX, an equation renderer, and for our typesetting system <emphasis>xerif</emphasis><footnote xml:id="fn-1">
+      <para>le-tex publishing services (2025): xerif. automatic is better. Available at: <link xlink:href="https://www.le-tex.de/en/xerif.html">https://www.le-tex.de/en/xerif.html</link> (Accessed: May 15, 2025)</para>
+    </footnote>.</para>
+    <para>For the latter, the schema-independent configurability of xml2tex helps to meet the diverse content requirements of our <emphasis>xerif</emphasis> clients. The configuration allows us to use several different XML schemas and map them to customer-specific TeX macros. While the xml2tex configuration allows us to map XML to TeX very flexibly with <emphasis>xerif</emphasis> , the layout setup, e.g. setting up the page format, selecting fonts, specifying spacing, etc. is still done conventionally in TeX.</para>
+    <para>In <emphasis>xerif</emphasis>, CoCoTeX serves this purpose. It’s a custom-tailored TeX framework that facilitates the setup of these parameters and extends LaTeX with numerous custom macros, a custom metadata and table model, accessibility support, and more. However, TeX’s complexity and the steep learning curve of our CoCoTeX framework presenting a major hurdle for external newcomers attempting to use <emphasis>xerif</emphasis> effortlessly.</para>
+    <para>A language for formatting page-based media that is considered much easier to learn is PrintCSS. Unlike TeX, PrintCSS is accessible and user-friendly, leveraging the familiar CSS syntax. This approach has led to its widespread adoption in automated publishing workflows. PrintCSS introduces a set of CSS specifications tailored for print media, enabling precise control over page layouts, content fragmentation (such as pages, columns, or regions), and content generation (including running headers, page numbers, and listings). By utilizing PrintCSS, HTML or XML content can be formatted for paged media output in a manner akin to styling conventional web pages with CSS.</para>
+    <para>However, it's important to note that PrintCSS has certain limitations: the existing specifications lack specific features, and in some areas, they remain underspecified. Moreover, there are only a limited number of implementations of these specifications, and the two available open-source renderers implement only a subset of the common CSS paged media features. Instead, these implementations address the absence of certain functionalities through the use of proprietary extensions. Leading developers of browser engines—namely Google, Mozilla, and Apple—do not provide support for PrintCSS in their browsers and show little motivation to include this feature in the future.</para>
+    <para>Nevertheless, the advantages of PrintCSS's ease of learning outweigh the disadvantages of its ambiguous specifications, so we sought to investigate the feasibility of incorporating PrintCSS support within the <emphasis>xerif</emphasis> framework. Starting from October 2024, Christine took on the task as part of her bachelor thesis and was able to implement a prototypic support for PrintCSS in <emphasis>xerif</emphasis> . This paper aims to outline the steps undertaken to implement their solution, discuss how we addressed the conceptual and technological differences between PrintCSS and TeX, and identify potential directions for future research.</para>
+  </sect1>
+  <sect1>
+    <title>The Status Quo: Configuring Layouts in <emphasis>xerif</emphasis></title>
+    <para>To understand how the layout configuration works, we have to take a look at the TeX preamble of a particular TeX document created with <emphasis>xerif</emphasis> . The layout features and default settings are provided by the <code>cocotex</code> document class. The customer-specific configuration is represented by a custom TeX style that is usually named after the client, e.g. <code>brill</code> for Koninklijke Brill NV, or now De Gruyter Brill. Macros for tables are provided by <code>h</code>
+      <code>tmltabs</code> , a package for specifying tables in a HTML-like fashion.</para>
+    <programlisting>\documentclass[greek,main=english,pubtype=collection]{cocotex}
+\usepackage{htmltabs}
+\usepackage[layout=1]{brill}</programlisting>
+    <para>The CoCoTeX framework is separated into various modules that provide specific macros for various layout aspects:</para>
+    <itemizedlist mark="bullet">
+      <listitem>
+        <para>Kernel: default macros to declare and evaluate CoCoTeX macros and properties</para>
+      </listitem>
+      <listitem>
+        <para>Common: default settings and required TeX packages</para>
+      </listitem>
+      <listitem>
+        <para>Floats: images and tables</para>
+      </listitem>
+      <listitem>
+        <para>Frame: page boxes, e.g. trim box, bleed box and crop marks</para>
+      </listitem>
+      <listitem>
+        <para>Accessibility: support for PDF/UA</para>
+      </listitem>
+      <listitem>
+        <para>Headings: part, chapter and section headings and their metadata</para>
+      </listitem>
+      <listitem>
+        <para>Lists: provides macros for various list types</para>
+      </listitem>
+      <listitem>
+        <para>Meta: macros for document metadata</para>
+      </listitem>
+      <listitem>
+        <para>Notes: endnotes and footnotes</para>
+      </listitem>
+      <listitem>
+        <para>Script: default font settings</para>
+      </listitem>
+      <listitem>
+        <para>Title: Macros and settings for title pages</para>
+      </listitem>
+    </itemizedlist>
+    <para>The custom TeX style is built upon the features provided by CoCoTeX and sets customer-specific parameters such as margins, fonts, type area, font sizes, leading and other styles. It’s also possible to define customer-specific macros or overwrite existing CoCoTeX macros. The style files can be selectively overridden by a cascading configuration. For example, you could specify different TeX styles based on the imprint, book series or individual books if necessary but our developers use this approach rarely.</para>
+    <para>For TeX developers, using TeX is obviously the most natural way to specify layout parameters. However, a normal TeX user would hardly be able to create a layout with <emphasis>xerif</emphasis> . Unfortunately, it is not enough to be able to write a paper with LaTeX. You need to have advanced TeX programming skills, be familiar with many libraries in the TeX ecosystem and know the CoCoTeX basics. For TeX novices, the learning curve might quickly become as steep as a wall.</para>
+  </sect1>
+  <sect1>
+    <title>PrintCSS and TeX</title>
+    <para>Of course, one of the main reasons to use TeX for <emphasis>xerif</emphasis> was that TeX is one of the technological building blocks of le-tex. The company also has little experience with other typesetting technologies such as XSL-FO and PrintCSS. But aside from the general tendency towards self-justification bias, there are valid reasons to prefer TeX over PrintCSS:</para>
+    <para>In contrast to TeX, CSS is not a programming but a formatting language. There is less you can do with PrintCSS and you are dependent on the functionality being provided by a layout engine, the PrintCSS renderer. PrintCSS has a quite smaller feature set compared to TeX and its vast ecosystem of packages. Although PrintCSS, unlike TeX, has a public specification, many things are missing that must be substituted by proprietary functions of the PrintCSS renderer.</para>
+    <para>PrintCSS might not be as intuitive as InDesign, but its core syntax and principles are beginner-friendly especially if you gained prior knowledge of CSS by web design. It provides a solid foundation for defining page-based layouts, and limitations in the specification could be addressed through vendor-specific CSS extensions.</para>
+    <para>TeX is a powerful typesetting engine capable of producing high-quality print documents and it might be tempting to think of TeX acting exclusively as a PrintCSS renderer. It is worth recalling that PassiveTeX, created by Michel Goossens and Sebastian Rahtz, served as an experimental solution for leveraging TeX as an XSL-FO formatter <footnote xml:id="fn-2">
+        <para>2 Martin Kraetke (2023): Bridging the Gaps Between XML and TEX. PassiveTeX. Available at <link xlink:href="https://markupuk.org/2023/webhelp/index.html#Sec2.html">https://markupuk.org/2023/webhelp/index.html#Sec2.html</link> (Accessed: May 15, 2025)</para>
+    </footnote>. But is TeX also capable of being used as PrintCSS renderer?</para>
+    <para>Conceptually, mapping CSS properties to TeX equivalents (e.g., margins, page breaks, fonts) is possible. However, this approach present a few practical challenges:</para>
+    <orderedlist numeration="arabic">
+      <listitem override="1.">
+        <para> Different paradigms: CSS is box-based and declarative; TeX is macro-based and procedural. A wide range of differences exist also between PrintCSS and TeX, from the underlying page model and font characteristics to the treatment of typographic issues.</para>
+      </listitem>
+      <listitem override="2.">
+        <para> Limited parsing capabilities: TeX doesn't natively understand XML, HTML or CSS.</para>
+      </listitem>
+      <listitem override="3.">
+        <para> Missing Features : CSS features like flexbox, grid, or advanced selectors have no direct TeX equivalent.</para>
+      </listitem>
+    </orderedlist>
+    <para>In this context, the three primary challenges involve parsing PrintCSS, transforming HTML to TeX, and accurately mapping CSS styling rules to corresponding TeX commands. However, relying solely on TeX doesn't seem practical for several reasons:</para>
+    <para>Creating a custom PrintCSS parser in TeX would be necessary, and the same challenge arises when handling HTML or XML. While TeX-based tools like xmltex could be used for XML parsing, they provide only limited configurability and do not support validation. Because of its procedural nature, TeX is not well-suited for navigating complex tree-based structures like XML and generating mixed content. So, there are additional layers needed, to facilitate the transformation between PrintCSS and TeX. The next section provides more details.</para>
+  </sect1>
+  <sect1>
+    <title>Building a PrintCSS renderer</title>
+    <sect2>
+      <title>Preliminary Considerations</title>
+      <para>First it was necessary to define the scope – on the one hand, to keep the work within the limits of a bachelor's thesis, and on the other hand, to provide a solid feature set that make it feasible for practical use. The most important specifications for PrintCSS have all been taken into account:</para>
+      <itemizedlist mark="bullet">
+        <listitem>
+          <para> CSS Paged Media Module Level 3 <footnote xml:id="fn-3">
+              <para>3 Elika J. Etemad et. al (2023): CSS Paged Media Module Level 3. W3C Working Draft. Available at <link xlink:href="https://www.w3.org/TR/css-page-3/">https://www.w3.org/TR/css-page-3/</link> (Accessed May 15, 2025)</para>
+          </footnote>
+         </para>
+        </listitem>
+        <listitem>
+          <para> CSS Fragmentation Module Level 3 <footnote xml:id="fn-4">
+              <para>4 Rossen Atanassov and Elika J. Etemad (2018): CSS Fragmentation Module Level 3. W3C Candidate Recommendation. Available at <link xlink:href="https://www.w3.org/TR/css-break-3/">https://www.w3.org/TR/css-break-3/</link> (Accessed May 15, 2025)</para>
+          </footnote>: partitions a flow into pages, columns, or regions,</para>
+        </listitem>
+        <listitem>
+          <para> CSS Generated Content for Paged Media Module <footnote xml:id="fn-5">
+              <para>5 Mike Bremford and Rachel Andrew (2024): CSS Generated Content for Paged Media Module. W3C Working Draft. <link xlink:href="https://www.w3.org/TR/css-gcpm-3/">https://www.w3.org/TR/css-gcpm-3/</link> (Accessed May 15, 2025)</para>
+          </footnote>: running headers, footers and footnotes</para>
+        </listitem>
+        <listitem>
+          <para> CSS Page Floats <footnote xml:id="fn-6">
+              <para>6 Johannes Wilm (2015): CSS Page Floats. W3C First Public Working Draft. Available at <link xlink:href="https://www.w3.org/TR/css-page-floats-3/">https://www.w3.org/TR/css-page-floats-3/</link> (Accessed May 15, 2025)</para>
+          </footnote> specifies page floats that can be shift to the top or bottom</para>
+        </listitem>
+      </itemizedlist>
+      <para>For a detailed list of the included CSS features, please refer to page <xref linkend="_Ref199866315"/>. However, there are various other CSS specifications involved, which are necessary for specifying fonts, applying colors and text styles, define font sizes and line heights etc. We defined a standard feature set which is listed at page <xref linkend="_Ref199866360"/>.</para>
+    </sect2>
+    <sect2>
+      <title>Parsing PrintCSS</title>
+      <para>Christine took on the majority of the work by independently implementing and testing the code, while occasionally consulting with Martin throughout the process. But she did not need to start from scratch. A CSS parser was already part of our transpect framework, but had to be extended for the PrintCSS grammar.</para>
+      <para>The CSS parser is based on an EBNF schema. EBNF is the abbreviation of Extended Backus-Naur form and is a declarative syntax to express a syntax (metasyntax) of a formal language. Christine has extended our CSS EBNF schema. For example, here is an EBNF code snippet that declares the syntax for specifying page rules in CSS:</para>
+      <programlisting>pagerule ::= '@page' S* (pageclass | pagename)?          
+pagename ::= IDENT
+pageclass ::= ':' ('first'|'blank'|'left'|'right')</programlisting>
+      <para>Using Gunther Rademacher's REx Parser Generator <footnote xml:id="fn-7">
+          <para>7 Guter Rademacher (2025): REx Parser Generator. Available at <link xlink:href="https://github.com/GuntherRademacher/rex-parser-generator">https://github.com/GuntherRademacher/rex-parser-generator</link> (Accessed May 15, 2025)</para>
+      </footnote>, the EBNF was later converted to XSLT. The XSLT is applied on the CSS file and creates an XML document including the CSS rules. The example below shows the XML representation (CSS XML) of a page rule:</para>
+      <programlisting>&lt;atrule origin="/tmp/style.css" type="page"&gt;
+  &lt;raw-css xml:space="preserve"&gt;
+    @page {&amp;#xD;
+      size:A4;&amp;#xD;
+      margin: 2cm 2cm 3cm 2cm;&amp;#xD;
+    }
+  &lt;/raw-css&gt;
+  &lt;declaration property="size" value="A4"/&gt;
+  &lt;shorthand property="margin" value="2cm 2cm 3cm 2cm" num="2"/&gt;
+  &lt;declaration property="margin-top" value="2cm" shorthand="2"/&gt;
+  &lt;declaration property="margin-right" value="2cm" shorthand="2"/&gt;
+  &lt;declaration property="margin-bottom" value="3cm" shorthand="2"/&gt;
+  &lt;declaration property="margin-left" value="2cm" shorthand="2"/&gt;
+&lt;/atrule&gt;</programlisting>
+      <para>Later, the CSS rules are applied to the content by evaluating the CSS selectors and inserted back into the source file as CSS attributes (CSSa) <footnote xml:id="fn-8">
+          <para>8 Gerrit Imsieke (2013). Conveying Layout Information with CSSa (Talk held at XML Prague). Available at <link xlink:href="https://archive.xmlprague.cz/2013/presentations/Conveying_Layout_Information_with_CSSa/CSSa_xmlprague_gimsieke.html#/step-1">https://archive.xmlprague.cz/2013/presentations/Conveying_Layout_Information_with_CSSa/CSSa_xmlprague_gimsieke.html#/step-1</link> (Accessed May 15, 2025)</para>
+      </footnote>:</para>
+      <programlisting>&lt;p&gt;The result of a Delta-DOR measurement provides knowledge 
+of the spacecraft’s angular position in the inertial reference frame defined 
+by the quasars (CCSDS &lt;a href="#j_astro-2022-0200_ref_002" &gt;2019&lt;/a&gt;).&lt;/p&gt;</programlisting>
+      <para>This CSS parser is encapsulated in a simple XProc step, which takes an XHTML document and an XSLT parser stylesheet as inputs. It produces both the CSS XML representation and an XHTML document with embedded CSS attributes (XHTML/CSSa):</para>
+      <programlisting>&lt;css:expand&gt;
+  &lt;p:input port="source" primary="true"/&gt;
+  &lt;p:input port="stylesheet"/&gt;
+  &lt;p:output port="result" primary="true"/&gt;
+  &lt;p:output port="xml-representation"/&gt;
+  &lt;p:output port="report" sequence="true"/&gt;
+&lt;/css:expand&gt;</programlisting>
+    </sect2>
+    <sect2>
+      <title>Generating an xml2tex Configuration</title>
+      <para>How is this information converted to TeX? Our xml2tex library is for us a natural choice for several reasons: it provides a schema-independent grammar for transforming XML into TeX, and it includes built-in libraries for handling formulas and tables, eliminating the need for custom solutions. Moreover, it seamlessly integrates with our <emphasis>xerif</emphasis> typesetting system.</para>
+      <para>As in CSS, in TeX some formatting information is inserted inline into the text, while others are typically declared in an external style file. For example, there are general formatting rules that specify the layout of the page and other rules that set a portion of text in italics. For this reason, Christine needed to analyze these layers and separate them systematically. Thankfully, xml2tex is able to declare different outputs with one configuration, e.g. a TeX file and a style file.</para>
+      <para>So, we decided to generate a xml2tex configuration with XSLT by analyzing XHTML/CSSa and CSS XML. The first part of the generated configuration is the creation of the TeX style file. Paper format, font declarations, font styles, headline elements (h1…h6), etc. are evaluated and the respective TeX macros are created. To align with <emphasis>xerif</emphasis> , the TeX style includes many instructions from our CoCoTeX framework. For example, by analyzing the size property of the <code>@page</code> rule above, this TeX snippet is created:</para>
+      <para>
+        <programlisting>&lt;template context="/html:html/html:head/(html:style|html:link)[1]"&gt;
+  &lt;file href="file:///home/cwindeln/printcss2tex/tmp/printcss.sty" encoding="utf-8"&gt;
+% (...)
+\setlength{\pagewidth}{210mm}
+\setlength{\pageheight}{297mm}
+% (...)
+  &lt;/file&gt;
+&lt;/template&gt;</programlisting>
+     </para>
+      <para>The second part of the configuration is generated by analyzing the CSS declarations and creating xml2tex templates from it. The xml2tex template below is generated from a declaration which sets the font size for <code>&lt;p&gt;</code> elements:</para>
+      <programlisting>&lt;template context="*:p"&gt;
+  &lt;text&gt;{\fontsize{11.5pt}&lt;/text&gt;
+  &lt;xsl:next-match xmlns:xsl="http://www.w3.org/1999/XSL/Transform"/&gt;
+  &lt;text&gt;}&lt;/text&gt;
+&lt;/template&gt;</programlisting>
+      <para>During the implementation, Christine noticed that there is no equivalent for the CSS selectors <code>::before</code> and <code>::after</code> in TeX. Therefore, we decided to create placeholder elements before, into which we can later generate the content using xml2tex. The entire transformation is organized into distinct steps, as illustrated below:</para>
+      <orderedlist numeration="arabic">
+        <listitem override="1.">
+          <para>Parse the CSS and generate CSS XML and XHTML/CSSa</para>
+        </listitem>
+        <listitem override="2.">
+          <para>Insert pseudo elements for content that is inserted with the CSS selectors <code>::before</code> and <code>::after</code>
+         </para>
+        </listitem>
+        <listitem override="3.">
+          <para>Generate a xml2tex configuration from CSS XML and XHTML/CSSa</para>
+        </listitem>
+        <listitem override="4.">
+          <para>Use xml2tex with the generated configuration and apply it on the XHTML/CSSa document to create TeX and the style file.</para>
+        </listitem>
+        <listitem override="5.">
+          <para>Render the TeX file with LuaTeX</para>
+        </listitem>
+      </orderedlist>
+      <figure>
+        <title role="Beschriftung">Figure 1: The transformation of XHTML and CSS to TeX</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/diagram.svg"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Summary, Discussion and Future Work</title>
+    <para>Christine was able to write a pipeline that can create a PDF from HTML and CSS by extending our CSS parser and using libraries that are used in <emphasis>xerif</emphasis> such as xml2tex and CoCoTeX. The presented software tool provides fundamental support for the PrintCSS specifications and could provide a basis for our clients to easily create their own layouts using PrintCSS.</para>
+    <para>However, due to the inherent differences between CSS and TeX, certain limitations in implementation may arise. In particular, complex layout features or specific typographic refinements may not be fully realized according to the PrintCSS standards. For example, while CSS allows you to specify the maximum number of orphans in a paragraph, in TeX you would specify a penalty. Multicolumn layouts work slightly differently in CSS and TeX and we did not introduce advanced CSS layout models like grid and flexbox.</para>
+    <para>Furthermore, CoCoTeX offers many layout features that are not possible with standard PrintCSS todays like a class system for figures and tables, improved word- and line-breaking options, custom dictionaries, advanced listings (ToC, LoT, LoF) and a robust PDF/UA-compliant accessibility support. Many of the CoCoTeX features did not make it yet into our PrintCSS renderer, but we plan to implement them as vendor-specific extensions in the future. More advanced CSS features need to be evaluated and might be implemented in TeX.</para>
+    <para>In any case, our goal isn't to cover the entire CSS specification. As with other PrintCSS formatters, there will always be limitations in the supported CSS vocabulary, which won't be particularly significant for users as long as they can realize their typographic ideas. After all, there is no web browser that support PrintCSS, and we certainly don't need CSS animations for <emphasis>xerif</emphasis>. Looking ahead, we aim to further explore the boundaries of what TeX can represent in the context of PrintCSS.</para>
+  </sect1>
+  <sect1>
+    <title><anchor role="start" xml:id="_Ref199866315"/>Appendix&#x202f;I: Supported PrintCSS Features</title>
+    <informaltable role="Tabellenraster" frame="all">
+      <tgroup cols="3" rowsep="1" colsep="1">
+        <colspec colnum="1" colname="col1" colwidth="87.43597773mm"/>
+        <colspec colnum="2" colname="col2" colwidth="37.09458567mm"/>
+        <colspec colnum="3" colname="col3" colwidth="35.31305778mm"/>
+        <tbody>
+          <row>
+            <entry colname="col1">
+              <para>Item</para>
+            </entry>
+            <entry colname="col2">
+              <para>Limitations</para>
+            </entry>
+            <entry colname="col3">
+              <para>Spec</para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>@page</code> rule</para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="6">
+              <para>CSS Paged Media Module Level 3</para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para>page selectors</para>
+            </entry>
+            <entry colname="col2"><para><code>:blank</code></para></entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>@(top|right|bottom|left)-
+((left|right)-corner)|
+(top|right|middle|center|left|bottom)</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>size</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>page-orientation</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>marks</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>bleed</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>break-(after|before|inside)</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="3">
+              <para>CSS Fragmentation Module Level 3</para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>page-break-(after|before|inside)</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>orphans</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>widows</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>string-set</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="3">
+              <para>CSS Generated Content for Paged Media Module</para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>@footnote</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>footnote-call</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>footnote-marker</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>float</code></para>
+            </entry>
+            <entry colname="col2">
+              <para><code>only block-start|top|bottom</code></para>
+            </entry>
+            <entry colname="col3" morerows="1">
+              <para>CSS Page Floats <footnote xml:id="fn-9">
+                  <para>9 Johannes Wilm et. al (2024): CSS Page Floats. W3C Editor’s Draft. Available at <link xlink:href="https://drafts.csswg.org/css-page-floats/">https://drafts.csswg.org/css-page-floats/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>float-reference</code></para>
+            </entry>
+            <entry colname="col2">
+              <para><code>only column|page</code></para>
+            </entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect1>
+  <sect1>
+    <title><anchor role="start" xml:id="_Ref199866360"/>Appendix II: Supported Standard CSS Features</title>
+    <informaltable role="Tabellenraster" frame="all">
+      <tgroup cols="3" rowsep="1" colsep="1">
+        <colspec colnum="1" colname="col1" colwidth="51.09986433mm"/>
+        <colspec colnum="2" colname="col2" colwidth="60.00750378mm"/>
+        <colspec colnum="3" colname="col3" colwidth="48.82444752mm"/>
+        <tbody>
+          <row>
+            <entry colname="col1">
+              <para>Item</para>
+            </entry>
+            <entry colname="col2">
+              <para>Limitations</para>
+            </entry>
+            <entry colname="col3">
+              <para>Spec</para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para>selectors</para>
+            </entry>
+            <entry colname="col2">
+              <para>only Universal, <code>#id</code>, <code>.class</code>, <code>::before</code>, <code>::after</code>, <code>::first-line</code>, <code>::first-letter</code></para>
+            </entry>
+            <entry colname="col3">
+              <para>CSS Selectors Level 3 <footnote xml:id="fn-10">
+                  <para>10 Tantek Çelik et. al (2018): Selectors Level 3. W3C Recommendation. Available at <link xlink:href="https://www.w3.org/TR/selectors-3/">https://www.w3.org/TR/selectors-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>@font-face</code> rule</para>
+            </entry>
+            <entry colname="col2">
+              <para>only OTF fonts supported</para>
+            </entry>
+            <entry colname="col3" morerows="6">
+              <para>CSS Fonts Module Level 3 <footnote xml:id="fn-11">
+                  <para>11 John Daggett et. al (2018): CSS Fonts Module Level 3. Available at <link xlink:href="https://www.w3.org/TR/css-fonts-3/">https://www.w3.org/TR/css-fonts-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>font-family</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>font-size</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>font-style</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>font-variant-position</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>font-variant-caps</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>font-weight</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>margin(-(top|right|bottom|left))?</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="1">
+              <para>CSS Box Model Module Level 3 <footnote xml:id="fn-12">
+                  <para>12 Elika J. Etemad (2024): CSS Box Model Module Level 3. W3C Recommendation. Available at <link xlink:href="https://www.w3.org/TR/css-box-3/">https://www.w3.org/TR/css-box-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>padding(-(top|right|bottom|left))?</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>width</code>, <code>height</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="1">
+              <para>CSS Box Sizing Module Level 3 <footnote xml:id="fn-13">
+                  <para>13 Tab Atkins and Elika J. Etemad (2024): CSS Box Sizing Module Level 3. W3C Working Draft. Available at <link xlink:href="https://www.w3.org/TR/css-sizing-3/">https://www.w3.org/TR/css-sizing-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>min-width</code>, <code>min-height</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>border(-(top|right|bottom|left))?(-(color|style|width))?</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="1">
+              <para>CSS Backgrounds and Borders Module Level 3 <footnote xml:id="fn-14">
+                  <para>14 Elika J. Etemad and Brad Kemper (2024): CSS Backgrounds and Borders Module Level 3. W3C Candidate Recommendation Draft. Available at <link xlink:href="https://www.w3.org/TR/css-backgrounds-3/">https://www.w3.org/TR/css-backgrounds-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>background(-color)?</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>color</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3">
+              <para>CSS Color Module Level 3 <footnote xml:id="fn-15">
+                  <para>15 Tantek Çelik et. al (2018): CSS Color Module Level 3. W3C Recommendation. Available at <link xlink:href="https://www.w3.org/TR/css-color-3/">https://www.w3.org/TR/css-color-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>text-align</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="4">
+              <para>CSS Text Module Level 3 <footnote xml:id="fn-16">
+                  <para>16 Elika J. Etemad et. al (2024): CSS Text Module Level 3. W3C Candidate Recommendation Draft. Available at <link xlink:href="https://www.w3.org/TR/css-text-3/">https://www.w3.org/TR/css-text-3/</link> Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>text-indent</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>line-break</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>hyphens</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>white-space</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>counter-reset</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="2">
+              <para>CSS Lists and Counters Module Level 3 <footnote xml:id="fn-17">
+                  <para>17 Elika J. Etemad and Tab Atkins (2020): CSS Lists and Counters Module Level 3. W3C Working Draft. Available at <link xlink:href="https://www.w3.org/TR/css-lists-3/">https://www.w3.org/TR/css-lists-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>counter-increment</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>list-style(-type)?</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>bookmark-(level|label|state)</code></para>
+            </entry>
+            <entry colname="col2"/>
+            <entry colname="col3" morerows="3">
+              <para>CSS Generated Content Module Level 3 <footnote xml:id="fn-18">
+                  <para>18 Elika J. Etemad and David Cramer (2019): W3C Working Draft. Available at <link xlink:href="https://www.w3.org/TR/css-content-3/">https://www.w3.org/TR/css-content-3/</link> (Accessed May 15, 2025)</para>
+              </footnote>
+             </para>
+            </entry>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>leader()</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>target-counter()</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+          <row>
+            <entry colname="col1">
+              <para><code>target-text()</code></para>
+            </entry>
+            <entry colname="col2"/>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </sect1>
+</article>
