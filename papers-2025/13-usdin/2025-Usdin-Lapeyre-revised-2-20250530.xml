@@ -68,7 +68,7 @@ articles.</para>
 <title>What is JATS?</title>
 <para>The Journal Article Tag Suite (hereafter JATS) is an ANSI/NISO standard (JATS version 1.4 ANSI/NISO Z39.96-2025)  designed to capture the content and metadata of journal articles. JATS is only a tag set, unlike TEI, DITA, and Akoma Ntoso, which provide extensive software/processing components. JATS provides semantic tags for the parts of journals (particularly in the metadata) that have traditionally been used for discovery and to manage journal articles. The JATS tagging for body structures is quite generic (paragraphs, tables, figures, lists, footnotes, etc.). The metadata and bibliographic elements are typically semantic and divide many elements into logical components (for example: multiple parts of a personal name, extensive information on collaborations, elaborate article funding metadata, and over 60 elements within a bibliographic citation).</para>
 
-<para>Journal articles are <emphasis outputformat="italic">not</emphasis> typically authored in JATS: they may be, for example, written in Microsoft Word or encoded in a bespoke journal article tag set. But at some stage in their lifecycle  nearly all the world&apos;s journal articles are translated into JATS. JATS is the tag set publishers and archives use to communicate and exchange; JATS can be input to a wide variety of hosting platforms; JATS is the archival format of choice for many large-scale archives such as PubMed Central, UK PubMed Central, JSTOR, the British National Library, the Australian National Library, and the US Library of Congress. JATS is international; in 2018 it was used in more than 30 countries, and that number grows over time.</para>
+<para>Journal articles are <emphasis>not</emphasis> typically authored in JATS: they may be, for example, written in Microsoft Word or encoded in a bespoke journal article tag set. But at some stage in their lifecycle  nearly all the world&apos;s journal articles are translated into JATS. JATS is the tag set publishers and archives use to communicate and exchange; JATS can be input to a wide variety of hosting platforms; JATS is the archival format of choice for many large-scale archives such as PubMed Central, UK PubMed Central, JSTOR, the British National Library, the Australian National Library, and the US Library of Congress. JATS is international; in 2018 it was used in more than 30 countries, and that number grows over time.</para>
 </section>
 
 <section>
@@ -110,7 +110,7 @@ included the multi-language mechanism. </para>
 <title>The Needs of the Few Must Not Burden the Many</title>
 <para>Most journal publishers do not publish multilingual articles, most journal articles are not multilingual, and most JATS users have not been uncomfortable because JATS did not accommodate multilingual articles. It was important that, in adding a mechanism to enable a small but growing community to use JATS, we not impose a burden on established users. (The JATS Standing Committee was told, in no uncertain terms, that <quote>NOBODY NEEDS THAT #*($!</quote>. We interpreted that to mean that the speaker didn&apos;t need it, wasn&apos;t interested in people who might need it, and was concerned about the burden that might be imposed on existing users if it were added.) </para>
 <para>It was the hope of the JATS Standing Committee that the JATS multi-language mechanism be neither bulky nor intrusive. Ideally, any mechanism should enable users to create true multilingual documents while not requiring changes to the tagging of mono-lingual documents. Ideally, any multi-language mechanisms should be completely ignorable by creators/users of mono-lingual documents. In other words, if you do not publish multilingual documents, nothing in your JATS-world should change.</para>
-<para>The JATS 1.4 multi-language structures were designed to be TOTALLY IGNORABLE. Users who have no need for multiple languages in one document can simply not use any of them. Some users make their own subsets of the JATS model that do not include <emphasis outputformat="italic">any</emphasis> of these attributes. They can continue to do so and to leave the multi-language structures out of their working versions. Documents that are valid to such a subset will be valid to the published models and will be indistinguishable from documents that were created using the whole model that happen not to use the Multi-Language structures. [<citation>JATSMLExamples</citation>]</para>
+<para>The JATS 1.4 multi-language structures were designed to be TOTALLY IGNORABLE. Users who have no need for multiple languages in one document can simply not use any of them. Some users make their own subsets of the JATS model that do not include <emphasis>any</emphasis> of these attributes. They can continue to do so and to leave the multi-language structures out of their working versions. Documents that are valid to such a subset will be valid to the published models and will be indistinguishable from documents that were created using the whole model that happen not to use the Multi-Language structures. [<citation>JATSMLExamples</citation>]</para>
 <para>Further, it is highly unlikely that any user will ever use <emphasis>all</emphasis> of the multi-language attributes at all, and never within a single article (with the possible exception of articles created to demonstrate use of the mechanism). The multi-language attributes can and should be used only when appropriate and useful, and when the information is available. A user should use the multi-language attributes, like everything else in JATS, to encode information that they desire to provide to users of the articles. There is no virtue, and significant cost, in encoding information in the XML that is unimportant, redundant, or of questionable accuracy. In other words, if: <itemizedlist>
 <listitem>
 <para>you don&apos;t know, or</para>
@@ -328,7 +328,7 @@ discussion of the issues in translating literary texts in general and onomatopoe
 specific.</para>
 </section>
 
-<bibliography xml:id="references">
+<bibliography>
 
 <bibliomixed>
 <abbrev>JATSTaglib</abbrev>
@@ -377,7 +377,7 @@ W3C Recommendation 29 October 2013<bibliomisc><link xl:href="http://www.w3.org/T
 </bibliomixed>
 
 <bibliomixed>
-<abbrev>ImproveML</abbrev>Vincent Lizzie: <title>Improving Journal Article Tag Suite for Multilingual Articles</title>. Sci Ed. 2022; 9: 2:169&#x2013;178. DOI:<link xl:role="doi"  xl:href="https://doi.org/10.6087/kcse.285">https://doi.org/10.6087/kcse.285</link>. <bibliomisc><link xl:href="https://www.escienceediting.org/journal/view.php?number=291">https://www.escienceediting.org/journal/view.php?number=291</link>   
+<abbrev>ImproveML</abbrev>Vincent Lizzie: <title>Improving Journal Article Tag Suite for Multilingual Articles</title>. Sci Ed. 2022; 9: 2:169&#x2013;178. DOI:<bibliomisc><link xl:role="doi"  xl:href="https://doi.org/10.6087/kcse.285">https://doi.org/10.6087/kcse.285</link></bibliomisc>. <bibliomisc><link xl:href="https://www.escienceediting.org/journal/view.php?number=291">https://www.escienceediting.org/journal/view.php?number=291</link>   
 </bibliomisc></bibliomixed>
 
 <bibliomixed>

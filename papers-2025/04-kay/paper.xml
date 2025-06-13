@@ -53,11 +53,10 @@ identifies other areas where the design could be further improved.</para>
   pulls the JSON information from Ecwid using a call on <code>fn:json-doc</code> with
     an appropriate URI, and then extracts the required data using path expressions such as</para>
     
-  <programlisting><![CDATA[<xsl:variable 
+  <programlisting language="xml"><![CDATA[<xsl:variable 
       name="subscriptionOption" 
       select="$items?items?1?recurringChargeSettings" 
-      as="map(*)?" />   
-    ]]></programlisting>  
+      as="map(*)?" />]]></programlisting>  
     
     <para>The JSON structure is straightforward,
   and the features in XSLT 3.0 and XPath 3.1 are more than adequate to handle it.
@@ -185,8 +184,7 @@ identifies other areas where the design could be further improved.</para>
     (representing the Java code <code>if (iter.next() != null) {iter.close(); return BooleanValue.FALSE}</code>)
       looks like this:</para>
     
-    <programlisting><![CDATA[
- <statement nodeType="IfStmt">
+    <programlisting language="xml"><![CDATA[<statement nodeType="IfStmt">
     <condition nodeType="BinaryExpr" operator="NOT_EQUALS">
        <left nodeType="MethodCallExpr" >
           <name nodeType="SimpleName" identifier="next"/>
@@ -217,8 +215,7 @@ identifies other areas where the design could be further improved.</para>
           </statement>
        </statements>
     </thenStmt>
- </statement>           
-      ]]></programlisting>
+ </statement>]]></programlisting>
     
     <para>The element names here (<code>left</code>, <code>right</code>, <code>condition</code>,
     <code>thenStmt</code>) tell you nothing about what kind of thing the element is (and therefore
@@ -262,8 +259,7 @@ identifies other areas where the design could be further improved.</para>
     
     <para>The JSON version of the XML fragment shown above ends up looking like this:</para>
     
-    <programlisting><![CDATA[
- {"_nodeType":"IfStmt",
+    <programlisting language="json"><![CDATA[{"_nodeType":"IfStmt",
    "condition":{"_nodeType":"BinaryExpr",
      "_operator":"NOT_EQUALS",
      "left":{"_nodeType":"MethodCallExpr",
@@ -307,8 +303,7 @@ identifies other areas where the design could be further improved.</para>
        }
      ]
    }
- }      
-      ]]></programlisting>
+ }]]></programlisting>
     
     <para>I decided to use "_" rather than "@" as a prefix for JSON properties derived from XML attributes,
     on the grounds that the result is a valid NCName and can therefore be more easily selected using
@@ -347,14 +342,12 @@ identifies other areas where the design could be further improved.</para>
     
     <para>A typical (but very simple) template rule in the transpiler might look like this:</para>
     
-    <programlisting><![CDATA[
-<xsl:template match="*[@nodeType='ReturnStmt']">
+    <programlisting language="xml"><![CDATA[<xsl:template match="*[@nodeType='ReturnStmt']">
     <xsl:call-template name="indent"/>
     <xsl:text>return </xsl:text>
     <xsl:apply-templates select="*"/>
     <xsl:text>;{$NL}</xsl:text>
-</xsl:template>      
-      ]]></programlisting>
+</xsl:template>]]></programlisting>
     
     <para>This rule processes an expression with <code>@nodeType='ReturnStmt'</code> and outputs the
     (Java or C#) text <code>"return XXX;"</code> with suitable indentation, and followed by a newline.
@@ -364,14 +357,12 @@ identifies other areas where the design could be further improved.</para>
     
     <para>The rule doesn't need much changing to handle JSON instead of XML. It becomes:</para>
     
-    <programlisting><![CDATA[
-<xsl:template match=".[?_nodeType='ReturnStmt']">
+    <programlisting language="xml"><![CDATA[<xsl:template match=".[?_nodeType='ReturnStmt']">
     <xsl:call-template name="indent"/>
     <xsl:text>return </xsl:text>
     <xsl:apply-templates select="?expression"/>
     <xsl:text>;{$NL}</xsl:text>
-</xsl:template>   
-      ]]></programlisting>
+</xsl:template>]]></programlisting>
     
     <para>Some observations:</para>
     
@@ -426,11 +417,9 @@ identifies other areas where the design could be further improved.</para>
         that it's at the top of the tree.</para>
         <para>With this example, we know that the JSON is in the form of a singleton map
         with the key <code>root</code>: that is, the JSON starts with:</para>
-        <programlisting>
-    { "root":{
+        <programlisting language="json">{ "root":{
         "_nodeType": "CompilationUnit",
-        "packageDeclaration": {          
-        </programlisting>
+        "packageDeclaration": {</programlisting>
         <para>and we can take advantage of this by using <code>match="record(root)"</code>
         to match the outermost map.</para>
       </listitem>
@@ -487,8 +476,7 @@ identifies other areas where the design could be further improved.</para>
     of the classes, interfaces, and methods. Here is a short extract (the real thing is about
     71,000 lines):</para>
     
-    <programlisting><![CDATA[
-<digest>
+    <programlisting language="xml"><![CDATA[<digest>
    <module package="net.sf.saxon.tree">
       <class name="NamespaceNode">
          <implements name="net.sf.saxon.om.NodeInfo"/>
@@ -507,13 +495,11 @@ identifies other areas where the design could be further improved.</para>
          <method name="getBaseURI" returns="java.lang.String"/>
          <method name="getLineNumber" returns="int"/>
          <method name="getColumnNumber" returns="int"/>
-         ...
-]]></programlisting>
+         ...]]></programlisting>
     
     <para>The JSON equivalent, which we will be generating here, mirrors this closely:</para>
     
-    <programlisting><![CDATA[
- { "digest":[
+    <programlisting language="json"><![CDATA[{ "digest":[
     {
       "package": "net.sf.saxon.tree",
       "class": [
@@ -533,8 +519,7 @@ identifies other areas where the design could be further improved.</para>
         { "method":{ "name":"getPublicId", "returns":"java.lang.String" } },
         { "method":{ "name":"getBaseURI", "returns":"java.lang.String" } },
         { "method":{ "name":"getLineNumber", "returns":"int" } },
-        { "method":{ "name":"getColumnNumber", "returns":"int" } },     
-      ]]></programlisting>
+        { "method":{ "name":"getColumnNumber", "returns":"int" } },]]></programlisting>
     
     <para>Actually, what I'm showing here is the result of converting the XML digest to JSON using the
     4.0 <code>element-to-map()</code> function. In this stage of the case study, we're looking at the code
@@ -545,8 +530,7 @@ identifies other areas where the design could be further improved.</para>
     so there has to be an explicit template rule for every element of interest. The top two templates 
     (in the XML version) are:</para>
     
-    <programlisting><![CDATA[
- <xsl:template name="xsl:initial-template">
+    <programlisting language="xml"><![CDATA[<xsl:template name="xsl:initial-template">
     <digest>
        <xsl:apply-templates select="collection($xmlDir || 
                              '?recurse=yes;select=*.xml')"/>
@@ -557,16 +541,14 @@ identifies other areas where the design could be further improved.</para>
     <module package="{f:qualifiedName(packageDeclaration/name)}">
        <xsl:apply-templates select="types/type"/>
     </module>
- </xsl:template>      
-      ]]></programlisting>
+ </xsl:template>]]></programlisting>
     
     <para>So the entry-point template reads all the XML files in a directory whose name is supplied
     as a parameter, and invokes a template to process each file independently; this selects
     the only elements of interest, which are the type elements (a type being typically a class
     or interface). These two templates translate in the JSON version to:</para>
     
-    <programlisting><![CDATA[
- <xsl:template name="xsl:initial-template">
+    <programlisting language="xml"><![CDATA[<xsl:template name="xsl:initial-template">
     <xsl:map>
        <xsl:map-entry key="'digest'">
           <xsl:array>
@@ -591,8 +573,7 @@ identifies other areas where the design could be further improved.</para>
           <xsl:apply-templates select="?types?type"/>
        </xsl:map>
     </xsl:map-entry>
- </xsl:template>      
-      ]]></programlisting>
+ </xsl:template>]]></programlisting>
     
     <para>Observations:</para>
     
@@ -640,8 +621,7 @@ identifies other areas where the design could be further improved.</para>
       copies this annotation into the XML syntax tree, and the transpiler picks it
       up from there.</para></footnote>:</para>
     
-    <programlisting><![CDATA[
- <xsl:function name="f:isDelegate" as="xs:boolean">
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:isDelegate" as="xs:boolean">
     <xsl:param name="interfaceDecl" as="element()"/>
     <xsl:choose>
        <xsl:when test="$interfaceDecl/annotations/
@@ -658,13 +638,11 @@ identifies other areas where the design could be further improved.</para>
                        [count(members/member)=1])"/>
        </xsl:otherwise>
     </xsl:choose>      
- </xsl:function>      
-      ]]></programlisting>
+ </xsl:function>]]></programlisting>
     
     <para>In the JSON version this becomes:</para>
     
-    <programlisting><![CDATA[
- <xsl:function name="f:isDelegate" as="xs:boolean">
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:isDelegate" as="xs:boolean">
     <xsl:param name="interfaceDecl" as="item()"/>
     <xsl:choose>
        <xsl:when test="$interfaceDecl?annotations
@@ -681,8 +659,7 @@ identifies other areas where the design could be further improved.</para>
                        [count(?members?*)=1])"/>
        </xsl:otherwise>
     </xsl:choose>      
- </xsl:function>      
-      ]]></programlisting>
+ </xsl:function>]]></programlisting>
     
     <para>which, although it might appear a little cryptic at first sight, is actually a very
     direct translation.</para>
@@ -690,8 +667,7 @@ identifies other areas where the design could be further improved.</para>
     <para>Incidentally, both versions could take advantage of the new <code>xsl:if</code> 
       instruction in XSLT 4.0: the JSON version could be written:</para>
     
-    <programlisting><![CDATA[
-<xsl:function name="f:isDelegate" as="xs:boolean">
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:isDelegate" as="xs:boolean">
     <xsl:param name="interfaceDecl" as="item()"/>
     <xsl:if test="$interfaceDecl?annotations
                   ?*?name?_identifier='CSharpDelegate'"
@@ -703,15 +679,13 @@ identifies other areas where the design could be further improved.</para>
                   [?_isInterface='true']
                   [?annotations?*?name?_identifier='FunctionalInterface']
                   [count(?members?*)=1])"/>     
- </xsl:function>             
-      ]]></programlisting>
+ </xsl:function>]]></programlisting>
     
     <para>This stylesheet outputs JSON, and it is therefore greatly concerned with constructing
     maps and arrays. We've already seen in the top-level template that this can be rather verbose.
     There's a lot of this kind of code:</para>
     
-    <programlisting><![CDATA[
- <xsl:map>
+    <programlisting language="xml"><![CDATA[<xsl:map>
     <xsl:map-entry key="'name'" select="f:degenerify(?name?_identifier)"/>
     <xsl:if test="f:isDelegate(.)">
        <xsl:map-entry key="'delegate'" select="1"/>
@@ -726,8 +700,7 @@ identifies other areas where the design could be further improved.</para>
           </xsl:for-each>
        </xsl:array>
     </xsl:map-entry>
- </xsl:map>      
-]]></programlisting>
+ </xsl:map>]]></programlisting>
     <para>and it would be nice to reduce the verbosity if we can. One way of doing this is to do more
     of the work in XPath expressions rather than XSLT instructions. A couple of new XSLT features are
     designed to facilitate this: an <code>xsl:select</code> instruction, which evaluates an XPath
@@ -735,15 +708,13 @@ identifies other areas where the design could be further improved.</para>
     thing as the <code>xsl:apply-templates</code> instruction. With these enhancements, we can
     almost replace the above code by:</para>
     
-    <programlisting><![CDATA[
-  <xsl:select> {
+    <programlisting language="xml"><![CDATA[<xsl:select> {
     'name' : f:degenerify(?name?_identifier),
     'delegate' : xs:integer(f:isDelegate(.)),
     ...
     'members' : array:build(?members?*[?_nodeType='MethodDeclaration'],
                             apply-templates#1)
-  } </xsl:select>
-      ]]></programlisting>
+  } </xsl:select>]]></programlisting>
     
     <para>The only ingredient missing here is that map constructors have no way to generate a map
     entry (such as <code>'delegate'</code>) conditionally. We're working on that one.</para>
@@ -751,14 +722,12 @@ identifies other areas where the design could be further improved.</para>
     <para>Another attempt to make map construction more concise is a new <code>xsl:record</code>
     instruction, allowing something like:</para>
     
-        <programlisting><![CDATA[
-  <xsl:record
+        <programlisting language="xml"><![CDATA[<xsl:record
     name = "f:degenerify(?name?_identifier)"
     delegate = "xs:integer(f:isDelegate(.))"
     ...
     members = "array:build(?members?*[?_nodeType='MethodDeclaration'],
-                            apply-templates#1)"/>
-      ]]></programlisting>
+                            apply-templates#1)"/>]]></programlisting>
     
     <para>Again, it offers no way to generate a map entry conditionally.</para>
   </section>
@@ -778,19 +747,16 @@ identifies other areas where the design could be further improved.</para>
     <para>By its nature, this stylesheet is often following links from the usage of a class to the
     definition of the class, and this is achieved using an XSLT key definition:</para>
     
-    <programlisting><![CDATA[
- <xsl:key name="classKey"  
+    <programlisting language="xml"><![CDATA[<xsl:key name="classKey"  
           match="class | interface"  
           use="ancestor::module/@package || '.' || 
                  string-join(ancestor-or-self::*
-                         [self::class|self::interface]/@name, '.')"/>     
-    ]]></programlisting>
+                         [self::class|self::interface]/@name, '.')"/>]]></programlisting>
     
     <para>This indexes every class or interface by a key that represents the full hierarchic
     name of the class or interface. For example, given this structure:</para>
     
-    <programlisting><![CDATA[
- <module package="net.sf.saxon.tree.iter">
+    <programlisting language="xml"><![CDATA[<module package="net.sf.saxon.tree.iter">
       <class name="EmptyIterator">
          <implements name="net.sf.saxon.om.SequenceIterator"/>
          <implements name="net.sf.saxon.tree.iter.ReversibleIterator"/>
@@ -807,8 +773,7 @@ identifies other areas where the design could be further improved.</para>
          <class name="OfNodes">
             <extends name="net.sf.saxon.tree.iter.EmptyIterator"/>
             <implements name="net.sf.saxon.tree.iter.AxisIterator"/>
-         ...   
-      ]]></programlisting>
+         ...]]></programlisting>
     
     <para>it indexes the class <code>OfNodes</code> with the key 
       <code>net.sf.saxon.tree.iter.EmptyIterator.OfNodes</code>.</para>
@@ -833,8 +798,7 @@ identifies other areas where the design could be further improved.</para>
     <para>I experimented with several ways of constructing the index as a map. The first approach
     uses recursive descent template rules with tunnel parameters:</para>
     
-    <programlisting><![CDATA[
-   <xsl:mode name="build-index" on-no-match="deep-skip"/>
+    <programlisting language="xml"><![CDATA[<xsl:mode name="build-index" on-no-match="deep-skip"/>
    <xsl:output method="json" indent="yes"/>
    
    <xsl:template match="record(package, *)" 
@@ -883,8 +847,7 @@ identifies other areas where the design could be further improved.</para>
          <xsl:apply-templates select="?digest?*" 
                               mode="build-index"/>
       </xsl:map>
-   </xsl:template>
-      ]]></programlisting>
+   </xsl:template>]]></programlisting>
     
     <para>The tunnel parameter <code>full-name</code> is used to build up the concatenated name as
     we descend the hierarchy; when we get to the leaf nodes, we can create a map entry using this
@@ -913,8 +876,7 @@ identifies other areas where the design could be further improved.</para>
     <para>My third attempt used the <code>map:build</code> function, again processing a pinned
       tree of maps and arrays to make ancestor information. Here it is:</para>
     
-    <programlisting><![CDATA[
- <xsl:function name="f:fullClassName">
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:fullClassName">
       <xsl:param name="c" as="(record(class, *)|record(interface, *))"/>
       <xsl:variable name="upper" 
                     select="label($c)?parent ! label(.)?parent"/>
@@ -931,8 +893,7 @@ identifies other areas where the design could be further improved.</para>
             pin(?digest)??~(record(class, *)|record(interface, *)),
             f:fullClassName#1)    
          "/>
-   </xsl:template>     
-      ]]></programlisting>
+   </xsl:template>]]></programlisting>
     
     <para>I've cheated a little here, because it uses constructs that aren't yet implemented in Saxon,
     so I had to use workarounds to make it work. But it's only using features that are defined
@@ -1331,7 +1292,7 @@ like <citation>RNCTUT</citation>.</para>
 
 </section>-->
 
-<bibliography xml:id="references">
+<bibliography>
 
 <bibliomixed>
 <abbrev>Delpratt and Lockett 2017</abbrev>
@@ -1357,14 +1318,14 @@ Michael Kay.
   <bibliomixed>
 <abbrev>Kay 2022</abbrev>
 Michael Kay.
-<title>XSLT Extensions for JSON Processing.</title> 
+<title>XSLT Extensions for JSON Processing</title> 
   Balisage: The Markup Conference 2022, Washington, DC, August 1 - 5, 2022
   <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol27.Kay01"/></bibliomisc>
 </bibliomixed>
 
 <bibliomixed>
 <abbrev>Kay 2023</abbrev>
-Michael Kay. <title>Schema-Aware Conversion of XML to JSON.</title> 
+Michael Kay. <title>Schema-Aware Conversion of XML to JSON</title> 
   Presented at Balisage: The Markup Conference 2023, Washington, DC, July 31 - August 4, 2023. 
 <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol28.Kay01"/></bibliomisc>
 </bibliomixed>

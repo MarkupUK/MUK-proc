@@ -605,7 +605,7 @@ setInterval(function () {
       </itemizedlist></para>
   </section>
 
-  <bibliography xml:id="references">
+  <bibliography>
     
     <bibliomixed>W3C: <title>XForms 1.1 W3C Recommendation</title>. 20 October 2009.
           <bibliomisc><link xl:href="https://www.w3.org/TR/xforms11/"/></bibliomisc>

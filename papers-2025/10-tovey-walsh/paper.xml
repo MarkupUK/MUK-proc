@@ -12,10 +12,10 @@
     </personname>
     <email>norm@tovey-walsh.com</email>
   </author>
-  <copyright>
+  <!--<copyright>
     <year>2025</year>
     <holder>Norm Tovey-Walsh</holder>
-  </copyright>
+  </copyright>-->
   <keywordset>
     <keyword>XProc</keyword>
     <keyword>Web</keyword>
@@ -53,12 +53,11 @@ straightforward way. Consider this pipeline:</para>
 
 <para>This pipeline simply loads a document and serializes it. For example:</para>
 
-<programlisting><![CDATA[$ bin/xmlcalabash.sh pipelines/document.xpl uri=https://testdata.xmlcalabash.com/index.xml]]></programlisting>
+<programlisting language="bourne"><![CDATA[$ bin/xmlcalabash.sh pipelines/document.xpl uri=https://testdata.xmlcalabash.com/index.xml]]></programlisting>
 
 <para>Returns the XML document:</para>
 
-<programlisting language="xml"><![CDATA[
-<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml">
+<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8"/>
 …
@@ -67,7 +66,7 @@ straightforward way. Consider this pipeline:</para>
 
 <para>And:</para>
 
-<programlisting><![CDATA[$ bin/xmlcalabash.sh pipelines/document.xpl uri=https://testdata.xmlcalabash.com/index.html]]></programlisting>
+<programlisting language="bourne"><![CDATA[$ bin/xmlcalabash.sh pipelines/document.xpl uri=https://testdata.xmlcalabash.com/index.html]]></programlisting>
 
 <para>Returns an HTML document:</para>
 
@@ -246,8 +245,7 @@ script = versionDecl, s, page, s .
 -versionDecl = s, -"script version ", version, s, -"." .
 @version = "0.2" .
 
-@page = -"page", RS, string, s, -"." .
-</programlisting>
+@page = -"page", RS, string, s, -"." .</programlisting>
 
 <para>(I’m eliding a few more lines of grammar needed to parse strings and
 whitespace. I probably didn’t write them for this purpose anyway, I probably

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://docbook.org/xml/5.0/rng/docbookxi.rng" schematypens="http://relaxng.org/ns/structure/1.0"?>
+<?xml-model href="../../Downloads/paper.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<book
+    xmlns="http://docbook.org/ns/docbook" 
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    version="5.0">
+    <info>
+        <editor><orgname>Markup UK</orgname></editor>
+        <mediaobject>
+            <imageobject>
+                <imagedata fileref="xsl/img/background.jpg"/>
+            </imageobject>
+        </mediaobject>
+        <cover>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="xsl/img/background.jpg"/>
+                </imageobject>
+            </mediaobject>
+        </cover>
+        <title>Markup UK 2025 Proceedings</title>
+    </info>
+
+    <xi:include href="papers-2025/01-pemberton/paper.xml"/>
+    <xi:include href="papers-2025/02-thomson/ixml_to_xspec.xml"/>
+    <xi:include href="papers-2025/03-cheraa/xxforms-ari-edit.xml"/>
+    <xi:include href="papers-2025/04-kay/paper.xml"/>
+    <xi:include href="papers-2025/05-kumaradas/Schema Test Suite - Markup UK 2025.xml"/>
+    <xi:include href="papers-2025/07-quin/quin.xml"/>
+    <xi:include href="papers-2025/10-tovey-walsh/paper.xml"/>
+    <xi:include href="papers-2025/12-windeln/Martin_Kraetke_Christine_Windeln_PrintCSS_Meets_Tex.xml"/>
+    <xi:include href="papers-2025/13-usdin/2025-Usdin-Lapeyre-revised-2-20250530.xml"/>
+
+</book>

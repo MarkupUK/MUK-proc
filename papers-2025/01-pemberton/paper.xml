@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE article SYSTEM "docbook.dtd">
 <?xml-stylesheet href="docbook.css" type="text/css"?>
+<?xml-model href="../../../../Downloads/paper.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
 <article xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          version="5.0-subset Balisage-1.5" xml:id="modular-ixml">
@@ -286,8 +286,7 @@
          <literal>December</literal> <literal>1999</literal> forms of
          dates:
       </para>
-      <programlisting>
-             date: numeric; textual.
+      <programlisting>date: numeric; textual.
          -numeric: day, -"/", month, -"/", year.
          -textual: day, -" "+, tmonth, -" "+, year.
               day: d, d?.
@@ -297,43 +296,36 @@
                    -"February", +"2";
                    ...
                    -"December", +"12".
-               -d: ["0"-"9"].
-      </programlisting>
+               -d: ["0"-"9"].</programlisting>
       <para>
          What you will see is that the serialisation of these are nearly
          identical, except that while <literal>31/12/1999</literal>
          produces
       </para>
-      <programlisting>
-         &lt;date>
+      <programlisting language="xml">&lt;date>
             &lt;day>31&lt;/day>
             &lt;month>12&lt;/month>
             &lt;year>1999&lt;/year>
-         &lt;/date>
-      </programlisting>
+         &lt;/date></programlisting>
       <para>
          <literal>31</literal> <literal>December</literal>
          <literal>1999</literal> produces
       </para>
-      <programlisting>
-         &lt;date>
+      <programlisting language="xml">&lt;date>
             &lt;day>31&lt;/day>
             &lt;tmonth>12&lt;/tmonth>
             &lt;year>1999&lt;/year>
-         &lt;/date>
-      </programlisting>
+         &lt;/date></programlisting>
       <para>
          where the difference is because it is produced from a different
          input syntax. Using renaming, you can specify that both have the
          same serialised name:
       </para>
-      <programlisting>
-         tmonth > month:
+      <programlisting>tmonth > month:
             -"January",  +"1";
             -"February", +"2";
             ...
-            -"December", +"12".
-      </programlisting>
+            -"December", +"12".</programlisting>
       <para>
          This says that while <literal>tmonth</literal> is the name used in
          the grammar, and represents the textual form of a month in the
@@ -346,9 +338,7 @@
          renaming as a string. For instance since ixml names may not end
          with a dot, but XML names may, you can write:
       </para>
-      <programlisting>
-         abc > "abc.": ...
-      </programlisting>
+      <programlisting>abc > "abc.": ...</programlisting>
       <para>
          The syntax of the start of a rule like this is called a
          <literal>naming</literal>, and can consist either of a
@@ -363,38 +353,32 @@
          since this introduces a roundtripping ambiguity. Because an output
          form such as
       </para>
-      <programlisting>
-         &lt;date>
+      <programlisting language="xml">&lt;date>
             &lt;day>31&lt;/day>
             &lt;month>12&lt;/month>
             &lt;year>1999&lt;/year>
-         &lt;/date>
-      </programlisting>
+         &lt;/date></programlisting>
       <para>
          can have been produced by two different input syntaxes, the
          roundtripping process has to choose one of them. Where necessary
          this can be overcome with a technique such as:
       </para>
-      <programlisting>
-         tmonth > month:
+      <programlisting>tmonth > month:
             style, 
             (-"January",  +"1";
              -"February", +"2";
              ...
              -"December", +"12").
-         @style: +"text".
-      </programlisting>
+         @style: +"text".</programlisting>
       <para>
          which would produce for the <literal>31</literal>
          <literal>December</literal> <literal>1999</literal> style of input
       </para>
-      <programlisting>
-         &lt;date>
+      <programlisting language="xml">&lt;date>
             &lt;day>31&lt;/day>
             &lt;month style='text'>12&lt;/month>
             &lt;year>1999&lt;/year>
-         &lt;/date>
-      </programlisting>
+         &lt;/date></programlisting>
       <para>
          which can be uniquely round-tripped.
       </para>
@@ -423,15 +407,11 @@
          "^" (and "@" but it is not possible to start
          the first rule of a grammar with that character):
       </para>
-      <programlisting>
-         +uses css from css.ixml
-      </programlisting>
+      <programlisting>+uses css from css.ixml</programlisting>
       <para>
          and
       </para>
-      <programlisting>
-         +uses iri, url, uri, urn from uri.ixml
-      </programlisting>
+      <programlisting>+uses iri, url, uri, urn from uri.ixml</programlisting>
       <para>
          This specifies which module to use, and which rules from that
          module are intended to be used.
@@ -439,29 +419,23 @@
       <para>
          It is possible to combine them
       </para>
-      <programlisting>
-         +uses css from css.ixml; iri, url, uri, urn from uri.ixml
-      </programlisting>
+      <programlisting>+uses css from css.ixml; iri, url, uri, urn from uri.ixml</programlisting>
       <para>
          The specification of what is allowable to be used from a module is
          similar:
       </para>
-      <programlisting>
-         +shares iri, url, uri, urn
-      </programlisting>
+      <programlisting>+shares iri, url, uri, urn</programlisting>
       <para>
          There are two main choices for a grammar for these. The first
          literally recognises the structure as it is specified above:
       </para>
-      <programlisting>
-         module: s, (uses; shares)*, ixml.
+      <programlisting>module: s, (uses; shares)*, ixml.
            uses: -"+uses", rs, from++(-";", s).
          shares: -"+shares", rs, entries.
            from: entries, rs, -"from", rs, location, s.
        -entries: share++(-",", s).
           share: @name, s.
-        @source: iri.
-      </programlisting>
+        @source: iri.</programlisting>
       <para>
          where <literal>s</literal> is the regular ixml rule for optional
          whitespace, <literal>rs</literal> for required whitespace,
@@ -471,20 +445,15 @@
          internationalised URI [<link linkend="iri">iri</link>], allowing
          the use of grammars from external sources, such as:
       </para>
-      <programlisting>
-         +uses iri from https://example.com/ixml/modules/iri.ixml
-      </programlisting>
+      <programlisting>+uses iri from https://example.com/ixml/modules/iri.ixml</programlisting>
       <para>
          For a specification like
       </para>
-      <programlisting>
-         +uses css from css.ixml; iri, url, uri, urn from uri.ixml
-      </programlisting>
+      <programlisting>+uses css from css.ixml; iri, url, uri, urn from uri.ixml</programlisting>
       <para>
          this produces a resulting structure like
       </para>
-      <programlisting>
-         &lt;uses>
+      <programlisting language="xml">&lt;uses>
             &lt;from source='css.ixml'>
                &lt;share name='css'/>
             &lt;/from>
@@ -494,25 +463,21 @@
                &lt;share name='uri'/>
                &lt;share name='urn'/>
             &lt;/from>
-         &lt;/uses>
-      </programlisting>
+         &lt;/uses></programlisting>
       <para>
          Alternatively, the grammar could look like:
       </para>
-      <programlisting>
-            module: s, (multiuse; shares)*, ixml.
+      <programlisting>module: s, (multiuse; shares)*, ixml.
          -multiuse: -"+uses", rs, uses++(-";", s).
             shares: -"+shares", rs, entries.
               uses: entries, rs, -"from", rs, from.
           -entries: share++(-",", s).
              share: @name, s.
-             @from: iri, s.
-      </programlisting>
+             @from: iri, s.</programlisting>
       <para>
          where the resulting structure then looks like:
       </para>
-      <programlisting>
-         &lt;uses from='css.ixml'>
+      <programlisting language="xml">&lt;uses from='css.ixml'>
             &lt;share name='css'/>
          &lt;/uses>
          &lt;uses from='uri.ixml'>
@@ -520,23 +485,18 @@
             &lt;share name='url'/>
             &lt;share name='uri'/>
             &lt;share name='urn'/>
-         &lt;/uses>
-      </programlisting>
+         &lt;/uses></programlisting>
       <para>
          The advantage of the latter version is that processing is slightly
          easier, since shallower, with a slight disadvantage with respect
          to round-tripping, since the two forms
       </para>
-      <programlisting>
-         +uses css from css.ixml; iri, url, uri, urn from uri.ixml
-      </programlisting>
+      <programlisting>+uses css from css.ixml; iri, url, uri, urn from uri.ixml</programlisting>
       <para>
          and
       </para>
-      <programlisting>
-         +uses css from css.ixml
-         +uses iri, url, uri, urn from uri.ixml
-      </programlisting>
+      <programlisting>+uses css from css.ixml
+         +uses iri, url, uri, urn from uri.ixml</programlisting>
       <para>
          are no longer distinguishable on roundtripping, since they produce
          the same serialisation.
@@ -585,17 +545,13 @@
          can include declarations, then the module for procedures would
          have:
       </para>
-      <programlisting>
-         +uses declaration from declaration.ixml
-         +shares procedure
-      </programlisting>
+      <programlisting>+uses declaration from declaration.ixml
+         +shares procedure</programlisting>
       <para>
          and the module for declarations would have:
       </para>
-      <programlisting>
-         +uses procedure from procedure.ixml
-         +shares declaration
-      </programlisting>
+      <programlisting>+uses procedure from procedure.ixml
+         +shares declaration</programlisting>
       <para>
          This illustrates that a <literal>uses</literal> specification is
          different from, for instance, a <literal>#include</literal>
@@ -606,16 +562,13 @@
          Note that a module can only share rules it defines; it is not
          permitted to share a rule from a different module like this:
       </para>
-      <programlisting>
-         +uses x, y from z.ixml
-         +shares x
-      </programlisting>
+      <programlisting>+uses x, y from z.ixml
+         +shares x</programlisting>
       <para>
          So, having defined what a module looks like, we can now use it to
          define itself:
       </para>
-      <programlisting>
-         +uses ixml, name, s, rs from ixml.ixml; iri from iri.ixml
+      <programlisting>+uses ixml, name, s, rs from ixml.ixml; iri from iri.ixml
          +shares module
 
             module: s, (multiuse; shares)*, ixml.
@@ -624,8 +577,7 @@
               uses: entries, rs, -"from", rs, from.
           -entries: share++(-",", s).
              share: @name, s.
-             @from: iri, s.
-      </programlisting>
+             @from: iri, s.</programlisting>
    </section>
    <section xml:id="L218">
       <title>Processing</title>
@@ -722,125 +674,99 @@
          As a simple example, imagine a language of identity statements of
          the style
       </para>
-      <programlisting>
-         total=price+tax+shipping
+      <programlisting>total=price+tax+shipping
          tax=price×10÷100
-         shipping=5
-      </programlisting>
+         shipping=5</programlisting>
       <para>
          expressed by this grammar that uses the definition of
          <literal>expr</literal> from another module:
       </para>
-      <programlisting>
-         +uses expr from expr.ixml
+      <programlisting>+uses expr from expr.ixml
              data: identity+.
          identity: id, -"=", expr, -#a.
-               id: [L]+.
-      </programlisting>
+               id: [L]+.</programlisting>
       <para>
          The only problem is that the <literal>expr</literal> module has a
          clashing rule for <literal>id</literal>:
       </para>
-      <programlisting>
-         +shares expr
+      <programlisting>+shares expr
          expr: id++op.
            id: [L; Nd]+.
-           op: ["+-×÷"].
-      </programlisting>
+           op: ["+-×÷"].</programlisting>
       <para>
          Since the invoking grammar never gets changed, the rule in the
          module gets renamed, resulting in the following complete grammar:
       </para>
-      <programlisting>
-             data: identity+.
+      <programlisting>data: identity+.
          identity: id, -"=", expr, -#a.
                id: [L]+.
 
              expr: id_++op.
            id_>id: [L; Nd]+.
-               op: ["+-×÷"].
-      </programlisting>
+               op: ["+-×÷"].</programlisting>
       <para>
          If the module's rule for <literal>id</literal> had instead been a
          <emphasis>renaming</emphasis>, it could have looked like this:
       </para>
-      <programlisting>
-         id>ident: [L; Nd]+.
-      </programlisting>
+      <programlisting>id>ident: [L; Nd]+.</programlisting>
       <para>
          and the renaming would have ended up as:
       </para>
-      <programlisting>
-         id_>ident: [L; Nd]+.
-      </programlisting>
+      <programlisting>id_>ident: [L; Nd]+.</programlisting>
    </section>
    <section xml:id="L312">
       <title>Example</title>
       <para>
          Making the example slightly more complex, with rules like
       </para>
-      <programlisting>
-         result[1]=a1+b1+c1
-         result[2]=a2+b2+c2
-      </programlisting>
+      <programlisting>result[1]=a1+b1+c1
+         result[2]=a2+b2+c2</programlisting>
       <para>
          using this grammar:
       </para>
-      <programlisting>
-         +uses expr from expr.ixml; identity from id.ixml
+      <programlisting>+uses expr from expr.ixml; identity from id.ixml
          rules: rule+.
-          rule: identity, -"=", expr, -#a.
-      </programlisting>
+          rule: identity, -"=", expr, -#a.</programlisting>
       <para>
          Module <literal>expr.ixml</literal>
       </para>
-      <programlisting>
-         +shares expr
+      <programlisting>+shares expr
             expr: operand++op.
          operand: id; number.
               id: [L], [L; Nd]*.
               op: ["+-×÷"].
-          number: ["0"-"9"]+.
-      </programlisting>
+          number: ["0"-"9"]+.</programlisting>
       <para>
          Module <literal>identity.ixml</literal> has a clash with both
          <literal>id</literal> and <literal>number</literal> from
          <literal>expr.ixml</literal>:
       </para>
-      <programlisting>
-         +shares identity
+      <programlisting>+shares identity
          identity: id; id, -"[", number, -"]".
                id: [L]+.
            number: digits, (".", digits)?.
-          -digits: [Nd]+.
-      </programlisting>
+          -digits: [Nd]+.</programlisting>
       <para>
          The invoking grammar never changes:
       </para>
-      <programlisting>
-         rules: rule+.
-          rule: identity, -"=", expr.
-      </programlisting>
+      <programlisting>rules: rule+.
+          rule: identity, -"=", expr.</programlisting>
       <para>
          In module <literal>expr.ixml</literal> nothing needs changing
       </para>
-      <programlisting>
-            expr: operand++op.
+      <programlisting>expr: operand++op.
          operand: id; number.
               id: [L], [L; Nd]*.
               op: ["+-×÷"].
-          number: ["0"-"9"]+.
-      </programlisting>
+          number: ["0"-"9"]+.</programlisting>
       <para>
          In <literal>identity.ixml</literal> both <literal>id</literal> and
          <literal>number</literal> are renamed:
       </para>
-      <programlisting>
-               identity: id_; id_, -"[", number_, -"]".
+      <programlisting>identity: id_; id_, -"[", number_, -"]".
                  id_>id: -"@", [L]+.
          number_>number: digits, ".", digits.
-                -digits: [Nd]+.
-      </programlisting>
+                -digits: [Nd]+.</programlisting>
       <para>
          The rules allow either or both to be renamed in
          <literal>expr.ixml</literal> instead.
@@ -851,36 +777,28 @@
       <para>
          The invoking grammar:
       </para>
-      <programlisting>
-         +uses id from ident.ixml; expr from expr.ixml
+      <programlisting>+uses id from ident.ixml; expr from expr.ixml
          rules: rule+.
-          rule: id, -"=", expr.
-      </programlisting>
+          rule: id, -"=", expr.</programlisting>
       <para>
          Module <literal>ident.ixml</literal>
       </para>
-      <programlisting>
-         +shares id
-         id: [L]+.
-      </programlisting>
+      <programlisting>+shares id
+         id: [L]+.</programlisting>
       <para>
          Module <literal>expr.ixml</literal>
       </para>
-      <programlisting>
-         +uses id, number from id.ixml
+      <programlisting>+uses id, number from id.ixml
          +shares expr
             expr: operand++op.
          operand: id; number.
-              op: ["+-×÷"].
-      </programlisting>
+              op: ["+-×÷"].</programlisting>
       <para>
          Module id.ixml
       </para>
-      <programlisting>
-         +shares id, number
+      <programlisting>+shares id, number
              id: [L], [L; Nd]*.
-         number: [Nd]+.
-      </programlisting>
+         number: [Nd]+.</programlisting>
       <para>
          Here there are two rules called <literal>id</literal> both shared
          and used by two different modules.
@@ -888,34 +806,26 @@
       <para>
          The invoking grammar is never changed:
       </para>
-      <programlisting>
-         rules: rule+.
-          rule: id, -"=", expr.
-      </programlisting>
+      <programlisting>rules: rule+.
+          rule: id, -"=", expr.</programlisting>
       <para>
          and since the <literal>id</literal> rule is used from
          <literal></literal>module <literal>ident.ixml</literal>, the rule
          may not be renamed there:
       </para>
-      <programlisting>
-         id: [L]+.
-      </programlisting>
+      <programlisting>id: [L]+.</programlisting>
       <para>
          This means that the <literal>id</literal> rule in module
          <literal>id.ixml</literal> has to be renamed:
       </para>
-      <programlisting>
-         id_>id: [L], [L; Nd]*.
-         number: [Nd]+.
-      </programlisting>
+      <programlisting>id_>id: [L], [L; Nd]*.
+         number: [Nd]+.</programlisting>
       <para>
          and in module <literal>expr.ixml</literal> that uses it
       </para>
-      <programlisting>
-            expr: operand++op.
+      <programlisting>expr: operand++op.
          operand: id_; number.
-              op: ["+-×÷"].
-      </programlisting>
+              op: ["+-×÷"].</programlisting>
    </section>
    <section xml:id="L469">
       <title>A Larger Example</title>
@@ -923,8 +833,7 @@
          Imagine you were defining a textual format for XForms
          [<link linkend="xf">xf</link>]:
       </para>
-      <programlisting>
-         Example XForm
+      <programlisting>Example XForm
          style xform.css
 
          model M
@@ -932,8 +841,7 @@
             submission save put:data.xml replace:none 
 
          input name "What is your name?"
-         submit "OK"
-      </programlisting>
+         submit "OK"</programlisting>
       <para>
          This is going to need definitions for CSS, URIs, XPath, and a lot
          more. Furthermore, it would be worth modularising it into several
@@ -945,18 +853,15 @@
       <para>
          The top-level:
       </para>
-      <programlisting>
-         +uses form from form.ixml
+      <programlisting>+uses form from form.ixml
          +uses content from content.ixml
 
          xform>html: h, form, content.
-           @h>xmlns: +"http://www.w3.org/1999/xhtml".
-      </programlisting>
+           @h>xmlns: +"http://www.w3.org/1999/xhtml".</programlisting>
       <para>
          Module <literal>form.ixml</literal>:
       </para>
-      <programlisting>
-         +shares form
+      <programlisting>+shares form
          +uses css from css.ixml;
          model from model.ixml;
          iri from iri.ixml;
@@ -969,13 +874,11 @@
                   style: csstype, css.
           @csstype>type: +"text/css".
             @cssrel>rel: +"stylesheet".
-                  @href: -iri, s.
-      </programlisting>
+                  @href: -iri, s.</programlisting>
       <para>
          Module <literal>model.ixml</literal>:
       </para>
-      <programlisting>
-         +shares model
+      <programlisting>+shares model
          +uses s, ref, xf from xforms-basics.ixml;
          id, name from xml.ixml;
          Action from action.ixml;
@@ -995,13 +898,11 @@
                         (method, -":", resource, s)?, replace?.
             @method: "get"; "put".
            @replace: -"replace:", name, s.
-         {etc}
-      </programlisting>
+         {etc}</programlisting>
       <para>
          Module <literal>content.ixml</literal>:
       </para>
-      <programlisting>
-         +shares content
+      <programlisting>+shares content
          +uses IDREF from xml.ixml;
          xf, ref, string, s from xforms-basics.ixml
 
@@ -1014,13 +915,11 @@
                 label: string.
 
                submit: -"submit", s, subid?, label?.
-    @subid>submission: -"submission:", IDREF, s.
-      </programlisting>
+    @subid>submission: -"submission:", IDREF, s.</programlisting>
       <para>
          and so on. Giving output like:
       </para>
-      <programlisting>
-	 &lt;html xmlns='http://www.w3.org/1999/xhtml'>
+      <programlisting language="xml">&lt;html xmlns='http://www.w3.org/1999/xhtml'>
             &lt;head>
                &lt;title>Example XForm&lt;/title>
                &lt;link type='text/css' rel='stylesheet' href='xform.css'/>
@@ -1039,8 +938,7 @@
 		  &lt;/submit>
                &lt;/group>
             &lt;/body>
-         &lt;/html>
-      </programlisting>
+         &lt;/html></programlisting>
    </section>
    <section xml:id="other-possible-approaches">
       <title>Other Possible Approaches</title>

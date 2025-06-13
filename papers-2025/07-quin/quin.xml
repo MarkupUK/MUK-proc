@@ -225,7 +225,7 @@
       map would be faster than the current method; profiling showed it was slow,
       and a workaround was to merge attribute values after every hundred input
       documents, and at the end of processing:</para>
-    <programlisting>&lt;xsl:with-param name="attribute-values-seen"
+    <programlisting language="xml">&lt;xsl:with-param name="attribute-values-seen"
   select="
     if ((position() ge last() - 1) or (position() mod 100) eq 99)
     then
