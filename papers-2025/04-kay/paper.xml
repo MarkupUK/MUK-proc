@@ -1,0 +1,1335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook"
+	 xmlns:xl="http://www.w3.org/1999/xlink"
+	 version="5.0" xml:lang="en">
+<info>
+<title>Processing JSON with Template Rules</title>
+
+
+<author>
+<personname>Michael Kay</personname>
+<email>mike@saxonica.com</email>
+<uri>https://www.saxonica.com/</uri>
+<personblurb><para>Michael Kay is the editor of the XSLT 2.0, 3.0, and now 4.0 specifications,
+and a leading contributor to many of the associated specifications such as XPath and XQuery.
+He founded Saxonica Ltd in 2004 to develop the Saxon product set, and continues to be an active
+developer with Saxonica, spending much of his time developing the 4.0 range of specifications,
+and the associated test material, as well as implementing the new features in the Saxon products.</para></personblurb>
+<affiliation>
+<jobtitle>Director of Innovation</jobtitle>
+<orgname>Saxonica Ltd</orgname>
+</affiliation>
+</author>
+
+<keywordset>
+<keyword>XSLT</keyword>
+<keyword>JSON</keyword>
+<keyword>template rules</keyword>
+</keywordset>
+
+<abstract>
+<para>This paper describes a case study exploring how effective the current design of XSLT 4.0 is
+in processing JSON files with a recursive structure, using the rule-based recursive descent
+design pattern familiar to XSLT users. It explores the conversion of an existing non-trivial
+XSLT-based application (a transpiler that converts Java source code to C#) to
+see how well it would be able to cope if the input were JSON rather than XML. The
+exercise has led to a number of changes in the proposed features of XSLT 4.0, and
+identifies other areas where the design could be further improved.</para>
+</abstract>
+</info>
+
+<section>
+<title>Introduction</title>
+
+  <para>XSLT 3.0, together with its accompanying specifications such as XPath 3.1, introduced
+  support for processing and generating JSON alongside XML. The new features have proved
+  useful, but they have known limitations.</para>
+  
+  <para>Saxonica, for example, uses the JSON capabilities in XSLT 3.0 when processing
+  new online orders from customers for the Saxon product. We use a third-party service,
+  Ecwid, that supplies details of new orders in JSON format, and we use an XSLT application
+  to process this order, add the details to our XML orders database, and generate license
+  keys and email notifications to the customer. The application uses XForms and SaxonJS. It
+  pulls the JSON information from Ecwid using a call on <code>fn:json-doc</code> with
+    an appropriate URI, and then extracts the required data using path expressions such as</para>
+    
+  <programlisting language="xml"><![CDATA[<xsl:variable 
+      name="subscriptionOption" 
+      select="$items?items?1?recurringChargeSettings" 
+      as="map(*)?" />]]></programlisting>  
+    
+    <para>The JSON structure is straightforward,
+  and the features in XSLT 3.0 and XPath 3.1 are more than adequate to handle it.
+    <footnote><para>More details of this application can be found at 
+      <citation>Delpratt and Lockett 2017</citation>. 
+      At the time of that paper the Ecwid data feed was plain text rather than JSON, but the paper does describe
+    some other ways in which the application uses JSON internally.</para></footnote></para>
+    
+    <para>But the capabilities of XSLT for processing JSON are more limited than the
+    capabilities for processing XML. One of these limitations, the one addressed in this
+    paper, is the ability to transform JSON using XSLT's quintessential processing model:
+    rule-based recursive-descent transformation using template rules.
+    </para>
+    
+    <para>A project is currently underway, informally known as QT4, to define 4.0 versions
+    of the XSLT, XPath, and XQuery languages. This project has been set up as a W3C Community Group
+    and meets weekly to discuss and agree proposed changes to the specification. The activity
+    can be tracked online at <uri>https://qt4cg.org/</uri> and of course anyone is welcome
+    to participate. To date over 500 changes to the specifications have been accepted, and
+    most of these have been implemented in Saxon and/or BaseX; more than 12,000 test cases
+    have been added to the XQuery test suite alone, on top of the 32,000 test cases already
+    available for the 3.1 specifications<footnote><para>Data obtained, naturally, using Saxon and XQuery.</para></footnote>.</para>
+
+    <para>But I was concerned that we hadn't really tackled or solved the issues concerned
+    with recursive-descent transformation. Back in 2016, before XSLT 3.0 was even finalised,
+    I published a paper <citation>Kay 2016</citation> at XML Prague in 2016 
+    giving a couple of worked examples of JSON transformations using XSLT 3.0, coming to the rather
+    unhappy conclusion that they were best tackled by converting the JSON to XML, transforming
+    the XML, and then converting the XML back to JSON. I returned to these examples in a Balisage
+    paper in 2022 <citation>Kay 2022</citation>
+    where I showed that these two particular problems could be tackled much more easily using
+    new features proposed for XSLT 4.0; however I remained uneasy that neither of the two problems
+    really featured the recursive-descent processing paradigm.</para>
+  
+    <para>So I resolved to conduct a case-study in which I would select a realistic application
+    in which recursive-descent rule-based transformation of JSON input was a requirement, and
+    use this application to test the usability of the XSLT 4.0 specifications in their current
+    state, and propose enhancements where they were found to be necessary. This paper summarises
+    the conclusions of that study. A blow-by-blow account containing contemporaneous notes of
+    the tasks undertaken can be found at <uri>https://github.com/qt4cg/qtspecs/issues/1786</uri>;
+    this paper focuses more on the final conclusions, and ignores some of the avenues I followed
+    that produced no useful insights.</para>
+  
+
+
+</section>
+  
+  <section>
+    <title>Selecting the case study</title>
+    
+    <para>The two key criteria for selecting a case study were (a) that use of JSON (rather than XML)
+    should be a natural choice for the input and output data, and (b) that the data should be
+    recursive — because it's with recursive data structures that the recursive-descent processing
+    model becomes a necessary part of the solution.</para>
+    
+    <para>The application that best fitted these requirements was the Java-to-C# transpiler, which
+    I described at Markup UK in 2021: <citation>Kay 2021</citation>
+    This is an application that is written almost entirely in XSLT (with a small amount of control
+    logic in Java and Gradle). It is a live application, used internally by Saxonica on a daily basis
+    to transform our Java source code into C# source code, which is then used to build the SaxonCS
+    product. The application runs in several phases:</para>
+    
+    <orderedlist>
+      <listitem>
+        <para>We preprocess the Java code using a Java preprocessor to exclude parts of the code that are
+        are not needed in SaxonCS.</para>
+        <para>We run the open-source <code>JavaParser</code> product to generate an XML representation
+        of the syntax tree of each (preprocessed) Java module in the Saxon product. This produces around
+        110Mb of XML across 2100 files.</para></listitem>
+      <listitem>
+      <para>We analyse these files to produce a digest file. The digest contains a list of classes,
+        interfaces, and methods across the product as a whole, in a single XML file. The digest is
+        around 4Mb.</para></listitem>
+      <listitem>
+        <para>We refine the digest file, producing a modified version with augmented information. The
+        main purpose of this process is to work out which Java methods are overridden, so that in the generated C#,
+        the can be suitably annotated with <code>virtual</code> or <code>override</code> modifiers,
+        something that is not possible by looking at each Java module in isolation.</para></listitem>
+      <listitem>
+        <para>We then transform each of the XML modules into a C# serialization, taking account of information
+        in the digest file. This stage is a pure recursive-descent rule-based transformation,
+        using around 350 template rules to handle each of the syntactic constructs identified by the Java
+        parser.</para>
+      </listitem>
+    </orderedlist>
+    
+    <para>As written, the application doesn't use JSON. But what if it did? It's convenient that the
+    JavaParser product generates XML, but it didn't have to be that way: JSON would work just as well.
+    There's no mixed content, which is the key feature that would give XML a natural advantage.</para>
+    
+    <para>So the case study pretends that we're starting with a syntax tree in JSON rather than XML;
+    and furthermore, it explores the use of JSON (rather than XML) for the digest file. Rather than converting
+    the JavaParser to emit JSON, however, we start by converting the XML to JSON, which also gives us a chance
+    to test the new features in XSLT 4.0 for converting XML to JSON.</para>
+    
+    <para>Some might argue that using XSLT for converting Java to C# is not exactly a typical use case for
+    XSLT. That's a fair criticism. However, I've seen XSLT used for many applications that you might not 
+    consider typical: for example, converting the output of a CAD tool into instructions controlling a 3-D printer.
+    Wherever complex data needs to be structurally transformed, XSLT is a possible solution.</para>
+    
+    <para>Note that it wasn't an aim of the case study to produce a complete working application. Rather,
+    the aim was to identify whether this was likely to be feasible, and what difficulties might be encountered,
+    and how proposed new language features might mitigate any problems.</para>
+    
+    <para>The remaining sections of the paper focus on what we learned examining each part of the application.</para>
+  </section>
+  
+  <section>
+    <title>Converting the input XML to JSON</title>
+    
+    <para>This was an opportunity to try out the new <code>fn:element-to-map</code> function.
+    I described the basic design for this function in a paper at Balisage in 2023<citation>Kay 2023</citation>, 
+    
+    
+    and we had an implementation in Saxon ready to test.</para>
+    
+    <para>The function doesn't convert lexical XML to lexical JSON: rather, it converts the XDM representation
+    of XML to the XDM representation of JSON (XDM being the X data model that underpins XSLT and XQuery).</para>
+    
+    <para>The idea of the function is that it converts each element type in one of a dozen or so different ways,
+    depending on the content model. The content model can be inferred either from a schema, or from examination of
+    a sample collection of input documents, or from an individual element instance. I didn't try to do a schema-aware
+    conversion because (a) no schema was available, and (b) generating one wouldn't be particularly useful, because
+    of the way the particular XML vocabulary works. Specifically, a typical fragment of the XML 
+    (representing the Java code <code>if (iter.next() != null) {iter.close(); return BooleanValue.FALSE}</code>)
+      looks like this:</para>
+    
+    <programlisting language="xml"><![CDATA[<statement nodeType="IfStmt">
+    <condition nodeType="BinaryExpr" operator="NOT_EQUALS">
+       <left nodeType="MethodCallExpr" >
+          <name nodeType="SimpleName" identifier="next"/>
+          <scope nodeType="NameExpr">
+             <name nodeType="SimpleName" identifier="iter"/>
+          </scope>
+       </left>
+       <right nodeType="NullLiteralExpr"/>
+    </condition>
+    <thenStmt nodeType="BlockStmt">
+       <statements>
+          <statement nodeType="ExpressionStmt">
+             <expression nodeType="MethodCallExpr" >
+                <name nodeType="SimpleName" identifier="close"/>
+                <scope nodeType="NameExpr">
+                   <name nodeType="SimpleName" identifier="iter"/>
+                </scope>
+             </expression>
+          </statement>
+          <statement nodeType="ReturnStmt">
+             <expression nodeType="FieldAccessExpr">
+                <name nodeType="SimpleName" identifier="FALSE"/>
+                <scope nodeType="NameExpr">
+                   <name nodeType="SimpleName" 
+                         identifier="BooleanValue"/>
+                </scope>
+             </expression>
+          </statement>
+       </statements>
+    </thenStmt>
+ </statement>]]></programlisting>
+    
+    <para>The element names here (<code>left</code>, <code>right</code>, <code>condition</code>,
+    <code>thenStmt</code>) tell you nothing about what kind of thing the element is (and therefore
+    what kind of structure its content has); rather it tells you about where it fits into the structure
+    of the parent element. It's the <code>nodeType</code> attribute that tells you about the
+    content model: if <code>nodeType="condition"</code> then there will be children named
+    <code>left</code> and <code>right</code>, while if <code>nodeType="IfStmt"</code> then
+    there will be children named <code>condition</code>, <code>thenStmt</code>, and optionally
+    <code>elseStmt</code>.</para>
+    
+    <para>This design, as well as making it difficult to construct a schema, also makes it
+    difficult for the <code>element-to-map</code> function to infer the right XML-to-JSON mapping
+    to use for each element name.</para>
+    
+    <para>Another consequence of the design is that most of the transpiler consists of rules
+    of the form <code>match="*[@nodeType='MethodCallExpr']"</code>: it is the <code>nodeType</code>
+    attribute that drives the processing, not the element name.</para>
+    
+    <para>The <code>elements-to-maps()</code> function, as it was specified and implemented at the time,
+    had an option <code>'uniform':true()</code> that caused the function to analyze the entire input
+    and infer a mapping for each element name that took into account all the elements encountered with
+    that name. By running this against the entire collection of 2100 input files, it ended up making quite
+    reasonable decisions, so far as one could tell. However, for constructs that only appeared 
+    very rarely, it might have made a poor choice, and I probably wouldn't have noticed because, in 
+    absence of a complete implementation of the transpiler, we didn't get as far as testing that
+    we were generating correct C# code at the end of the process.</para>
+    
+    <para>It also became clear that examining all the structures that occur in the input to the function
+    doesn't necessarily give the right answer if you run the same conversion on a different set of
+    input files the following day. Because there is downstream code processing the JSON output,
+    it is vital that tomorrow's output is consistent with today's.</para>
+    
+    <para>This experience led to a decision to make the choices made by the processor more visible and
+    open to scrutiny and adjustment. We split the function into two: <code>element-to-map-plan()</code>
+    takes a corpus of XML documents and generates a conversion plan, specifically a so-called "layout"
+    to be used for each element name. The second function, <code>element-to-map()</code>, accepts this
+    plan as input, and uses it to guide a specific conversion. The plan is designed so it can itself
+    be serialized as JSON, which means that (a) it can be modified by hand, and (b) the same plan can
+    be used consistently every time a conversion is run, even though the original data is no longer
+    available.</para>
+    
+    <para>The JSON version of the XML fragment shown above ends up looking like this:</para>
+    
+    <programlisting language="json"><![CDATA[{"_nodeType":"IfStmt",
+   "condition":{"_nodeType":"BinaryExpr",
+     "_operator":"NOT_EQUALS",
+     "left":{"_nodeType":"MethodCallExpr",
+       "name":{"_nodeType":"SimpleName",
+         "_identifier":"next"
+       },
+       "scope":{"_nodeType":"NameExpr",
+         "name":{"_nodeType":"SimpleName",
+           "_identifier":"iter"
+         }
+       }
+     },
+     "right":{"_nodeType":"NullLiteralExpr"
+     }
+   },
+   "thenStmt":{"_nodeType":"BlockStmt",
+     "statements":[{"_nodeType":"ExpressionStmt",
+         "expression":{"_nodeType":"MethodCallExpr",
+           "name":{"_nodeType":"SimpleName",
+             "_identifier":"close"
+           },
+           "scope":{"_nodeType":"NameExpr",
+             "name":{"_nodeType":"SimpleName",
+               "_identifier":"iter"
+             }
+           }
+         }
+       },
+       
+       {"_nodeType":"ReturnStmt",
+         "expression":{"_nodeType":"FieldAccessExpr",
+           "name":{"_nodeType":"SimpleName",
+             "_identifier":"FALSE"
+           },
+           "scope":{"_nodeType":"NameExpr",
+             "name":{"_nodeType":"SimpleName",
+               "_identifier":"BooleanValue"
+             }
+           }
+         }
+       }
+     ]
+   }
+ }]]></programlisting>
+    
+    <para>I decided to use "_" rather than "@" as a prefix for JSON properties derived from XML attributes,
+    on the grounds that the result is a valid NCName and can therefore be more easily selected using
+    the XPath lookup operator, for example <code>$node?_nodeType</code>. The <code>element-to-map</code> function
+    allows any prefix (or none) to be used.</para>
+    
+    <para>The fragments shown above illustrate the XML and JSON representations of the raw Java parse tree.
+    In practice the JavaParser product also has an option (the type solver) to decorate the parse tree
+    with additional attributes containing the inferred types of various constructs, and
+    their expanded names. For example the <code>left</code> node of the first <code>condition</code>
+    above has two additional properties: <code>"_RETURN": "net.sf.saxon.value.AtomicValue"</code>,
+    and <code>"_RESOLVED_TYPE": "com.saxonica.functions.qt4.DuplicateValues.DuplicatesIterator"</code>,
+    indicating that in the Java method call <code>iter.next()</code>, the type of <code>iter</code>
+    is <code>com.saxonica.functions.qt4.DuplicateValues.DuplicatesIterator</code>, and the return
+    type of the method call is <code>net.sf.saxon.value.AtomicValue</code>.</para>
+    
+  </section>
+  
+  <section>
+    <title>Serializing the parse tree</title>
+    
+    <para>In the real transpiler, the final stage of processing is to take each of the XML (now JSON)
+    documents representing the parse tree of a module, and, with the aid of information in the digest
+    file, to generate corresponding C# code. This combines two tasks: handling any differences between
+    Java and C#, and then serializing the result (with sufficient indentation and spacing to make it
+    legible, since we're going to need to debug it).</para>
+    
+    <para>For the sake of the case study, I decided to skip the business logic of Java to C# conversion,
+    and simply re-serialize the parse tree as Java code. This mirrored the development approach I had used
+    for the transpiler, where I first wrote template rules to convert the parse tree back to Java, and then
+    incrementally modified the XSLT to handle cases where the C# needed to be different.</para>
+    
+    <para>I didn't attempt to rewrite all the template rules, but converted a sufficient subset that several
+    of the larger Java modules could be successfully processed. I felt this would give us all the feedback
+    we needed on whether the task was feasible.</para>
+    
+    <para>A typical (but very simple) template rule in the transpiler might look like this:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:template match="*[@nodeType='ReturnStmt']">
+    <xsl:call-template name="indent"/>
+    <xsl:text>return </xsl:text>
+    <xsl:apply-templates select="*"/>
+    <xsl:text>;{$NL}</xsl:text>
+</xsl:template>]]></programlisting>
+    
+    <para>This rule processes an expression with <code>@nodeType='ReturnStmt'</code> and outputs the
+    (Java or C#) text <code>"return XXX;"</code> with suitable indentation, and followed by a newline.
+    The <code>XXX</code> here is constructed by recursive application of template rules to the single
+    operand of the return statement (if any): <code>select="*"</code> selects the operand, whatever
+    it might be, and processes it using its own template rule.</para>
+    
+    <para>The rule doesn't need much changing to handle JSON instead of XML. It becomes:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:template match=".[?_nodeType='ReturnStmt']">
+    <xsl:call-template name="indent"/>
+    <xsl:text>return </xsl:text>
+    <xsl:apply-templates select="?expression"/>
+    <xsl:text>;{$NL}</xsl:text>
+</xsl:template>]]></programlisting>
+    
+    <para>Some observations:</para>
+    
+    <itemizedlist>
+      <listitem>
+        <para><code>match="."</code> matches anything. We could have written 
+        <code>match="map(*)"</code> to indicate that we're only interested in matching
+        maps; or we could have written <code>match="record(_nodeType, *)</code> to indicate
+        that we're only interested in matching maps having a <code>"_nodeType</code> property.
+        I quite like the idea of combining that with the predicate to allow syntax
+        like <code>match="record(_nodeType='ReturnStmt', *)"</code> but that's wishful thinking
+        for now.</para>
+      </listitem>
+      <listitem>
+        <para>The <code>xsl:text</code> instruction produces a text node. The stylesheet as a whole
+          is producing a text file (Java or C# source code), and the traditional way of doing that
+          is to use the XSLT text output method, with a result tree consisting entirely of text nodes.
+          There's a lot of inbuilt XML legacy there, but it works.
+        </para>
+        <para>The variable <code>{$NL}</code> is used in preference to a literal newline because
+        it doesn't disrupt the indentation of the code. This is purely a matter of personal style.</para>
+        <para>Using the latest features in the XSLT 4.0 spec, we could replace the last three lines
+        in the template body with <code>&lt;xsl:text>return {apply-templates(?expression)};{$NL}&lt;/xsl:text></code>,
+        which some people might prefer.</para>
+      </listitem>
+      <listitem>
+        <para>The original XSLT uses <code>select="*"</code> in the <code>apply-templates</code>
+        instruction to select all children; the revised XSLT uses <code>select="?expression"</code>
+        to select only the <code>expression</code> child. That is because the attributes and children
+        of the element node in the XML have all become named properties in the JSON, and <code>?*</code>
+        would select them all. There's no convenient way with a lookup expression of saying something
+        like <code>select="?* except ?_nodeType"</code> (the XPath <code>except</code> operator
+        only works with nodes). We have an open issue on this.</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>It turns out to be rather convenient that we can define the match patterns of template
+        rules based on the properties of a map in the JSON, rather than on the associated key. If
+    instead of <code>"right":{"_nodeType":"NullLiteralExpr"}</code> we had to cope with
+    <code>"NullLiteralExpr":{"_role":"right"}</code> (a design that could equally well have
+    been chosen), then the matching would become rather more complex, as we shall see.</para>
+    
+    <para>While most of the template rules in this stylesheet match on the value of the
+    <code>nodeType</code> attribute, this isn't true of all of them.</para>
+    
+    <itemizedlist>
+      <listitem>
+        <para>With the JSON tree, there's no obvious equivalent of <code>match="/"</code>,
+        which matches the root of the tree. There's a good reason for this: the XDM model
+        for JSON doesn't include parent pointers, so a map or array that's at the top of
+        the tree produced by parsing JSON doesn't actually <emphasis>know</emphasis>
+        that it's at the top of the tree.</para>
+        <para>With this example, we know that the JSON is in the form of a singleton map
+        with the key <code>root</code>: that is, the JSON starts with:</para>
+        <programlisting language="json">{ "root":{
+        "_nodeType": "CompilationUnit",
+        "packageDeclaration": {</programlisting>
+        <para>and we can take advantage of this by using <code>match="record(root)"</code>
+        to match the outermost map.</para>
+      </listitem>
+      <listitem>
+        <para>In other cases where the original stylesheet matched on element name, it was
+        usually possible to exploit redundancy in the data to match on properties instead.
+        For example the element with name <code>packageDeclaration</code> always
+        has the attribute <code>nodeType="packageDeclaration"</code>, and the element
+        with name <code>imports</code> contains a sequence of elements each having the
+        attribute <code>nodeType="importDeclaration"</code>.</para>
+        <para>In one or two cases a template rule that matched on an element name
+        (to handle a particular part of an expression, such a the <code>finally</code>
+        clause of a try/catch) could simply be inlined into the calling template.</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>The conclusion from this exercise was that the conversion to handle JSON rather than
+    XML input was straightforward — but that we had been lucky. The template rules all matched
+    on attribute values rather than element names; and none of them made use of features such as
+    XML node identity, or access to parents, ancestors, or siblings, that would be difficult
+    to replicate in the JSON world.</para>
+    
+    <para>Also: I've glossed over the fact that in this phase, I was merely looking at the code
+    that serializes the parse tree back to Java, and skipped the “business logic” that does the
+    conversion from Java to C#. That code, from a fairly superficial examination, includes
+    a few things that are rather harder to deal with:</para>
+    
+    <itemizedlist>
+      <listitem>
+        <para>The template rules access information from the digest file using an <code>xsl:key</code>
+        definition. The key definition is essentially the same as that described in the subsequent
+        section <emphasis>Refining the digest file</emphasis>, and creates the same challenges.</para>
+      </listitem>
+      <listitem>
+        <para>There are a number of functions and templates that use the parent or attribute axis
+        to examine the context of an expression. For example there is a function <code>isInterfaceMember</code>
+        that distinguishes methods defined in a class from methods defined in an interface, which it
+        does by searching the ancestor axis to see whether the containing type is a class or an interface.
+        With a JSON model there are always two ways of tackling this: the needed context information
+        (class or interface?) can be passed down the call tree as a tunnel parameter, or the mechanism
+        for pinning the tree can be used to expose an equivalent to the ancestor axis. This is discussed
+        further in a later section.</para>
+      </listitem>
+    </itemizedlist>
+    
+  </section>
+  
+  <section>
+    <title>Generating the digest file</title>
+    
+    <para>Let's look at another stage of the transpilation process: generation of the digest file.
+    In the existing transpiler, this reads the entire collection of 2100 XML files produced by
+    the Java parser, and constructs a single XML file (the digest) containing summary details
+    of the classes, interfaces, and methods. Here is a short extract (the real thing is about
+    71,000 lines):</para>
+    
+    <programlisting language="xml"><![CDATA[<digest>
+   <module package="net.sf.saxon.tree">
+      <class name="NamespaceNode">
+         <implements name="net.sf.saxon.om.NodeInfo"/>
+         <constructor params="net.sf.saxon.om.NodeInfo|net.sf.saxon.om.NamespaceBinding|int"/>
+         <field name="element" type="net.sf.saxon.om.NodeInfo"/>
+         <field name="nsBinding" type="net.sf.saxon.om.NamespaceBinding"/>
+         <field name="position" type="int"/>
+         <field name="fingerprint" type="int"/>
+         <method name="getTreeInfo" returns="net.sf.saxon.om.TreeInfo"/>
+         <method name="head" returns="net.sf.saxon.om.NodeInfo" csReturns="net.sf.saxon.om.Item"/>
+         <method name="getNodeKind" returns="int"/>
+         <method name="equals" returns="boolean" sig="java.lang.Object" params="java.lang.Object"/>
+         <method name="hashCode" returns="int"/>
+         <method name="getSystemId" returns="java.lang.String"/>
+         <method name="getPublicId" returns="java.lang.String"/>
+         <method name="getBaseURI" returns="java.lang.String"/>
+         <method name="getLineNumber" returns="int"/>
+         <method name="getColumnNumber" returns="int"/>
+         ...]]></programlisting>
+    
+    <para>The JSON equivalent, which we will be generating here, mirrors this closely:</para>
+    
+    <programlisting language="json"><![CDATA[{ "digest":[
+    {
+      "package": "net.sf.saxon.tree",
+      "class": [
+        { "name":"NamespaceNode" },
+        { "implements":{ "name":"net.sf.saxon.om.NodeInfo" } },
+        { "constructor":{ "params":"net.sf.saxon.om.NodeInfo|net.sf.saxon.om.NamespaceBinding|int" } },
+        { "field":{ "name":"element", "type":"net.sf.saxon.om.NodeInfo" } },
+        { "field":{ "name":"nsBinding", "type":"net.sf.saxon.om.NamespaceBinding" } },
+        { "field":{ "name":"position", "type":"int" } },
+        { "field":{ "name":"fingerprint", "type":"int" } },
+        { "method":{ "name":"getTreeInfo", "returns":"net.sf.saxon.om.TreeInfo" } },
+        { "method":{ "name":"head", "returns":"net.sf.saxon.om.NodeInfo", "csReturns":"net.sf.saxon.om.Item" } },
+        { "method":{ "name":"getNodeKind", "returns":"int" } },
+        { "method":{ "name":"equals", "returns":"boolean", "sig":"java.lang.Object", "params":"java.lang.Object" } },
+        { "method":{ "name":"hashCode", "returns":"int" } },
+        { "method":{ "name":"getSystemId", "returns":"java.lang.String" } },
+        { "method":{ "name":"getPublicId", "returns":"java.lang.String" } },
+        { "method":{ "name":"getBaseURI", "returns":"java.lang.String" } },
+        { "method":{ "name":"getLineNumber", "returns":"int" } },
+        { "method":{ "name":"getColumnNumber", "returns":"int" } },]]></programlisting>
+    
+    <para>Actually, what I'm showing here is the result of converting the XML digest to JSON using the
+    4.0 <code>element-to-map()</code> function. In this stage of the case study, we're looking at the code
+    needed to generate this structure, but I didn't actually complete the exercise, partly because the
+    code uses features not yet implemented in Saxon.</para>
+    
+    <para>The stylesheeet is fairly small (just 180 lines). It uses a mode with <code>on-no-match="fail"</code> 
+    so there has to be an explicit template rule for every element of interest. The top two templates 
+    (in the XML version) are:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:template name="xsl:initial-template">
+    <digest>
+       <xsl:apply-templates select="collection($xmlDir || 
+                             '?recurse=yes;select=*.xml')"/>
+    </digest>     
+ </xsl:template>
+ 
+ <xsl:template match="root">
+    <module package="{f:qualifiedName(packageDeclaration/name)}">
+       <xsl:apply-templates select="types/type"/>
+    </module>
+ </xsl:template>]]></programlisting>
+    
+    <para>So the entry-point template reads all the XML files in a directory whose name is supplied
+    as a parameter, and invokes a template to process each file independently; this selects
+    the only elements of interest, which are the type elements (a type being typically a class
+    or interface). These two templates translate in the JSON version to:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:template name="xsl:initial-template">
+    <xsl:map>
+       <xsl:map-entry key="'digest'">
+          <xsl:array>
+             <xsl:for-each select="(collection($jsonDir || 
+                           '?recurse=yes;select=*.json') ! pin(.)) ? *">
+                <xsl:array-member>
+                   <xsl:map>
+                      <xsl:apply-templates select="."/>
+                   </xsl:map>
+                </xsl:array-member>
+             </xsl:for-each>
+          </xsl:array>
+       </xsl:map-entry> 
+    </xsl:map>
+ </xsl:template>
+ 
+ <xsl:template match="?root">  <!-- match=".[label(.)?key = 'root']" --> 
+    <xsl:map-entry key="'module'">
+       <xsl:map>
+          <xsl:map-entry key="'_package'" 
+                         select="f:qualifiedName(?packageDeclaration?name)"/>
+          <xsl:apply-templates select="?types?type"/>
+       </xsl:map>
+    </xsl:map-entry>
+ </xsl:template>]]></programlisting>
+    
+    <para>Observations:</para>
+    
+    <itemizedlist>
+      <listitem>
+        <para>The JSON version of the digest is a singleton map, with key <code>"digest"</code>,
+        whose value is an array of maps. Constructing this top-level map-of-array-of-maps is
+        somewhat verbose, but straightforward enough.</para>
+      </listitem>
+      <listitem>
+        <para>The first template rule applies the <code>pin()</code> function to each of the
+        2100 XML documents in the collection, before applying templates to the result. I'll have
+        more to say about the <code>pin()</code> function in due course, what it does is to
+        create a copy of the tree of maps and arrays, with each item in the tree augmented
+        with a label carrying information about where it was found in the tree.</para>
+        <para>It's possible we may decide that when <code>xsl:apply-templates</code>
+        selects a map or array, it should be pinned automatically. That decision hasn't been
+        made yet.</para>
+      </listitem>
+      <listitem>
+        <para>The second template rule is shown with two alternative forms of the match pattern.
+        The commented-out version works in Saxon today: it tests whether the label of the item
+        (created when it was pinned) has a <code>key</code> property of <code>root</code>.
+        The second form is a proposed contraction: <code>match="?root"</code> is proposed
+        syntax equivalent to the first form. This would only work if the tree has been pinned,
+        because without this, a value in the tree knows nothing about its associated key.
+        (Contrast this with the XDM model for XML, where an element name is an intrinsic
+        property of an element node.)</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>This stylesheet processes the input JSON by applying templates to the values found
+    in its arrays and maps: the default processing is <code>&lt;xsl:apply-templates select="?*"/></code>.
+    This selects the values, not the key-value pairs. I have experimented with selecting key
+    value pairs instead, using <code>&lt;xsl:apply-templates select="map:entries(.)"/></code>,
+    and there are some cases where this is a good solution, but I have usually found it causes
+    confusion. If the values are labelled with their associated key (by pinning the tree before
+    we start), then it turns out not to be necessary.</para>
+    
+    <para>For many of the functions and templates in the stylesheet, the translation is fairly
+    direct. For example the XML version has a function to test whether a Java interface
+    has an annotation marking it as a functional interface
+      <footnote><para>In the Java source code, we use the annotation <code>@CSharpDelegate</code>
+      to mark interfaces that should be transpiled to C# delegates. The JavaParser faithfully
+      copies this annotation into the XML syntax tree, and the transpiler picks it
+      up from there.</para></footnote>:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:isDelegate" as="xs:boolean">
+    <xsl:param name="interfaceDecl" as="element()"/>
+    <xsl:choose>
+       <xsl:when test="$interfaceDecl/annotations/
+                       annotation/name/@identifier='CSharpDelegate'">
+          <xsl:sequence select="$interfaceDecl/annotations/
+                       annotation[name/@identifier='CSharpDelegate']/
+                       memberValue/@value = 'true'"/>
+       </xsl:when>
+       <xsl:otherwise>
+          <xsl:sequence select="exists($interfaceDecl
+                       [@nodeType='ClassOrInterfaceDeclaration']
+                       [@isInterface='true']
+                       [annotations/annotation/name/@identifier='FunctionalInterface']
+                       [count(members/member)=1])"/>
+       </xsl:otherwise>
+    </xsl:choose>      
+ </xsl:function>]]></programlisting>
+    
+    <para>In the JSON version this becomes:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:isDelegate" as="xs:boolean">
+    <xsl:param name="interfaceDecl" as="item()"/>
+    <xsl:choose>
+       <xsl:when test="$interfaceDecl?annotations
+                       ?*?name?_identifier='CSharpDelegate'">
+          <xsl:sequence select="$interfaceDecl?annotations
+                       ?*[?name?_identifier='CSharpDelegate']
+                       ?memberValue?_value = 'true'"/>
+       </xsl:when>
+       <xsl:otherwise>
+          <xsl:sequence select="exists($interfaceDecl
+                       [?_nodeType='ClassOrInterfaceDeclaration']
+                       [?_isInterface='true']
+                       [?annotations?*?name?_identifier='FunctionalInterface']
+                       [count(?members?*)=1])"/>
+       </xsl:otherwise>
+    </xsl:choose>      
+ </xsl:function>]]></programlisting>
+    
+    <para>which, although it might appear a little cryptic at first sight, is actually a very
+    direct translation.</para>
+    
+    <para>Incidentally, both versions could take advantage of the new <code>xsl:if</code> 
+      instruction in XSLT 4.0: the JSON version could be written:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:isDelegate" as="xs:boolean">
+    <xsl:param name="interfaceDecl" as="item()"/>
+    <xsl:if test="$interfaceDecl?annotations
+                  ?*?name?_identifier='CSharpDelegate'"
+            then="$interfaceDecl?annotations
+                  ?*[?name?_identifier='CSharpDelegate']
+                  ?memberValue?_value = 'true'"
+            else="exists($interfaceDecl
+                  [?_nodeType='ClassOrInterfaceDeclaration']
+                  [?_isInterface='true']
+                  [?annotations?*?name?_identifier='FunctionalInterface']
+                  [count(?members?*)=1])"/>     
+ </xsl:function>]]></programlisting>
+    
+    <para>This stylesheet outputs JSON, and it is therefore greatly concerned with constructing
+    maps and arrays. We've already seen in the top-level template that this can be rather verbose.
+    There's a lot of this kind of code:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:map>
+    <xsl:map-entry key="'name'" select="f:degenerify(?name?_identifier)"/>
+    <xsl:if test="f:isDelegate(.)">
+       <xsl:map-entry key="'delegate'" select="1"/>
+    </xsl:if>
+    ...
+    <xsl:map-entry key="'members'">
+       <xsl:array>
+          <xsl:for-each select="?members?*[?_nodeType='MethodDeclaration']">
+             <xsl:array-member>
+                <xsl:apply-templates select="."/>
+             </xsl:array-member>
+          </xsl:for-each>
+       </xsl:array>
+    </xsl:map-entry>
+ </xsl:map>]]></programlisting>
+    <para>and it would be nice to reduce the verbosity if we can. One way of doing this is to do more
+    of the work in XPath expressions rather than XSLT instructions. A couple of new XSLT features are
+    designed to facilitate this: an <code>xsl:select</code> instruction, which evaluates an XPath
+    expression held in its content, and an <code>apply-templates</code> function, which does the same
+    thing as the <code>xsl:apply-templates</code> instruction. With these enhancements, we can
+    almost replace the above code by:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:select> {
+    'name' : f:degenerify(?name?_identifier),
+    'delegate' : xs:integer(f:isDelegate(.)),
+    ...
+    'members' : array:build(?members?*[?_nodeType='MethodDeclaration'],
+                            apply-templates#1)
+  } </xsl:select>]]></programlisting>
+    
+    <para>The only ingredient missing here is that map constructors have no way to generate a map
+    entry (such as <code>'delegate'</code>) conditionally. We're working on that one.</para>
+    
+    <para>Another attempt to make map construction more concise is a new <code>xsl:record</code>
+    instruction, allowing something like:</para>
+    
+        <programlisting language="xml"><![CDATA[<xsl:record
+    name = "f:degenerify(?name?_identifier)"
+    delegate = "xs:integer(f:isDelegate(.))"
+    ...
+    members = "array:build(?members?*[?_nodeType='MethodDeclaration'],
+                            apply-templates#1)"/>]]></programlisting>
+    
+    <para>Again, it offers no way to generate a map entry conditionally.</para>
+  </section>
+  
+  <section>
+    <title>Refining the digest</title>
+    
+    <para>The final part of the transpiler to be examined in this case study is the stylesheet
+    that refines the digest. This is concerned with adding attributes to the information about
+    classes and methods: the most obvious example is to annotate C# methods as <code>virtual</code>
+    if they are overridden in a subclass, or as <code>override</code> if they are overriding
+    a method in a superclass. Another task is to change the return type of a method if it overrides
+    a superclass method with a wider return type: when we wrote the transpiler, C# did not allow
+    covariant return types, and it still imposes restrictions that are more severe than those in Java
+    (for example for methods defined in interfaces).</para>
+    
+    <para>By its nature, this stylesheet is often following links from the usage of a class to the
+    definition of the class, and this is achieved using an XSLT key definition:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:key name="classKey"  
+          match="class | interface"  
+          use="ancestor::module/@package || '.' || 
+                 string-join(ancestor-or-self::*
+                         [self::class|self::interface]/@name, '.')"/>]]></programlisting>
+    
+    <para>This indexes every class or interface by a key that represents the full hierarchic
+    name of the class or interface. For example, given this structure:</para>
+    
+    <programlisting language="xml"><![CDATA[<module package="net.sf.saxon.tree.iter">
+      <class name="EmptyIterator">
+         <implements name="net.sf.saxon.om.SequenceIterator"/>
+         <implements name="net.sf.saxon.tree.iter.ReversibleIterator"/>
+         ...
+         <field name="theInstance" 
+                type="net.sf.saxon.tree.iter.EmptyIterator" 
+                static="1"/>
+         <method name="getInstance" 
+                 returns="net.sf.saxon.tree.iter.EmptyIterator" 
+                 static="1"/>
+         <method name="nextAtomizedValue" 
+                 returns="net.sf.saxon.om.AtomicSequence"/>
+         ...
+         <class name="OfNodes">
+            <extends name="net.sf.saxon.tree.iter.EmptyIterator"/>
+            <implements name="net.sf.saxon.tree.iter.AxisIterator"/>
+         ...]]></programlisting>
+    
+    <para>it indexes the class <code>OfNodes</code> with the key 
+      <code>net.sf.saxon.tree.iter.EmptyIterator.OfNodes</code>.</para>
+    
+    <para>XSLT keys work only with nodes, not with maps and arrays, and we have no intention
+    of changing that. Instead, the preferred approach is to construct a map that can act as an index.
+    Often it will be appropriate for this map to be held in a global variable. How should we construct it?
+    </para>
+    
+    <para>In simple cases, constructing a map is easy. For example the equivalent in XPath 4.0 of a key
+    defined with <code>match="employee" use="@ssn"</code> is a map built using
+    <code>map:build(.??employee, fn{@ssn})</code>
+      <footnote><para><code>map:build</code>, with two arguments, returns a map in which each
+      key-value pair contains a value from the sequence supplied in the first argument,
+      with a corresponding key calculated using the function supplied in the second argument.
+      The XPath 4.0 expression <code>fn{@ssn}</code> represents a function that returns the value of
+      the <code>@ssn</code> attribute of the node supplied as the implicit function argument:
+      in XPath 3.1 this would be written <code>function($node){$node/@ssn}</code>.</para></footnote>. 
+      This case is more difficult, because with 
+    a tree of maps and arrays built from JSON, there is no ancestor axis to play with.</para>
+    
+    <para>I experimented with several ways of constructing the index as a map. The first approach
+    uses recursive descent template rules with tunnel parameters:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:mode name="build-index" on-no-match="deep-skip"/>
+   <xsl:output method="json" indent="yes"/>
+   
+   <xsl:template match="record(package, *)" 
+                 mode="build-index" priority="2">
+      <xsl:message>Processing package {?package}</xsl:message>
+      <xsl:next-match>
+          <xsl:with-param name="full-name" 
+                          select="?package" tunnel="yes"/>
+      </xsl:next-match>
+   </xsl:template>
+   
+   <xsl:template match="record(class, *)" mode="build-index">
+      <xsl:param name="full-name" tunnel="yes"/>
+      <xsl:variable name="full-class-name" 
+                    select="`{$full-name}.{?class?*?name}`"/>
+      <xsl:message>Processing class {$full-class-name}</xsl:message>      
+      <xsl:map-entry key="$full-class-name" 
+                     select="{'class': ?class}"/>
+      <xsl:apply-templates select="?class?*[. instance of (record(class, *)
+                                                          |record(interface, *))]" 
+                           mode="#current">
+          <xsl:with-param name="full-name" 
+                          select="$full-class-name" 
+                          tunnel="yes"/>
+      </xsl:apply-templates>
+   </xsl:template>
+   
+   <xsl:template match="record(interface, *)" mode="build-index">
+      <xsl:param name="full-name" tunnel="yes"/>
+      <xsl:variable name="full-class-name" 
+                    select="`{$full-name}.{?interface?*?name}`"/>
+      <xsl:message>Processing interface {$full-class-name}</xsl:message>
+      <xsl:map-entry key="$full-class-name" 
+                     select="{'interface': ?interface}"/>
+      <xsl:apply-templates select="?class?*[. instance of (record(class, *)
+                                                          |record(interface, *))]" 
+                           mode="#current">
+          <xsl:with-param name="full-name" 
+                          select="$full-class-name" 
+                          tunnel="yes"/>
+      </xsl:apply-templates>
+   </xsl:template>
+   
+   <xsl:template name="xsl:initial-template">
+      <xsl:map>
+         <xsl:apply-templates select="?digest?*" 
+                              mode="build-index"/>
+      </xsl:map>
+   </xsl:template>]]></programlisting>
+    
+    <para>The tunnel parameter <code>full-name</code> is used to build up the concatenated name as
+    we descend the hierarchy; when we get to the leaf nodes, we can create a map entry using this
+    name, so there is no need to access ancestor information. This works, but it's a lot of work
+    to replicate a fairly simple <code>xsl:key</code> declaration. The <code>xsl:message</code>
+    instructions are there as a reminder of how difficult I found it to get this right. The need
+    for separate paths to handle classes and interfaces is especially irritating. They could probably
+    be combined, but I found it was getting too complicated.</para>
+    
+    <para>Note the use of the idiom <code>match="record(class, *)</code>. This matches any map
+    that has an entry with the key <code>"class"</code>. A single key is often enough to identify
+    the relevant maps uniquely.</para>
+    
+    <para>The subtlety is that a top-level class is represented in the digest by a map that has
+    both a <code>package</code> key and a <code>class</code> key, and both contribute to the
+    full name of the class. By giving the <code>match="record(package, *)"</code> template rule
+    higher priority, and then using <code>xsl:next-match</code>, we ensure that both names are
+    added to the hierarchic name, in the right order. An inner class will have an entry that only
+    matches the <code>match="record(class, *)"</code> template rule.</para>
+    
+    <para>My second attempt to build the index also used recursive-descent template processing,
+    but instead of passing tunnel parameters down with each call, it relied on the ability in a pinned
+    tree of maps and arrays to access ancestor information. This worked, but it demonstrated no benefits
+    over the first approach.</para>
+    
+    <para>My third attempt used the <code>map:build</code> function, again processing a pinned
+      tree of maps and arrays to make ancestor information. Here it is:</para>
+    
+    <programlisting language="xml"><![CDATA[<xsl:function name="f:fullClassName">
+      <xsl:param name="c" as="(record(class, *)|record(interface, *))"/>
+      <xsl:variable name="upper" 
+                    select="label($c)?parent ! label(.)?parent"/>
+      <xsl:variable name="prefix" select="
+         if ($c instance of record(package, *))
+         then $c?package
+         else f:fullClassName($upper)"/>
+      <xsl:sequence select="$prefix ||  '.' || $c?('class','interface')?*?name"/>     
+   </xsl:function>
+     
+   <xsl:template name="xsl:initial-template">
+      <xsl:sequence select="
+         map:build(
+            pin(?digest)??~(record(class, *)|record(interface, *)),
+            f:fullClassName#1)    
+         "/>
+   </xsl:template>]]></programlisting>
+    
+    <para>I've cheated a little here, because it uses constructs that aren't yet implemented in Saxon,
+    so I had to use workarounds to make it work. But it's only using features that are defined
+    in the status-quo 4.0 specification.</para>
+    <para>Some observations:</para>
+    
+    <itemizedlist>    
+      <listitem>
+        <para>The construct <code>??</code> is a deep lookup operator: it does the same for maps and arrays
+          as <code>//</code> does for node trees. It can be qualified by a type, so <code>??~record(method)</code>
+          searches the entire tree for values matching the class <code>record(method)</code>. In this case
+          we have supplied a choice type: <code>??~(A|B)</code> matches items that are instances of either
+          <code>A</code> or <code>B</code>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>We have called <code>pin()</code> on the tree so that each value is labelled; the label
+        includes information about the containing (parent) map or array.</para>
+      </listitem>
+      <listitem>
+        <para>The first argument to <code>map:build</code> selects the items to be indexed.
+        The second computes a key value for each one. This is done by calling a user-written
+        recursive function <code>f:fullClassName</code>.</para>
+      </listitem>
+      <listitem>
+        <para>In this function, <code>$upper</code> navigates to the grandparent of
+          a value. That's because the structure uses arrays of maps: to get from an inner class
+        to its containing class, we need to go up two levels. The local name of the selected
+        class or interface is then prefixed either with the package name (if it is a top-level
+        class or interface), or with the full name of the containing (grandparent) class,
+        computed by a recursive call, if it represents an inner class.</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>Which is preferable? Opinions will probably differ. Neither is as concise as I would like,
+    but is the requirement frequent enough to justify custom syntax for the equivalent of an ancestor
+    axis? With the current (very early) implementation in Saxon, both take around the same time: 500ms
+    to 700ms to index a 5Mb digest file.</para>
+  </section>
+  
+  <section>
+    <title>Conclusions</title>
+    <para>What have we learned from this case study? Quite a lot. We've learned about things that
+    work well, we've learned about how to take best advantage of some of the new constructs in the
+    language, we've generated ideas for further refinements to the language specs (some of which
+    were implemented during the course of the study), and we've learned about areas where there
+    is still room for further improvements.</para>
+    <para>Here's a list of some of the more important observations.</para>
+    
+    <itemizedlist>
+      <listitem>
+        <para>When converting XML to JSON, we discovered the importance of achieving a mapping
+        that i consistent not only over a large collection of instance documents, but that is also
+        consistent over time despite the fact that tomorrow's instance documents might not have
+        exactly the same structure as today's. We redesigned the <code>element-to-map</code>
+        function to meet this requirement.</para>
+      </listitem>
+      <listitem>
+        <para>The plan constructed by the <code>element-to-map-plan</code> function seems
+          to work well on the samples we needed to convert, given a set of input documents
+          that is sufficiently large and representative.</para>
+      </listitem>
+      <listitem>
+        <para>We found that it's easiest to define template rules for maps if they can be
+        written to depend only on the internal structure of the map, and not on the key
+        used to identify the map within a larger structure. Whether this is possible depends
+        on the design of the JSON to be tranformed. Writing match patterns of the form
+        <code>match="record(real, complex)</code> that recognise the type of a map
+        from the names of its fields is often a good approach. Sometimes one would also
+        like to match on the values of a field, for example 
+          <code>match="record(type, *)[?type="xxx']</code>. It would be nice to have
+        syntax that's less clumsy for this. There's a temptation for users to reduce it
+        to <code>match=".[?type="xxx']</code> but this seems to lack clarity.</para>
+      </listitem>
+      <listitem>
+        <para>XSLT often processes selected child elements or attributes by inline code
+        within a template, and then processes the remainder using a construct such as
+        <code>&lt;xsl:apply-templates select="* except (X, Y, Z)"/></code> where
+        <code>X</code>, <code>Y</code>, <code>Z</code> are the children that have been given special treatment.
+        The <code>except</code> operator works only on nodes, and the lookup operator
+        <code>?</code> currently provides no similar capability to select all properties except
+        some specifically-named ones. One option is to provide lower-priority template
+        rules that match <code>X</code>, <code>Y</code>, and <code>Z</code> and do nothing
+        with them.</para>
+      </listitem>
+      <listitem>
+        <para>For this and other reasons, it is often useful to match values appearing in a tree
+        of maps and arrays by their associated key. The syntax <code>match="?keyval"</code>
+        has been proposed for this. The semantics, though, depend on values being labelled with
+        their associated key, and the full complexities of this (and the usability problems that
+        it might introduce) are not yet fully understood.</para>
+      </listitem>
+      <listitem>
+        <para>It would be useful for the <code>union</code>, <code>except</code>, and <code>intersect</code>
+        operators in patterns to apply to all kinds of pattern, not only patterns that match nodes. (The semantics
+        of these operators in a pattern have already diverged in detail from their XPath semantics.)</para>
+      </listitem>
+      <listitem>
+        <para>It would be nice to have some equivalent to <code>match="/"</code> to match the root of
+        a tree.</para>
+      </listitem>
+      <listitem>
+        <para>I had been concerned about how template rules should process arrays. The case study revealed no
+        problems in this area. In most cases arrays are not processed by matching them in a template rule,
+        but by iterating over the array in the template rule for its container.</para>
+      </listitem>
+      <listitem>
+        <para>The current syntax for constructing maps and arrays in XSLT is rather verbose, and could
+        be improved for many common use cases. Sometimes the right answer is to do it in XPath:
+        the introduction of the <code>fn:apply-templates</code> function and the <code>xsl:select</code>
+        instruction both facilitate that. In other cases the new <code>xsl:record</code> instruction
+        helps. An equivalent to <code>array:build</code> as an XSLT instruction has also been
+        mooted.</para>
+      </listitem>
+      <listitem>
+        <para>Neither <code>xsl:record</code> nor XPath map constructors make it easy to
+        include an entry in the constructed map conditionally.</para>
+      </listitem>
+      <listitem>
+        <para>Pinned maps and arrays make access to containing (ancestor) arrays and maps possible,
+        but the current syntax for doing so is very clumsy.</para>
+      </listitem>
+      <listitem>
+        <para>We've added quite a lot of functionality to introduce modifiers for lookup expressions
+        (such as <code>$x?pair::y</code>). But this case study didn't identify any situations where
+        they proved useful.</para>
+      </listitem>
+      <listitem>
+        <para>When the JSON structure uses arrays of maps (which is quite common), paths such as
+        <code>?x?*?y?*?z</code> start to appear frequently (and are very hard to debug when they select
+        nothing). Could this be improved?</para>
+      </listitem>
+    </itemizedlist>
+    
+  </section>
+
+ 
+  
+
+
+<!--<section>
+<title>Another section</title>
+
+<para>You can use not only paragraphs, but also programlistings:</para>
+
+<programlisting><![CDATA[<article xmlns="http://docbook.org/ns/docbook" …>
+  <title>Sample article</title>
+  <para>This is a really short article.</para>
+</article>]]></programlisting>
+
+<para>DocBook offers plenty of elements for inline markup, for example
+<tag>code</tag> for arbitrary code, e.g. <code>print 2+3;</code>.</para>
+
+<para>You can give titles to your programlistings using <tag>example</tag>:</para>
+
+<example>
+<title>DocBook V4.5 document</title>
+<programlisting><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE article PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN'
+                         'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'>
+<article lang="en">
+  <title>Sample article</title>
+  <para>This is a very short article.</para>
+</article>]]></programlisting>
+</example>
+
+<para>Lists can be created using <tag>itemizedlist</tag> or
+<tag>orderedlist</tag> elements:</para>
+
+<itemizedlist>
+<listitem>
+<para><emphasis>DocBook V4.x is feature frozen.</emphasis>DocBook V4.5
+is the last version of DocBook in the V4.x series. Any new DocBook
+development, like the addition of new elements, will be done in
+DocBook V5.0. It is only matter of time before useful, new elements
+will be added into DocBook V5.0, but they are not likely to be back
+ported into DocBook V4.x. DocBook V4.x will be in maintenance mode and
+errata will be published if necessary. </para>
+</listitem>
+<listitem>
+<para><emphasis>DocBook V5.0 offers new functionality.</emphasis>
+DocBook V5.0 provides significant improvements over DocBook V4.x. For
+example there is general markup for annotations, a new and flexible
+system for linking, and unified markup for information sections using
+the <tag>info</tag> element.</para>
+</listitem>
+<listitem>
+<para><emphasis>DocBook V5.0 is more extensible.</emphasis> Having
+DocBook V5.0 in a separate namespace allows you to easily mix DocBook
+markup with other XML-based languages like SVG, MathML, XHTML or even
+FooBarML.</para>
+</listitem>
+<listitem>
+<para><emphasis>DocBook V5.0 is easier to customize.</emphasis> RELAX
+NG offers many powerful constructs that make customization much easier
+than it would be using a DTD (see <xref linkend="customizations"/>).</para>
+</listitem>
+</itemizedlist>
+
+<para>Links to external resources are created using <tag>link</tag>
+element and appropritate XLink attributes. Detailed documentation
+about each DocBook V5.0 element is presented in <link
+xl:href="http://docbook.org/tdg5/en/html/pt02.html">the reference part
+of <citetitle>DocBook: The Definitive Guide</citetitle></link>.</para>
+
+<para>Table are also easy to create.</para>
+
+<table xml:id="t.removed">
+<title>Recommended mapping for removed elements</title>
+<tgroup cols="2">
+<thead>
+<row>
+<entry>Old name</entry>
+<entry>Recommended mapping</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry><tag>action</tag></entry>
+<entry>Use <computeroutput>&lt;<tag>phrase</tag> remap="action"&gt;</computeroutput>.</entry>
+</row>
+<row>
+<entry><tag>beginpage</tag></entry>
+<entry>Remove: <tag>beginpage</tag> is advisory only
+and has tended to cause confusion.  A processing instruction or
+comment should be a workable replacement if one is needed.</entry>
+</row>
+<row>
+<entry><tag>highlights</tag></entry>
+<entry>Use <tag>abstract</tag>.  Note that because <tag
+condition="v4">highlights</tag> has a broader content model, you may
+need to wrap contents in a <tag>para</tag> inside
+<tag>abstract</tag>.</entry>
+</row>
+<row>
+<entry><tag>interface</tag></entry>
+<entry>Use one of the <quote>gui*</quote> elements
+(<tag>guibutton</tag>, <tag>guiicon</tag>, <tag>guilabel</tag>,
+<tag>guimenu</tag>, <tag>guimenuitem</tag>, or
+<tag>guisubmenu</tag>).</entry>
+</row>
+<row>
+<entry><tag>invpartnumber</tag></entry>
+<entry>Use <computeroutput>&lt;<tag>biblioid</tag> class="other"
+otherclass="medialabel"&gt;</computeroutput>.  The
+<tag>productnumber</tag> element is another alternative.</entry>
+</row>
+<row>
+<entry><tag>medialabel</tag></entry>
+<entry>Use <computeroutput>&lt;<tag>citetitle</tag>
+pubwork="<replaceable>mediatype</replaceable>"&gt;</computeroutput>,
+where <replaceable>mediatype</replaceable> is the type of media being
+labeled (e.g.,<tag class="attvalue">cdrom</tag> or <tag
+class="attvalue">dvd</tag>).</entry>
+</row>
+<row>
+<entry><tag>modespec</tag></entry>
+<entry>No longer needed.  The current processing model for
+<tag>olink</tag> renders <tag>modespec</tag>
+unnecessary.</entry>
+</row>
+<row>
+<entry><tag>structfield</tag>, <tag>structname</tag></entry>
+<entry>Use <tag>varname</tag>. If you need to distinguish between the
+two, use <computeroutput>&lt;<tag>varname</tag>
+remap="<replaceable>structname or
+structfield</replaceable>"&gt;</computeroutput>.  In some contexts, it
+may also be appropriate to use <tag>property</tag> for <tag
+condition="v4">structfield</tag>.</entry>
+</row>
+</tbody>
+</tgroup>
+</table>
+
+</section>
+
+<section xml:id="editors">
+<title>Editing DocBook V5.0</title>
+
+<para>Because DocBook is an XML-based format and XML is a text-based
+format, you can use any text editor to create and edit DocBook V5.0
+documents. However, using <quote>dumb</quote> editors like Notepad is
+not very productive. You will do better if you use an editor that
+supports XML. Although there are DTD and W3C XML Schemas available for
+DocBook V5.0, which means you can use any editor that works with DTDs
+or W3C XML Schemas, we recommend that you use the RELAX NG grammar
+with DocBook V5.0. The rest of this section contains an overview of
+XML editors (listed in alphabetical order) that are known to work with
+RELAX NG schemas and that offer guided editing based on the RELAX NG
+schema.</para>
+
+<section xml:id="editors-nxml">
+<title>Emacs and nXML</title>
+
+<para><link xl:href="http://www.thaiopensource.com/nxml-mode/">nXML
+mode</link> is an add-on for the <application
+xl:href="http://www.gnu.org/software/emacs/emacs.html">GNU
+Emacs</application> text editor. By installing nXML you can turn Emacs
+into a very powerful XML editor that offers guided editing and
+validation of XML documents.</para>
+
+<figure xml:id="f.emacs">
+<title>Emacs with nXML mode provides guided editing and validation</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/emacs.png'/>
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>nXML uses a special configuration file named
+<filename>schemas.xml</filename> to associate schemas with XML
+documents. Often you will find this file in the directory
+<filename>site-lisp/nxml/schema</filename> inside the Emacs installation
+directory. Adding the following line into the configuration file,
+will associate DocBook V5.0 elements with the appropriate
+schema:</para>
+
+<programlisting>&lt;namespace ns="http://docbook.org/ns/docbook" uri="<replaceable>/path/to/</replaceable>docbook.rnc"/></programlisting>
+
+<para>If you can't edit the global <filename>schemas.xml</filename> file,
+you can create this file in the same directory as your document. nXML will
+find associations placed there also. In this case you must create a
+complete configuration file like:</para>
+
+<programlisting>&lt;locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  &lt;namespace ns="http://docbook.org/ns/docbook" uri="<replaceable>/path/to/</replaceable>docbook.rnc"/>
+&lt;/locatingRules></programlisting>
+
+</section>
+
+<section>
+<title>oXygen</title>
+
+<para><application
+xl:href="http://www.oxygenxml.com/">oXygen</application> is a feature
+rich XML editor. It has built-in support for many schema languages
+including RELAX NG. It comes preconfigured with DocBook support.</para>
+
+<figure xml:id="f.oxygen.open5">
+<title>DocBook V5.0 document opened in oXygen</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/oxygen3.png' width="100%"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+</section>
+
+<section>
+<title>XML Mind XML editor</title>
+
+<para><application xl:href="http://www.xmlmind.com/xmleditor/">XML
+Mind XML editor</application> (XXE) is a visual validating XML editor that
+provides a wordprocessor-like interface to users. It is available in
+two versions, Standard and Professional. The Standard version is free and
+provides everything you need to edit DocBook V5.0 documents.</para>
+
+<figure>
+<title>XML Mind XML Editor – feels almost like MS Word but real DocBook V5.0 markup is created</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/xxe.png' width="100%"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>In order to use DocBook V5.0 in XXE you have to install
+an add-on. Go to
+<menuchoice><guimenu>Options</guimenu><guimenuitem>Install
+Add-ons…</guimenuitem></menuchoice>. Then choose <guilabel>DocBook
+5 configuration</guilabel> and press the <guibutton>OK</guibutton>
+button. After restart, XXE is ready to work with DocBook V5.0
+documents.</para>
+
+</section>
+
+</section>
+
+<section xml:id="customizations">
+<title>Customizations</title>
+
+<para>You can reference elements with <tag
+class="attribute">xml:id</tag> using <tag>xref</tag> element, like
+<xref linkend="customizations"/>.</para>
+
+</section>
+
+<section>
+<title>Conclusion</title>
+
+<para>You should finish your article with references. You can easily
+cite references from you article using <tag>citation</tag> element,
+like <citation>RNCTUT</citation>.</para>
+
+</section>-->
+
+<bibliography>
+
+<bibliomixed>
+<abbrev>Delpratt and Lockett 2017</abbrev>
+O'Neil Delpratt and Debbie Lockett. <title>Distributing XSLT Processing between Client and Server</title>. 
+Presented at XML London 2017, June 10 - 11th, 2017. DOI: 10.14337/XMLLondon17.Lockett01.
+Available at <bibliomisc><link xl:href="https://xmllondon.com/2017/xmllondon-2017-proceedings.pdf"/></bibliomisc>
+</bibliomixed>
+
+<bibliomixed>
+<abbrev>Kay 2016</abbrev>
+Michael Kay. <title>Transforming JSON using XSLT 3.0</title>. XML Prague 2016.
+<bibliomisc><link xl:href="http://archive.xmlprague.cz/2016/files/xmlprague-2016-proceedings.pdf"/></bibliomisc>
+</bibliomixed>
+
+<bibliomixed>
+<abbrev>Kay 2021</abbrev>
+Michael Kay.
+<title><![CDATA[<transpile from="Java" to="C#" via="XML" with="XSLT"/>]]></title>. 
+  Markup UK, London, 2021
+  <bibliomisc><link xl:href="https://markupuk.org/2021/pdf/Markup-UK-2021-proceedings.pdf"/></bibliomisc>
+</bibliomixed>
+  
+  <bibliomixed>
+<abbrev>Kay 2022</abbrev>
+Michael Kay.
+<title>XSLT Extensions for JSON Processing</title> 
+  Balisage: The Markup Conference 2022, Washington, DC, August 1 - 5, 2022
+  <bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol27.Kay01"/></bibliomisc>
+</bibliomixed>
+
+<bibliomixed>
+<abbrev>Kay 2023</abbrev>
+Michael Kay. <title>Schema-Aware Conversion of XML to JSON</title> 
+  Presented at Balisage: The Markup Conference 2023, Washington, DC, July 31 - August 4, 2023. 
+<bibliomisc><link xl:href="https://doi.org/10.4242/BalisageVol28.Kay01"/></bibliomisc>
+</bibliomixed>
+
+</bibliography>
+
+</article>

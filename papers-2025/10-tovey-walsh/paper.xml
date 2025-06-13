@@ -1,0 +1,435 @@
+<article xmlns="http://docbook.org/ns/docbook"
+         xmlns:h="http://www.w3.org/1999/xhtml"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xml:id="markupuk2025" version="5.2">
+<info>
+  <title>Surfing the web with XProc</title>
+  <author>
+    <personname>
+      <firstname>Norm</firstname>
+      <surname>Tovey-Walsh</surname>
+    </personname>
+    <email>norm@tovey-walsh.com</email>
+  </author>
+  <!--<copyright>
+    <year>2025</year>
+    <holder>Norm Tovey-Walsh</holder>
+  </copyright>-->
+  <keywordset>
+    <keyword>XProc</keyword>
+    <keyword>Web</keyword>
+    <keyword>Selenium</keyword>
+  </keywordset>
+  <abstract>
+    <para>XProc 3.1 comes with many great features for surfing the web. The
+    <tag>p:document</tag> instruction will load XML, HTML, or JSON documents. The
+    <tag>p:http-request</tag> step allows a pipeline author to interact with web services.
+    It supports many HTTP methods, query parameters, content negotiation, and
+    single and multipart request and response bodies.</para>
+    <para>But what about web applications? Web pages that rely on client-side
+    processing, with XSLT using SaxonJS, for example, or just plain old
+    Javascript, present a special challenge. What can we do about that?</para>
+  </abstract>
+</info>
+
+<section>
+<title>Introduction</title>
+
+<para>Back in January, on the <code>xproc-dev</code> mailing list, Andy Carver <link
+xlink:href="https://lists.w3.org/Archives/Public/xproc-dev/2025Jan/0063.html">asked
+about</link> “grabbing web pages”. In
+principle, this is easy. XProc 3.1, like the web itself, supports an extensible
+set of document types identified by content type. All XProc implementations
+support XML, HTML, JSON, text, and binary types. Implementors may support
+additional content types; XML Calabash supports YAML and a variety of RDF
+content types, for example.</para>
+
+<para>This means that an XProc pipeline can load those documents in a completely
+straightforward way. Consider this pipeline:</para>
+
+<programlisting language="xml"><xi:include href="pipelines/document.xpl" parse="text"
+/></programlisting>
+
+<para>This pipeline simply loads a document and serializes it. For example:</para>
+
+<programlisting language="bourne"><![CDATA[$ bin/xmlcalabash.sh pipelines/document.xpl uri=https://testdata.xmlcalabash.com/index.xml]]></programlisting>
+
+<para>Returns the XML document:</para>
+
+<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+…
+</body>
+</html>]]></programlisting>
+
+<para>And:</para>
+
+<programlisting language="bourne"><![CDATA[$ bin/xmlcalabash.sh pipelines/document.xpl uri=https://testdata.xmlcalabash.com/index.html]]></programlisting>
+
+<para>Returns an HTML document:</para>
+
+<programlisting language="xml"><![CDATA[<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+…       
+      </body>
+</html>]]></programlisting>
+
+<para>The document served on <uri>https://testdata.xmlcalabash.com/index.html</uri>
+begins like this:</para>
+
+<programlisting language="xml"><![CDATA[<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<title>Index</title>
+<link rel="stylesheet" href="style.css">
+</head>
+…]]></programlisting>
+
+<para>XProc has no trouble loading this “non-XML” document because it is served with an HTML
+content type. So far, everything is looking pretty good for surfing the web with XProc.</para>
+
+<para>But Andy had run up against a real problem, one best illustrated by an example.
+Consider the web page shown in <xref linkend="city-table"/>.
+</para>
+
+<figure xml:id="city-table">
+<title>A table of cities</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref="img/city-table.png" contentwidth="8in"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+<para>This looks like a perfectly straightforward HTML page. But if we point our
+document pipeline at it, we get something (that might be) quite unexpected:</para>
+
+<programlisting language="xml"><![CDATA[<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>Some cities in the UK</title>
+      <script defer src="cities.js"></script>
+      <link href="../style.css" rel="stylesheet">
+      <link href="cities.css" rel="stylesheet">
+      </head>
+   <body>
+      <p>[<a href="/">Home</a>]</p>
+      <h1>Some cities in the UK</h1>
+
+      <table></table>
+
+      <p>Load <button id="more">More</button></p>
+   </body>
+</html>]]></programlisting>
+
+<para>Right where we expected the table, we get a <tag>table</tag>.</para>
+
+<para>A completely empty table.</para>
+
+<para>The culprit here is the <tag>script</tag> tag on line 7 that loads
+<uri>cities.js</uri>. When the <tag>p:load</tag> step accesses pages on the web,
+it does so in much the same way that <application>curl</application> does: it
+opens a connection to the page, pulls down the data sent by the web server, and
+hands that back to the processor.</para>
+
+<para>Your browser does the same thing, but it also does a lot more. It
+downloads all of the linked resources: images, stylesheets, scripts, etc. Then
+it constructs a styled presentation of the page that includes the images. If
+scripts were downloaded, those are executed and the page is updated accordingly.
+Scripting allows a page to be interactive: clicking, selecting, scrolling, the
+browser supports a huge range of events all of which can cause more script
+execution and more updates to the page.</para>
+
+<para>All of this is out of reach from the <tag>p:load</tag> step. It wouldn’t
+be hard to extend our document pipeline to find and download linked images,
+stylesheets, and scripts, but we couldn’t <emphasis>execute</emphasis> those
+scripts. We don’t have a browser sandbox to run them in.</para>
+</section>
+<section>
+<title>Enter Selenium</title>
+
+<para>Selenium’s tagline is “Selenium automates browsers. That’s it!” Automation
+works because modern web browsers implement a “WebDriver” set of APIs for this
+purpose. The main use case is automated testing of web applications, but it’s
+not limited to that.</para>
+
+<para>Selenium is roughly three APIs in a trench coat. One of those APIs talks
+to the web browser through the WebDriver API. The other exposes a standard
+Selenium API to a host language. And in the middle, Selenium wires these two 
+APIs together.</para>
+
+<para>There are host language APIs for Java, Python, C#, Ruby, JavaScript, and
+Kotlin. For an implementation written in any of those languages, talking to
+Selenium is just a matter of loading the right language bindings.</para>
+
+<para>In theory, we could start a web driver for our browser, start Selenium,
+direct Selenium to load the page, wait for the scripts running in the browser to
+populate the table, and ask Selenium to give us the data.</para>
+
+<para>All we need to do is implement a Selenium step.</para>
+
+<para>The trouble with a Selenium step is that it doesn’t
+<emphasis>do</emphasis> anything all by itself. It exposes an API that you can
+drive from a host language. You’d need to be able to drive it from XProc.</para>
+
+<para>To drive Selenium from XProc, the step would need to have some way to
+describe what the author wanted to do. XProc isn’t really designed to support
+stateful, imperative programming so mapping directly to the Selenium host
+language APIs isn’t really an option.</para>
+
+<para>What’s needed is some way for the pipeline author to describe how they
+want Selenium to behave. They need some mechanism for scripting the interaction.
+Then we can imagine a Selenium step that takes that script as input and uses it
+to interact with the browser.</para>
+</section>
+
+<section>
+<title>Enter Invisible XML</title>
+
+<para>The most practical thing seemed to be a little text-based scripting
+language. Armed with a small amount of experience using Selenium to test web
+applications and a Selenium reference guide, the plan was:</para>
+
+<orderedlist>
+<listitem>
+<para>Invent a little bit of syntax.</para>
+</listitem>
+<listitem>
+<para>Write a parser for it.</para>
+</listitem>
+<listitem>
+<para>See if it works.</para>
+</listitem>
+<listitem>
+<para>Repeat until done.</para>
+</listitem>
+</orderedlist>
+
+<para>Invisible XML fits perfectly here:</para>
+
+<orderedlist>
+<listitem>
+<para>Writing parsers in iXML is easy.</para>
+</listitem>
+<listitem>
+<para>My processor already supports Invisible XML,
+so parsing the users script with iXML is easy.</para>
+</listitem>
+<listitem>
+<para>The output of a parse is an XML document.</para>
+</listitem>
+<listitem>
+<para>In an XProc implementation, writing an interpreter for some XML is easy.</para>
+</listitem>
+</orderedlist>
+
+<para>Here’s how it started:</para>
+
+<programlisting>script version 0.2 .
+page "http://example.com" .</programlisting>
+
+<para>We start with a version, so we can adapt as it evolves, and then we know
+we’re going to want to load a page. Next, we write a little bit of iXML to parse
+it:</para>
+
+<programlisting language="ixml">ixml version "1.1-nineml" .
+
+script = versionDecl, s, page, s .
+
+-versionDecl = s, -"script version ", version, s, -"." .
+@version = "0.2" .
+
+@page = -"page", RS, string, s, -"." .</programlisting>
+
+<para>(I’m eliding a few more lines of grammar needed to parse strings and
+whitespace. I probably didn’t write them for this purpose anyway, I probably
+copied them from some other grammar.)</para>
+
+<para>Now we just add some more syntax, then some more iXML, and “repeat until done.”</para>
+
+<para>It finished as 
+<link xlink:href="https://codeberg.org/xmlcalabash/xmlcalabash3/src/branch/main/xmlcalabash/src/main/resources/com/xmlcalabash/ext/selenium-grammar.ixml">130ish lines</link> of iXML. It took a few evenings, but
+<link xlink:href="https://docs.xmlcalabash.com/reference/current/cx-selenium.html#selenium-scripting">the
+resulting language</link> supports a healthy subset of the Selenium API, three
+kinds of conditional blocks, subroutines, variables, and XPath
+expressions.</para>
+
+<para>(It is in many respects a very sloppy language with side effects and minimal 
+static checking. But it’s a proof-of-concept as much as anything.)</para>
+
+</section>
+
+<section>
+<title>cx:selenium</title>
+
+<para>The 
+<link xlink:href="https://docs.xmlcalabash.com/reference/current/cx-selenium.html"><tag>cx:selenium</tag>
+step</link> is an atomic step:</para>
+
+<programlisting language="xml"><![CDATA[<p:declare-step type="cx:selenium">
+  <p:input port="source" content-types="text xml"/>
+  <p:output port="result" sequence="true"/>
+  <p:option name="browser" as="xs:string?"/>
+  <p:option name="capabilities" as="map(xs:QName, item())?"/>
+  <p:option name="arguments" as="xs:string*"/>
+</p:declare-step>]]></programlisting>
+
+<para>Here’s a pipeline that uses <tag>cx:selenium</tag> instead of
+<tag>p:load</tag> to get a web page. Like our earlier pipeline, this one loads a
+page and serializes it. But this time, it loads the page with Selenium, allowing
+the browser to evaluate any scripts it contains:</para>
+
+<programlisting language="xml"><xi:include href="pipelines/cities1.xpl" parse="text"
+/></programlisting>
+
+<para>Running that script gives us table data:</para>
+
+<programlisting language="xml"><![CDATA[<html xmlns="http://www.w3.org/1999/xhtml">
+   <head>
+      <meta charset="utf-8"/>
+      <title>Some cities in the UK</title>
+      <script defer="defer" src="cities.js"/>
+      <link href="../style.css" rel="stylesheet"/>
+      <link href="cities.css" rel="stylesheet"/>
+   </head>
+   <body>
+      <p>[<a href="/">Home</a>]</p>
+      <h1>Some cities in the UK</h1>
+      <table>
+         <thead>
+            <tr>
+               <th>City</th>
+               <th>Country</th>
+               <th>Latitude</th>
+               <th>Longitude</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr>
+               <td>Abbots Langley</td>
+               <td>England</td>
+               <td>51.701 </td>
+               <td>-0.416 </td>
+            </tr>
+            <tr>
+               <td>Aberaman</td>
+               <td>Wales</td>
+               <td>51.7   </td>
+               <td>-3.4333</td>
+            </tr>
+…
+            <tr>
+               <td>Addlestone</td>
+               <td>England</td>
+               <td>51.3695</td>
+               <td>-0.4901</td>
+            </tr>
+         </tbody>
+      </table>
+      <p>Load <button id="more">More</button>
+      </p>
+   </body>
+</html>]]></programlisting>
+
+<para>How does it work? The <code>page</code> command loads the page, the <code>pause</code> command
+waits for half a second so the browser has a chance to fill the table, and the <code>output</code>
+command sends the current page DOM to the <code>result</code> port.</para>
+
+<para>We can also interact with the page. This script:</para>
+
+<programlisting language="xml"><xi:include href="pipelines/cities2.xpl" parse="text"
+/></programlisting>
+
+<para>Finds the button on the page with the id “more”, clicks it, waits, then returns the page.
+That will return the second page of results.</para>
+
+<para>As a final example, consider this script:</para>
+
+<programlisting>script version 0.2 .
+page "{$uri}" .
+
+until "not(empty($row))" do
+  find $row by selector = "table tbody tr" .
+  pause PT0.25S .
+done
+
+# Search for $city, hit more until we find it
+find $city by xpath = "//td[. = '{$city}']".
+while "empty($city)" do
+  call clickNext .
+  find $city by xpath = "//td[. = '{$city}']".
+done
+
+find $row by xpath "//tr[td[. = '{$city}']]" .
+
+output xpath "normalize-space(replace($row/*:td[3], ' ', ' '))" to result .
+output xpath "normalize-space(replace($row/h:td[4], ' ', ' '))" to result .
+
+close .
+
+subroutine clickNext
+   find $button by selector = "button" .
+   scroll to $button .
+   click $button .
+   pause PT0.25S .
+end</programlisting>
+
+<para>This script:</para>
+
+<orderedlist>
+<listitem><para>Loads the page.
+</para></listitem>
+<listitem><para>Waits until the table has data, rather than assuming 0.5s will be long enough.
+</para></listitem>
+<listitem><para>Looks for the city with an XPath expression. While it isn’t present,
+it uses a subroutine to click the next button.
+</para></listitem>
+<listitem><para>If we’ve found the city, we get its row.
+</para></listitem>
+<listitem><para>Then we output the latitude and longitude after doing a little cleanup.
+</para></listitem>
+<listitem><para>Then we close the browser.
+</para></listitem>
+<listitem><para>The “clickNext” subroutine scrolls finds the button, scrolls to it, clicks it,
+and wait’s ¼s.
+</para></listitem>
+</orderedlist>
+</section>
+
+<section>
+<title>Security implications</title>
+
+<para>Selenium drives a headless browser. It can essentially do anything with
+the browser that you can. And it’s quite possibly driving a browser that you’ve
+already used to login to sites. A malicious script could potentially wreak havoc.
+</para>
+
+<para>To help mitigate this problem, the <tag>cx:selenium</tag> step can be configured
+with a whitelist:</para>
+
+<programlisting language="xml"><![CDATA[<x:selenium xmlns:x="https://xmlcalabash.com/ext/ns/selenium"
+            whitelist="http://localhost.*
+                       https://testdata.xmlcalabash.com/.*"/>]]></programlisting>
+
+<para>With this configuration, the step will only accept URIs that match
+<literal>localhost</literal> or <literal>testdata.xmlcalabash.com</literal>.</para>
+
+</section>
+
+<section>
+<title>Next steps</title>
+
+<para>The scripting language could certainly be improved. Someone with deeper Selenium
+experience might be able to see immediately what’s missing. Any attempts to do complex
+browser interactions are bound to turn up areas where things are awkward at best.</para>
+
+<para>But even as it stands today, it offers new opportunties for surfing the
+web with XProc.</para>
+</section>
+</article>

@@ -1,0 +1,444 @@
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
+<info>
+<title>Schema Test Suite</title>
+<subtitle>Building a Stronger Foundation for Schema Validation</subtitle>
+
+<author>
+<personname>Rebecca Bamford</personname>
+<email>rebecca.bamford@bloomsbury.com</email>
+<personblurb><para>Rebecca Bamford is a Senior Content Analyst at Bloomsbury Publishing Group plc.</para></personblurb>
+<affiliation>
+<jobtitle>Senior Content Analyst</jobtitle>
+<orgname>Bloomsbury Publishing Plc</orgname>
+</affiliation>
+</author>
+
+<author>
+<personname>Francis Denton</personname>
+<email>francis.denton@bloomsbury.com</email>
+<personblurb><para>Francis Denton is a Content Analyst at Bloomsbury Publishing Group plc.</para></personblurb>
+<affiliation>
+<jobtitle>Content Analyst</jobtitle>
+<orgname>Bloomsbury Publishing Plc</orgname>
+</affiliation>
+</author>
+
+<author>
+<personname>Astrea Kumaradas</personname>
+<email>astrea.kumaradas@bloomsbury.com</email>
+<personblurb><para>Astrea Kumaradas is a Content Analyst at Bloomsbury Publishing Group plc.</para></personblurb>
+<affiliation>
+<jobtitle>Content Analyst</jobtitle>
+<orgname>Bloomsbury Publishing Plc</orgname>
+</affiliation>
+</author>
+
+<keywordset>
+<keyword>DocBook</keyword>
+<keyword>Schema</keyword>
+<keyword>Schematron</keyword>
+<keyword>TEI</keyword>
+<keyword>Unit testing</keyword>
+<keyword>Validation</keyword>
+<keyword>VRA</keyword>
+<keyword>XML</keyword>
+</keywordset>
+
+<abstract role="blurb">
+<para>This paper examines the need for stronger foundations in XML schema design, particularly when working with complex content models such as DocBook, TEI, or VRA<footnote><para>Visual Resources Association, a metadata schema.</para></footnote>. These models are based on element and attribute relationships, requiring validation scenarios that enforce structural and semantic accuracy. While significant effort goes into developing schemas to represent these complex models, their accuracy in capturing data requirements is often assumed.</para>
+<para>To address this, the Content Architecture team at Bloomsbury Publishing have introduced a unit test-driven methodology for validating the structural integrity of Bloomsbury XML schemas. Our initial implementation of this schema test suite has proven effective in supporting schema modifications by providing reliable feedback to verify the reliability of our schemas.</para>
+</abstract>
+</info>
+
+<section>
+<title>Introduction</title>
+<para>Bloomsbury Publishing’s Content Strategy fundamentally centres on the question: <emphasis role="italic">How do we leverage the value of content most effectively and efficiently?</emphasis> The strategy becomes even more crucial when working with complex content models such as DocBook, TEI, and VRA, with their intricate relationships between elements, attributes, and content structures.</para>
+
+<blockquote><para>"Fail fast, fail often."</para></blockquote>
+
+<para>Our approach, which encourages early and frequent testing before integration into the deployed version of a schema, is a philosophy that helps identify issues early in the workflow. Smoking out issues early on is significantly less disruptive and complex to resolve than uncovering problems at later stages in our workflows. While this approach will likely increase the number of failures reported and might seem counterintuitive, each failed test provides valuable feedback, enabling us to refine the schemas and improve publishing processes.</para>
+
+<blockquote><para>"Write tests for everything."</para></blockquote>
+
+<para>Although we had existing frameworks in place to validate the integrity of our extensive Schematron schema, we identified a gap in the lack of structured testing for the RELAX NG and XML schemas that we work with. To address this, we decided to develop a test suite to verify and validate our customised schemas, ensuring that our content validation standards are met now and for any future schema modifications, for every stage of our content workflow.</para>
+
+<section> 
+<title>Structural Validation vs. Schematron</title>
+
+<para>In XML validation, there are two primary approaches to ensure the accuracy and integrity of content:</para>
+<orderedlist>
+  <listitem>
+    <para>Structural validation</para>
+  </listitem>
+  <listitem>
+    <para>Schematron</para>
+  </listitem>
+</orderedlist>
+  
+<para>Structural validation (e.g., RELAX NG, XSD) handles the overall structure of an XML document, ensuring that elements appear in the correct order, adhere to the proper data types, and follow hierarchical relationships between elements. For instance, when a <code>bibliography</code> element is present, the <code>following-sibling</code> must be as per the following: <emphasis role="italic">expected the element end-tag or element "bibliography", "glossary", "index" or "toc"</emphasis>.</para>
+<para>On the other hand, Schematron enforces a more granular, rule-based validation that can be precisely tailored to business requirements. For instance, for accessibility purposes, when <code>figure</code> elements are present, <code>alt</code> elements must be included as a child of the <code>mediaobject</code> element, or the file will raise error messages.</para>
+
+<example>
+  <title>DocBook Schematron Invalid Markup</title>
+  <programlisting language="xml">&lt;figure @xml:id="b-figure1"&gt; 
+      &lt;info&gt; 
+        &lt;title&gt;Image&lt;/title&gt; 
+      &lt;/info&gt; 
+      &lt;mediaobject&gt; 
+        &lt;imageobject&gt; 
+          &lt;imagedata fileref="images/f001.jpg" format="image/jpeg"/&gt; 
+        &lt;/imageobject&gt; 
+      &lt;/mediaobject&gt; 
+    &lt;/figure&gt;</programlisting>
+  <para><emphasis role="bold">Validation Error</emphasis>: figure with @fileref value of "images/f001.jpg" must contain correct markup for descriptive text to ensure accessibility. Check element with id "b-figure1".</para>
+</example>
+
+<para>Both structural validation and Schematron serve different but complementary roles; combining them ensures that the XML content adheres to a required structural format and meets the customised requirements. This multi-validation approach significantly improves the reliability and validity of content throughout its lifecycle, ensuring that the high standards required in publishing are met. Additionally, we use the parsing results from industry standard validators for each flavour of schema, where any such errors should be reported by them as per usual.</para>
+</section>
+<section>
+<title>Schema Languages</title>
+<para>There are many different XML schema languages, and in the publishing industry, complex content models like DocBook and TEI are represented through schemas, each addressing specific content requirements:</para>
+<itemizedlist>
+<listitem>
+<para><emphasis role="bold">DocBook</emphasis>: now defined using the RELAX NG schema language, offers cleaner, more precise, and more extensible content models, making customised versions significantly easier to create than its previous DTD-based schema. <citation>D5TDG</citation></para>
+</listitem>
+<listitem>
+<para><emphasis role="bold">TEI</emphasis>: The Text Encoding Initiative is an XML application designed for the markup of classic literature, widely used by libraries, museums, publishers, and individual scholars to represent all textual material for online research and teaching. The guidelines define and document a markup language for representing the structural, renditional, and conceptual features of texts. <citation>TEI</citation></para>
+</listitem>
+<listitem>
+  <para xml:id="vra-def"><emphasis role="bold">VRA (Visual Resources Association) Core</emphasis>: An XML-compatible metadata schema for organising works of art, namely visual resources.</para>
+</listitem>
+</itemizedlist>  
+<para>For specific publishing workflows, we implement a customisation layer to our structural schemas by extending core schemas such as the DocBook Publishers schema <citation>DBR</citation>. This customisation is achieved with the use of an <code>include</code> statement in our customised schemas, and it allows us to build on the core standard structures whilst incorporating specific requirements and constraints that align with our publishing requirements <citation>CDB</citation>. Over time, the customised schemas have evolved to address the increasing complexity of the content we process; therefore, our commitment to ensuring comprehensive and accurate validation throughout the content lifecycle is vital.</para>
+
+</section>
+</section>
+<section>
+<title>Schema Test Suite</title>
+<para>As previously identified, working with XML documents with complex content models involves enforcing structural and semantic rules through schemas. However, a critical question arises: <emphasis role="italic">How can we verify the validity of the schemas to implement these structural requirements, especially as they grow in size and are tailored to suit business needs?</emphasis> To address this gap, we have introduced a unit test-driven methodology for validating structural schemas.</para>
+<section>
+<title>Unit Testing Methodology</title>
+  <para>A unit testing methodology was best suited for the test suite design process, as this methodology allowed us to break down each schema element and treat it as an independently testable unit. This granular approach ensures that specific content models behave as expected in isolation from the schema. <citation>UTPBQBP</citation></para>
+<para>While limiting to granular, more focused tests allows for faster validation of test cases and clearer validation reports, running the full suite provides regression coverage, ensuring modifications or additions do not inadvertently break existing schema functionality.</para>
+</section> 
+<section>
+<title>Test Cases</title>
+<para>Test cases are created in XML format, where we expect one invalid and one valid XML file per defined structure. A unique aspect of this methodology is that conventionally valid and invalid files will pass the validation process; the success of the validation process lies in the schema's ability to enforce its structural and semantic rules effectively.</para>
+<section>
+<title>Folder Directory Hierarchy</title>
+<para>We organise the test cases using a structured directory hierarchy to ensure consistency and clarity during testing. This organisation supports the efficient targeting of individual defined structures, for example, when testing the <code>role</code> attribute for <code>abstract</code> elements in our DocBook schema, the test case components are organised as follows:</para>
+<example>
+  <title>Tree diagram that breaks down the file directory structure of test cases</title>
+<programlisting>+---bloomsbury-mods-tests 
+¦   +---condition-attribute 
+¦   ¦       fail.xml 
+¦   ¦       pass.xml 
+¦   ¦        
+¦   +---outputformat-attribute 
+¦   ¦       fail.xml 
+¦   ¦       pass.xml 
+¦   ¦        
+¦   +---relation-attribute 
+¦   ¦       fail.xml 
+¦   ¦       pass.xml 
+¦   ¦        
+¦   +---role-attribute 
+¦   ¦   +---abstract 
+¦   ¦   ¦       fail.xml 
+¦   ¦   ¦       pass.xml 
+¦   ¦   ¦        
+¦   ¦   +---address 
+¦   ¦   ¦       fail.xml 
+¦   ¦   ¦       pass.xml 
+¦   ¦   ¦</programlisting>        
+</example>
+  
+  <example>
+    <title>Abstract Defined Structure</title>
+    <programlisting>db.abstract.role.attribute = 
+      attribute role { "blurb" | "authorAbstract" | "extract" } 
+        db.abstract.attlist = 
+          db.abstract.role.attribute 
+          &amp; db.common.attributes 
+          &amp; db.common.linking.attributes</programlisting>
+    <para>Each test case is designed to validate against a specific defined structure, so in this instance, not only does it test a list of attributes that an <code>abstract</code> element can have, but the test also validates that the <code>role</code> attribute of <code>abstract</code> elements conforms to one of the following allowed values:</para>
+   <itemizedlist>
+     <listitem>
+       <para>blurb</para>
+     </listitem>
+     <listitem>
+       <para>authorAbstract</para>
+     </listitem>
+     <listitem>
+       <para>extract</para>
+     </listitem>
+   </itemizedlist>
+  </example>
+
+<para>Although the test cases can be individually targeted during testing, which should significantly reduce the processing time, they are also designed to be valid when run against the entire test suite. Executing the whole suite ensures comprehensive regression testing, flagging if new modifications to the schema have inadvertently broken existing functionality.</para>
+</section>
+<section>
+<title>Templates</title>
+<para>Test case templates are provided for consistency and accuracy for each schema, thereby reducing the likelihood of user error and simplifying test case creation. Although test cases are created manually, with the aid of test case templates, the idea of automation for future development is something to explore going forward. Automating test case creation will help accelerate and improve the accuracy of the validation process to support the ever-evolving schemas, while making the process more accessible for people with different technical backgrounds.</para>
+</section>
+  
+<section>
+<title>Passing XML</title>
+<para>Valid XML test cases are expected to pass schema validation since they contain structurally and semantically correct content.</para>
+<para>For instance, the following DocBook XML file should conform to the defined structures contained in the schema being validated, where all the <code>role</code> attribute values for the <code>biblioset</code> element are permitted values:</para>
+  <programlisting language="xml">&lt;book xmlns="http://docbook.org/ns/docbook" xml:id="b-book" role="fullText"&gt;
+    &lt;info&gt;
+      &lt;title&gt;biblioset-role-attribute-tests&lt;/title&gt;
+      &lt;biblioset role="publisher"/&gt;
+      &lt;biblioset role="isbns"/&gt;
+      &lt;biblioset role="series"/&gt;
+      &lt;biblioset role="companionWebsite"/&gt;
+    &lt;/info&gt;
+  &lt;/book&gt;</programlisting>
+</section> 
+  
+<section>
+<title>Failing XML</title>
+<para>Invalid XML test cases are intentionally designed to violate defined structures. They are successful when the suite correctly identifies them as invalid, demonstrating that the schema properly enforces its intended constraints.</para>
+<para>For example, the following DocBook XML file will be flagged as a pass by the test suite, as it does not adhere to the structures defined within the schema:</para>
+  <programlisting language="xml">&lt;book xmlns="http://docbook.org/ns/docbook" xml:id="b-book" role="fullText"&gt;
+    &lt;info&gt;
+      &lt;title&gt;biblioset-role-attribute-tests&lt;/title&gt;
+      &lt;biblioset role="isbn"/&gt;
+    &lt;/info&gt;
+  &lt;/book&gt;</programlisting>
+</section> 
+</section> 
+<section>
+  
+<title>Implementation and Execution</title>
+<section>
+<title>Tools and Libraries</title>
+<simplelist>
+<member><emphasis role="bold">BaseX</emphasis>: The processor for the test suite, chosen for its familiarity. Versions prior to 8.6.7 lack the required functions, so more up-to-date versions should be used. </member>
+<member><emphasis role="bold">XQuery</emphasis>: The main language used to build the test suite and incorporate BaseX’s built-in XQuery functions. </member>
+<member><emphasis role="bold">XSLT</emphasis>: Primarily used to transform the test results into reports.</member>
+</simplelist>
+</section>
+<section>
+<title>Execution Logic</title>
+<para>Once test cases have been defined, the validation suite can be used with any RELAX NG or XSD schema. The primary validation process is managed through XQuery functions, which allow users to address the following:</para>
+<example>
+<title>Map schemas to their corresponding test cases</title>
+<programlisting language="xquery">declare variable $sch:schemas as map(*) := map { 
+  "bloomsbury-mods": map { 
+    "schema": "..\..\content-models\DocBook\schema\bloomsbury-mods.rnc", 
+    "test-cases": "bloomsbury-mods-tests" 
+  }, 
+  "vra-strict-bloomsbury": map { 
+    "schema": "..\..\content-models\VRA\schema\vra-strict-bloomsbury.xsd", 
+    "test-cases": "vra-strict-bloomsbury-tests" 
+  },  
+  "bmyTEI-tests": map { 
+    "schema": "..\..\content-models\TEI\schema\bmyTEI.rnc", 
+    "test-cases": "bmyTEI-tests" 
+  } 
+};</programlisting>
+</example>
+<example>
+<title>Target a specific schema during the test suite validation process</title>
+<programlisting language="xquery">declare function sch:options($userInput) { 
+  let $schema := $sch:schemas($userInput) 
+  return 
+  $schema 
+};</programlisting>
+</example>
+<para>Additionally, BaseX’s built-in XQuery validation functions are used to assess whether XML documents conform to their corresponding schemas.</para>
+  <informalexample>
+    <para><emphasis role="bold">Function</emphasis>: <function>validate:xsd-report()</function></para>
+    <para><emphasis role="bold">Signature</emphasis>:</para>
+    <programlisting language="xquery">validate:xsd-report( 
+              $input    as item(), 
+              $schema   as xs:string?  := (), 
+              $options  as map(*)      := {} 
+            ) as element(report)</programlisting>
+    <para><emphasis role="bold">Summary</emphasis>:</para>
+    <para>Validates the XML <varname>$input</varname> document against a <varname>$schema</varname> and returns warnings, errors and fatal errors as XML.</para>
+  </informalexample>
+  
+  <informalexample>
+    <para><emphasis role="bold">Function</emphasis>: <function>validate:rng-report()</function></para>
+    <para><emphasis role="bold">Signature</emphasis>:</para>
+    <programlisting language="xquery">validate:rng-report( 
+               $input    as item(), 
+               $schema   as xs:string, 
+               $compact  as xs:boolean?  := {} 
+             ) as element(report)</programlisting>
+    <para><emphasis role="bold">Summary</emphasis>:</para>
+    <para>Validates the XML <varname>$input</varname> document against a <varname>$schema</varname>, using the XML or <varname>$compact</varname> notation, and returns warnings, errors and fatal errors as XML.</para>
+  </informalexample>
+</section>
+<section>
+<title>Reporting</title>
+  <para>Test results are captured in human-readable, queryable reports, which are generated and exported in multiple formats. Built-in BaseX reporting includes the following:</para> 
+    <bridgehead>Trace logs</bridgehead> 
+    <para>Immediate user reporting is provided during the suite's execution and once it is complete. The <code>trace()</code> function offers logs during the validation process, which can be useful for debugging. The function returns the directory path for all items being tested in that execution run.</para>
+    <example>
+      <title>Trace log</title>
+      <para>"Validating: C:\Resources2\xquery\schema\tests\bloomsbury-mods-tests\role-attribute\book\book-role-attribute-fullText\fail.xml"</para> 
+      <para>"Validating: C:\Resources2\xquery\schema\tests\bloomsbury-mods-tests\role-attribute\book\book-role-attribute-fullText\pass.xml"</para> 
+      <para>"Validating: C:\Resources2\xquery\schema\tests\bloomsbury-mods-tests\role-attribute\book\book-role-attribute-pdfOnly\fail.xml"</para> 
+      <para>"Validating: C:\Resources2\xquery\schema\tests\bloomsbury-mods-tests\role-attribute\book\book-role-attribute-pdfOnly\pass.xml"</para>
+    </example>
+    <bridgehead>BaseX Result Window</bridgehead>
+    <para>This summarises the test results in a user-friendly manner, displaying the number of test cases that pass and fail.</para>
+    <example>
+      <title>Valid Test Cases</title>
+      <para>***0 TESTS FAILED***</para>  
+      <para>***94 TESTS PASSED***</para> 
+    </example>
+    
+    <para>Further reporting is also provided in the scenario of a test case which fails validation. The reports will provide the following:</para>
+     <orderedlist>
+       <listitem>
+         <para>A direct path to the XML that failed the test suite validation.</para>
+       </listitem>
+       <listitem>
+         <para>Overview of the result.</para>
+       </listitem>
+       <listitem>
+         <para>Descriptive user error messages for easy debugging.</para>
+       </listitem>
+     </orderedlist>
+      
+      <example>
+        <title>Invalid Test Cases</title>
+        <para>***1 TESTS FAILED***</para>  
+        <para>***93 TESTS PASSED***</para>
+      </example>
+        <programlisting language="xml">&lt;sch:validation xmlns:sch="http://bloomsbury.com/schema-test"&gt;
+  &lt;sch:path&gt;file:///C:/Resources2/xquery/schema/tests/bloomsbury-mods-tests/role-attribute/book/book-role-attribute-fullText/pass.xml&lt;/sch:path&gt;
+  &lt;sch:results&gt;***TEST FAILED***&lt;/sch:results&gt;
+  &lt;sch:message&gt;
+    &lt;report&gt;
+      &lt;status&gt;invalid&lt;/status&gt;
+      &lt;message level="Error" line="1" column="115" url="file:///C:/Resources2/xquery/schema/tests/bloomsbury-mods-tests/role-attribute/book/book-role-attribute-fullText/pass.xml"&gt;value of attribute "role" is invalid; must be equal to "fullText" or "pdfOnly"&lt;/message&gt;
+    &lt;/report&gt;
+  &lt;/sch:message&gt;
+&lt;/sch:validation&gt;</programlisting>
+        
+        <programlisting language="xml">&lt;sch:validation xmlns:sch="http://bloomsbury.com/schema-test"&gt;
+  &lt;sch:path&gt;file:///C:/Resources2/xquery/schema/tests/bloomsbury-mods-tests/role-attribute/book/book-role-attribute-fullText/fail.xml&lt;/sch:path&gt;
+  &lt;sch:results&gt;***TEST FAILED***&lt;/sch:results&gt;
+  &lt;sch:message&gt;fail.xml valid against Schema which is incorrect&lt;/sch:message&gt;
+&lt;/sch:validation&gt;</programlisting>
+
+<bridgehead>XML Reporting</bridgehead>
+<figure>
+<title>XML file of schema report where test cases pass validation.</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/valid_report_xml.jpg' width="100%"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+<figure>
+<title>XML file of schema report where test cases fail validation.</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/invalid_report_xml.jpg' width="100%"/>
+</imageobject>
+</mediaobject>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/invalid_report_details_xml.jpg' width="100%"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+<bridgehead>HTML Reporting</bridgehead>
+<para>HTML reports are generated through the transformation of XML reports via XSLT.</para>
+
+<figure>
+<title>An HTML file of the schema report where test cases pass validation.</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/valid_report_html.jpg' width="100%"/>
+</imageobject>
+</mediaobject>
+</figure>
+<figure>
+<title>An HTML file of the schema report where test cases fail validation.</title>
+<mediaobject>
+<imageobject>
+<imagedata fileref='images/invalid_report_html.jpg' width="100%"/>
+</imageobject>
+</mediaobject>
+</figure>
+
+</section>
+</section>
+</section>
+  
+<section>
+<title>Conclusion</title>
+<para>We have established a foundation for sustainable and reliable XML schema development by applying a structured, unit-test-based approach to schema validation, enhancing confidence in validity. It supports long-term quality assurance, and the principles and practices outlined here are applicable across multidisciplinary teams and domains, which can serve as a foundation for stronger schema validation.</para>
+<section>
+<title>Continuous Development</title>
+<para>As mentioned, future work will explore automating test case creation to improve the validation process further. Additionally, the archiving of reports, which could aid debugging and provide a valuable audit trail of schema modifications, will be explored.</para>
+</section>
+<section>
+<title>Integration</title>
+<para>Validation must be embedded into the schema development lifecycle to ensure and maintain high schema quality. Our approach integrates validation at every stage by:</para>
+<orderedlist>
+<listitem>
+<para>Regular regression testing - running the entire schema during each cycle, not just a subset of the schema.</para>
+</listitem>
+<listitem>
+<para>Continuous improvement - automating test case creation and archiving reports.</para>
+</listitem>
+<listitem>
+<para>Expansion - incrementally developing test cases to reflect the full breadth of the schemas, ensuring complete rule coverage. </para>
+</listitem>
+</orderedlist>
+</section>
+<section>
+<title>Accessibility</title>
+<para>The test suite has been intentionally designed for accessibility across varying technical backgrounds, so users only require a basic understanding of XML to run and interpret test results. Embedding validation into the wider development workflow encourages shared ownership of schema quality and accuracy, and by lowering the technical barrier to make schema validation more accessible, it can be adopted more broadly within multidisciplinary teams.</para>
+</section>
+</section>
+   
+  <bibliography>
+    <bibliomixed>
+      <abbrev>D5TDG</abbrev>
+      Walsh, N. and Hamilton, R.L. (2010). <title>DocBook 5: The Definitive Guide</title>. O’Reilly Media, Inc
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>TEI</abbrev>
+      tei-c.org. (n.d.). <title>TEI: Text Encoding Initiative</title>. [online] Available at: <bibliomisc><link xl:href="https://tei-c.org/"/></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>VRAC</abbrev>
+      Visual Resources Association (VRA) Core. (n.d.). Available at: <bibliomisc><link xl:href="https://elizabethbradshaw.wordpress.com/wp-content/uploads/2015/12/final_paper_pdf.pdf"/></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>DBR</abbrev>
+      Docbook.org. (2025). <title>DocBook Release</title>. [online] Available at: <bibliomisc><link xl:href="https://docbook.org/xml/5.1cr1/"/></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>CDB</abbrev>
+      Docbook.org. (2020). <title>Customizing DocBook</title>. [online] Available at: <bibliomisc><link xl:href="https://tdg.docbook.org/tdg/5.1/ch05#ch05-layers"/></bibliomisc>
+    </bibliomixed>
+    
+    <bibliomixed>
+      <abbrev>UTPBQBP</abbrev>
+      CodeFresh (n.d.). <title>Unit Testing: Principles, Benefits &amp; 6 Quick Best Practices</title>. [online] Codefresh. Available at: <bibliomisc><link xl:href="https://codefresh.io/learn/unit-testing/"/></bibliomisc>
+    </bibliomixed>
+  </bibliography>
+  
+  <acknowledgements>
+    <title>Acknowledgements</title>
+    <para>We thank our fellow Bloomsbury Content Analysts and Content Architecture colleagues who contributed to the testing infrastructure and schemas that made this project possible.</para>
+  </acknowledgements>
+  
+</article>

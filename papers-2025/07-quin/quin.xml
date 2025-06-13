@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article xmlns="http://docbook.org/ns/docbook"
+	 xmlns:xl="http://www.w3.org/1999/xlink"
+	 version="5.0" xml:lang="en">
+<info>
+<title>Design and Performance of a Corpus Scanner</title>
+
+<author>
+      <personname>Liam Quin</personname>
+      <email>liam@fromoldbooks.org</email>
+      <uri>http://www.delightfulcomputing.com/</uri>
+      <personblurb>
+        <para>Liam Quin runs a small consulting and training firm from Milford,
+          Ontario: <link xl:href="https://www.delightfulcomputing.com/"
+            >Delightful Computing</link>.</para>
+        <para>In a previous life, Liam was in charge of the XML Activity at W3C,
+          and was involved in a number of specifications produced there,
+          including XQuery, XPath 2 and 3, XSLT 2 and 3, XML 5e, and
+          more.</para>
+      </personblurb>
+      <affiliation>
+        <jobtitle>Drudge</jobtitle>
+        <orgname>Delightful Computing</orgname>
+      </affiliation>
+    </author>
+
+<keywordset>
+<keyword>XML</keyword>
+<keyword>DocBook</keyword>
+<keyword>authoring</keyword>
+</keywordset>
+
+<abstract>
+<para>People working with large collections of XML documents often need to know
+        specific characteristics of the documents in the collection in
+        aggregate. For example, an attribute value that only occurs once in a
+        million documents might warrant investigation; an element that was
+        expected but that does not occur anywhere might similarly suggest a
+        problem. People designing transformations or style sheets might find it
+        useful to handle the most commonly occurring elements first.</para>
+<para>FreqX is an XSLT-based tool that summarizes the various elements,
+        attributes, attribute values, and other details in a collection of XML
+        documents. It can produce several different report formats, including an
+        HTML Web page, a CSV file for a spreadsheet, and of course XML data. It
+        has been run on collections containing tens of thousands of documents,
+        running into tens of gigabytes of XML.</para>
+      <para>Unfortunately, early versions of the tool used large amounts of
+        memory—several times more memory than the actual scanned documents
+        occupied. This made the tool unsuitable for one of its design
+        goals.</para>
+      <para>Recently, the FreqX tool has been improved so that it runs more
+        quickly and uses much less memory.</para>
+      <para>This paper describes some of the design decisions that were made
+        both in the creation of FreqX and in the subsequent revision, and also
+        the process of making the tool support large amounts of data.</para>
+      <para>The tool is written in XSLT 3, and makes use of a number of XPath
+        and XSLT features introduced in that version. Some of these are
+        discussed in the paper. FreqX is publicly available, including full
+        source code, with original development funded by Mulberry Technologies.
+        Suggestions for additional features, as well as reports of problems, are
+        welcomed: the tool is actively maintained.</para>
+      <para>The result of the improvements was a reduction in memory usage from
+        over sixty gigabytes to less than three gigabytes when processing the
+        Early English Books Online corpus of some fifty-three thousand TEI-based
+        XML documents, and a reduction in time from almost six hours before a
+        crash down to between thirty and forty-five minutes with successful
+        output, running in both cases with Saxon 9 on a decade-old
+        computer.</para>
+</abstract>
+</info>
+
+<section>
+<title>Introduction</title>
+
+<para>FreqX is a tool that produces reports about elements and attributes found
+      in a body or <emphasis>corpus</emphasis> of XML documents. Some uses of
+      FreqX have included:</para>
+    <itemizedlist>
+      <listitem>
+        <para>Researching elements that could be dropped from a new version of a
+          vocabulary;</para>
+      </listitem>
+      <listitem>
+        <para>Investigating whether there were values of
+            <emphasis>role</emphasis> or <emphasis>class</emphasis> attributes
+          that were used frequently enough to suggest a new element to represent
+          the concept;</para>
+      </listitem>
+      <listitem>
+        <para>Investigating a large body of documents (thousands or tens of
+          thousands) as part of maintaining or writing transformations or other
+          software;</para>
+      </listitem>
+      <listitem>
+        <para>Producing pretty reports for conference papers or client reports
+          (the importance of this should not be underestimated).</para>
+      </listitem>
+    </itemizedlist>
+    <para>This paper discusses some of the challenges that one encounter when
+      writing such a tool, and some of the (often arbitrary) design decisions
+      taken.</para>
+    <para>Some of the challenges included:</para>
+    <itemizedlist>
+      <listitem>
+        <para>Supporting multiple ways to specify which documents to
+          process;</para>
+      </listitem>
+      <listitem>
+        <para>Handling documents that has parse errors in them;</para>
+      </listitem>
+      <listitem>
+        <para>Running in a reasonable time;</para>
+      </listitem>
+      <listitem>
+        <para>Not running out of memory;</para>
+      </listitem>
+      <listitem>
+        <para>Coping with documents requiring different DTD files for the same
+          PUBLIC identifier;</para>
+      </listitem>
+    </itemizedlist>
+
+<para>Initial FreqX development was sponsored by Mulberry Technologies. They
+      wanted the tool written in XSLT since that was their primary language, and
+      since it’s also the author’s, this was a good fit.</para>
+    <para>Subsequent development was funded by Delightful Computing, with help
+      from Gerrit Imsieke of Le-Tex Publishing and others.</para>
+
+</section>
+  <section>
+    <title>Tool Requirements and Features</title>
+    <para>This section gives a brief overview of the features. Its purpose is to
+      give the reader enough context to follow the rest of the paper. Further
+      features, that were introduced to overcome limitations or problems, are
+      discussed in later sections This paper is not intended to be an
+      introduction to the tool itself, but to describe development of the
+      tool.</para>
+    <section>
+      <title>Easy to configure and run</title>
+      <para>It must be easier in most cases to run FreqX than to write ad hoc
+        queries or to write something else.</para>
+      <para>An external XML configuration file can be used, so that a run can be
+        duplicated or refined.</para>
+      <para>FreqX can be run using a batch shell script (supplied) or from an
+        environment such as Oxygen XML Editor.</para>
+    </section>
+    <section>
+      <title>Convenient to provide inputs</title>
+      <para>Just as it must be easy to run and configure the tool, it must also
+        be easy to give FreqX a corpus of documents.</para>
+      <para>Currently, FreqX can read an XML document listing files to process,
+        which can be in Saxon collection format or Oxygen project format; it can
+        explore a folder recursively; it can use Saxon collection arguments; it
+        may also be possible to configure it using a suitable resolver to
+        explore BaseX database collections, although this has not been
+        tested.</para>
+    </section>
+    <section>
+      <title>Produce multiple forms of report</title>
+      <para>Currently FreqX can produce HTML, CSV, and an XML format that it can
+        also read for combining runs. Other report formats can be added. The
+        author has also explored a JSON report suitable for use with various
+          <code>d3.js</code> visualizations.</para>
+    </section>
+    <section>
+      <title>Combine multiple runs into a single report</title>
+      <para>As mentioned in the previous section, FreqX can read its own output.
+        As a result it is possible to run FreqX on multiple sets of documents,
+        possibly with different options such as different XML catalogue files,
+        and produce combined reports.</para>
+    </section>
+    <section>
+      <title>Robust against parse errors</title>
+      <para>A non-well-formed or invalid document must not cause FreqX to crash.
+        Instead, a summary of parse errors shall be produced.</para>
+      <para>Large corpora are likely to have problems. Sometimes they are
+        collections of different sorts of documents, or may include intermediate
+        formats or even a sub-folder of documents known by its creators to be
+        erroneous. FreqX produces a list of errors in the HTML report, limited
+        by default to the first fifty erroneous documents.</para>
+    </section>
+    <section>
+      <title>Extensible and Maintainable</title>
+      <para>It must be straight forward to add a new report. In addition, the
+        XSLT should be documented internally and readable.</para>
+      <para>This requirement is subjective, but the places to edit to add a new
+        report are in options, help, and report functions.</para>
+    </section>
+  </section>
+
+<section xml:id="customizations">
+    <title>Implementation</title>
+    <para>An early version of FreqX used a recursive template to process one
+      input file at a time. This quickly ran out of memory, and was replaced
+      with the XSLT 3 <code>xsl:iterate</code> instruction. This still ran out
+      of memory, and we shall return to this topic in a later section, but it
+      handled many more documents.</para>
+    <para>The first strategy was to produce an XPath map structure from each
+      input document, containing a list of all distinct elements found, and all
+      attributes and all attribute values, and then to merge the maps at each
+      iteration.</para>
+    <para>This strategy turned out to use too much memory. A rewrite using
+      elements instead of maps to represent the data was faster and used less
+      memory.</para>
+    <para>It’s entirely likely that the problem was actually not that maps were
+      slower than elements in Saxon 9, but that it’s easy to include a fragment
+      of an input document in a map, and, unlike when it’s copied into element
+      content, the fragment is a live node in a document tree, and hence the
+      entire document must be kept in memory to support possible XPath
+      navigation away from the node. This is especially easy to do by mistake
+      with attribute nodes.</para>
+    <para>A way to check for this can be to run a stylesheet in XSLT streaming
+      mode, because any template that then tries to return data from an input
+      stream will raise an error. Nodes must be “grounded” instead, for example,
+      using the XPath 3 <code>fn:copy-of()</code> function. However, converting
+      a transformation to work correctly in streaming mode is generally
+      non-trivial.</para>
+    <para>The current implementation makes an <code>e</code> element for each
+      element in the input, and an <code>at</code> element for each attribute
+      seen. These are then turned into distinct values at the end of processing
+      each input file, and converted into <code>count</code> elements that
+      represent totals seen so far.</para>
+    <para>The process of combining <code>at</code> elements repersenting the set
+      of attribute values seen so far turns out to be slow. It might be that a
+      map would be faster than the current method; profiling showed it was slow,
+      and a workaround was to merge attribute values after every hundred input
+      documents, and at the end of processing:</para>
+    <programlisting language="xml">&lt;xsl:with-param name="attribute-values-seen"
+  select="
+    if ((position() ge last() - 1) or (position() mod 100) eq 99)
+    then
+      dc:merge-attribute-values(
+        $attribute-values-seen,
+        $this-data-set[local-name() = 'at']
+      )
+    else (
+      $attribute-values-seen,
+      dc:merge-attribute-values(
+        (),
+        $this-data-set[local-name() = 'at']
+      )
+    )
+  " /></programlisting>
+    <para>The <emphasis>merge-attributes-seen()</emphasis> function makes a
+        <emphasis>count</emphasis> element for each distinct attribute
+      name/value combination; there can easily be millions of these, and as the
+      sequence of pairs already discovered grows large, the process slows down
+      considerably. So there is a trade-off between extra memory for duplicated
+      attribute/value <emphasis>count</emphasis> elements and CPU time. Running
+        <emphasis>merge-attributes-seen()</emphasis> only at the end of
+      processing can use a lot of memory, but running it for every document is
+      slow.</para>
+    <para>Although the same consideration applies to element names and to
+      attribute names, there are generally many fewer of these.</para>
+  </section>
+  <section>
+    <title>Memory Usage and Speed</title>
+    <para>Gerrit Imsieke ran Saxon in profiling mode and discovered that, as
+      mentioned in the previous section, merging the list of seen attributes was
+      very slow. <emphasis>Not</emphasis> merging them saved a lot of time but
+      produced wrong answers.</para>
+    <para>This is when the author started to suspect that the entire input was
+      being kept in memory. The Saxon <emphasis>uri-collection()</emphasis>
+      function was being called with a <emphasis>stable=no</emphasis> parameter,
+      which the documentation seemed to suggest would mean the documents would
+      not need to be kept in memory.</para>
+    <para>It appears, based on testing, that in fact
+        <emphasis>stable=no</emphasis> simply means that calling
+        <emphasis>uri-collection()</emphasis> multiple times in the same run
+      might not always return the same set of document URIs (filenames). It does
+        <emphasis>not</emphasis> mean that the documents themselves are not
+      guaranteed to be stable, and hence does <emphasis>not</emphasis> mean the
+      documents are not kept in memory.</para>
+    <para>In the end what worked was processing each input document in an
+      external stylesheet, called using the XPath 3
+        <emphasis>fn:transform()</emphasis> function. Since each invocation of
+      XSLT was separate, it seemed memory was not retained between them, and
+      FreqX ran much faster.</para>
+    <programlisting language="xquery">xsl:sequence select="transform(
+  map {
+    'stylesheet-location' : $process-file-xsl,
+    'initial-template' : QName((), 'initial-template'),
+    'stylesheet-params' : map {
+        QName('http://www.delightfulcomputing.com/', 'freqx-control-doc') : $freqx-control-doc,
+        QName('http://www.delightfulcomputing.com/', 'freqx-input-uri') : $this?name
+    }
+  }
+)?output/*" /></programlisting>
+    <para>Performance can to some extent be measured using the builtin profiling
+      in Saxon; an alternative is to transform the XSLT style sheet to add
+        <code>xsl:message</code> instructions at the start and end of each
+      template of interest, and then to analyze timestamps on the log
+      file.</para>
+    <para>Since XPath functions are deterministic, functions such as
+        <emphasis>fn:current-time()</emphasis> always return the same value
+      within a single XSLT episode. Therefore the time for profiling must be
+      reported either with a Java native method call, or by using an external
+      tool such as the combination of <emphasis>ts</emphasis> and
+        <emphasis>unbuffer</emphasis> from the Linux more-utils package. The
+        <emphasis>ts</emphasis> command adds timestamps to each line of input.
+      However, program standard output is buffered for efficiency and is
+      delivered in clumps when the buffer is full. The
+        <emphasis>unbuffer</emphasis> command can be used to prevent that
+      buffering and get accurate timestamps.</para>
+    <para>Timings can also be obtained by separate runs of the external
+      stylesheet that would be called using <emphasis>fn:transform()</emphasis>,
+      and memory can be measured, for example on Linux or Unix systems with
+        <emphasis>/usr/bin/time</emphasis> (<emphasis>time</emphasis> without
+      the path is a built-in in many shells, including
+      <emphasis>bash</emphasis>, that gives less information).</para>
+    <para>People running timings need to keep overall system activity in mind,
+      as well as overall system memory usage.</para>
+    <para>In the case of FreqX, memory rose to over sixty gigabytes on a test
+      collection, and it became clear it was keeping all of the documents in
+      memory.</para>
+    <para>Changing FreqX to use fn:transform() on the result of doc($filename)
+      did not help.</para>
+    <para>Passing $filename as a parameter to the external stylesheet
+        <emphasis>did</emphasis> help: runtime was reduced dramatically, as was
+      memory usage.</para>
+    <para>A further refinement was to keep namespace URIs as integer keys into a
+      map instead of strings, but the additional complexity of passing that back
+      from the external stylesheet did not seem justified; the author may return
+      to this in the future.</para>
+  </section>
+  <section>
+    <title>Parsing Errors</title>
+    <para>Saxon extends the <emphasis>fn:uri-collection()</emphasis> function to
+      be able to descend recursively into a directory (folder) structure and
+      return all files found whose names match a pattern. FreqX uses this as one
+      of its mechanisms to obtain a lit of files to analyze. But not all input
+      files will always be DTD-valid, and some may not even be well-formed XML
+      at all, regardless of file name.</para>
+    <para>FreqX wraps each call to open a file (using the
+        <emphasis>fn:doc()</emphasis> function) inside xsl:try and xsl:catch, so
+      that parse errors do not terminate processing. It then records the errors.
+      Since there may be a great many errors, by default only the first fifty
+      are recorded, and are included in an expandable
+        <emphasis>summary/details</emphasis> section in the HTML report.</para>
+    <para>The most common parse error is not finding a DTD. The FreqX wrapper
+      script takes optional filenames for a Java catalog resolver class and an
+      XML catalog file. However, Saxon only supports using one such catalog file
+      in any given run, and a large corpus might well contain documents using
+      different incompatible versions of a DTD identified by the same
+      identifier, whether SYSTEM or PUBLIC.</para>
+    <para>FreqX can be run multiple times, and the counts combined. A future
+      version might be able to process only the failed documents from a previous
+      run, so that one can more easily combine results from runs with different
+      XML catalog files.</para>
+  </section>
+  <section>
+    <title>Extensibility</title>
+    <para>FreqX uses an array of maps to represent information about available
+      reports. In the following code listing, the <code>dc:v()</code> function
+      produces a string, empty in the case of an empty sequence. This is needed
+      as otherwise an empty sequence in a comma-separated sequence would be
+      discarded, and the columns in the CSV files would not align. This is not
+      required for numbers, as zero values are not discarded. An alternative
+      design might have used an array, as these can contain empty sequences.
+      With XSLT 4, a record type would provide increased type safety.</para>
+    <programlisting language="xml">&lt;xsl:variable name="<emphasis role="bold">csv-makers</emphasis>" as="map(*)"
+  select="
+      (: <emphasis>This data structure drives the various different</emphasis>
+       : <emphasis>comma-separated-value (CSV) reports.</emphasis>
+       :)
+     map {
+      'elements' : map {
+        'what' : function($counts) { $counts/elements/* },
+        'headings' : 'Element,NS,Nocc,NDocs',
+        'attributes' : function($count as element(count)) {
+          (
+            dc:v($count/@name),
+            dc:v($count/@ns),
+            xs:string($count),
+            dc:v($count/@ndocs)
+          )
+        }
+     },
+     'element-parents' : map {
+       'what' : function($counts) { $counts/elements-parents/* },
+       'headings' : 'Element,NS,Parent,Parent NS,Nocc,NDocs',
+       'attributes' : function($count as element(count)) {
+         (
+            dc:v($count/@name),
+            dc:v($count/@ns),
+            dc:v($count/@parent-name),
+            dc:v($count/@parent-ns),
+            xs:string($count),
+            dc:v($count/@ndocs)
+         )
+       }
+     },</programlisting>
+    <para>The listing is incomplete: there are more entries in the actual XSLT
+      file for FreqX, and of course a new CSV report can be added by inserting a
+      new entry into the map. Entirely new formats, such as JSON, require a
+      separate new template, but the hardest part is deciding how to represent
+      the information in the report.</para>
+    <para>The report generator will apply the <emphasis>attributes</emphasis>
+      function to each count element in turn, receive a sequence of strings in
+      return, and make them into one item of the report: one comma-separated
+      line, for example. The function examines the attributes of
+        <emphasis>count</emphasis> elements to obtain information such as names,
+      namespaces, counts.</para>
+    <para>This architecture means that the representation of final counts as
+      count elements can be changed with only moderate effort, and the
+      representation of observations is entirely self-contained in the document
+      scanner. As a result it would be possible to experiment again with maps
+      instead of elements, for example.</para>
+  </section>
+  <section>
+    <title>Future Work</title>
+    <para>Although FreqX is much faster than it used to be, it could probably be
+      faster.</para>
+    <para>Using <emphasis>fn:transform()</emphasis> might let multiple XML
+      catalog files be used. If not, the author has written an XSLT-based DTD
+      parser that could possibly be integrated and used (at the expense of
+      speed) where needed. It is not, at the time of writing this paper,
+      possibly to supply a catalog resolver to the XPath
+        <emphasis>fn:doc()</emphasis> function, unfortunately. FreqX does,
+      however support combining results from a previous run with a different XML
+      catalogue file in use, which can mitigate this problem.</para>
+    <para>Additional output formats and additional visualizations may be
+      helpful. A JSON report is in the works, along with a treemap visualization
+      based on <emphasis>d3.js</emphasis>.</para>
+  </section>
+  <section>
+    <title>Conclusion</title>
+    <para>Using fn:transform() on each input file helped to control memory
+      usage, and proved more effective than several other strategies tried. The
+      input filename is passed to the external template, not the parsed
+      tree.</para>
+    <para>FreqX provides a useful overview of a corpus, and now runs in a
+      reasonable time.</para>
+  </section>
+  <appendix>
+    <title>Samples</title>
+    <para>This section includes some screenshots from an HTML report produced by
+      FreqX to give an idea of the results. The report is interactive, so some
+      of the screenshots show the result of a user clicking on (activating) an
+      element or attribute name.</para>
+    <figure>
+      <title>Report Summary</title>
+      <para>The Configuration section is collapsed by default, but is expended
+        here to show the options.</para>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="quin01-freqx-summary.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Element Frequency</title>
+      <para>This report has one line for each element name seen, sorted by
+        frequency across all input documents. The report starts (after
+        configuration and errors) with top-level elements seen, partly because
+        any surprises here need to be attended to forthwith. This report was run
+        on a single fifty-megabyte XML document.</para>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="quin02-freqx-top-level-elements.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Element Details</title>
+      <para>In this figure the user has clicked on the <emphasis>fr</emphasis>
+        (footnote reference) element. It has expanded to show
+          <emphasis>fr</emphasis> was found in one document (not surprising as
+        only one document was analyzed in this run), that it occurred inside
+          <emphasis>p</emphasis> and <emphasis>q</emphasis> (quote) elements,
+        and that 9641 of the <emphasis>fr</emphasis> elements had an
+          <emphasis>fr</emphasis> attribute. In the dictionary an
+          <emphasis>fr</emphasis> element without a <emphasis>to</emphasis>
+        attribute usually represents an error.</para>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="quin03-freqx-elements.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Attribute Values</title>
+      <para>The part of the report showing attributes is not included in this
+        paper because it is similar to the part showing elements. This figure
+        shows the final report from FreqX, the distinct values of attributes.
+        The entry for <emphasis>xml:lang</emphasis> has been expanded.</para>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="quin04-freqx-attribute-values.png"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </appendix>
+
+</article>
