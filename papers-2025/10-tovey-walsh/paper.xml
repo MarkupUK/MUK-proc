@@ -101,7 +101,7 @@ Consider the web page shown in <xref linkend="city-table"/>.
 <title>A table of cities</title>
 <mediaobject>
 <imageobject>
-<imagedata fileref="img/city-table.png" contentwidth="8in"/>
+<imagedata fileref="img/city-table-75pc.png" contentdepth='100%' scalefit="1" width="100%"/>
 </imageobject>
 </mediaobject>
 </figure>

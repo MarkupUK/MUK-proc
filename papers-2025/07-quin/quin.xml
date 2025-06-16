@@ -444,7 +444,7 @@
         here to show the options.</para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="quin01-freqx-summary.png"/>
+          <imagedata fileref="quin01-freqx-summary.png" width="100%" contentdepth="100%" scalefit="1"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -457,7 +457,7 @@
         on a single fifty-megabyte XML document.</para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="quin02-freqx-top-level-elements.png"/>
+          <imagedata fileref="quin02-freqx-top-level-elements.png" width="100%" contentdepth="100%" scalefit="1"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -474,7 +474,7 @@
         attribute usually represents an error.</para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="quin03-freqx-elements.png"/>
+          <imagedata fileref="quin03-freqx-elements.png" width="100%" contentdepth="100%" scalefit="1"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -486,7 +486,7 @@
         The entry for <emphasis>xml:lang</emphasis> has been expanded.</para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="quin04-freqx-attribute-values.png"/>
+          <imagedata fileref="quin04-freqx-attribute-values.png" width="100%" contentdepth="100%" scalefit="1"/>
         </imageobject>
       </mediaobject>
     </figure>

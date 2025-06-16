@@ -52,7 +52,7 @@
 				<title>High-level overview of an iXML conversion</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata fileref="images/ixml_conversion_high_level.formal.drawio.png" width="100%" />
+						<imagedata fileref="images/ixml_conversion_high_level.formal.drawio.png" width="100%" scalefit='1' contentdepth='100%'/>
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -159,7 +159,7 @@
 					<title>Simple XSpec test file</title>
 					<mediaobject>
 						<imageobject>
-							<imagedata fileref="images/jumping_xspec.png" width="100%" />
+							<imagedata fileref="images/jumping_xspec.png" width="100%" scalefit='1' contentdepth='100%'/>
 						</imageobject>
 					</mediaobject>
 				</figure>
@@ -181,7 +181,7 @@
 					<title>XSpec results (HTML)</title>
 					<mediaobject>
 						<imageobject>
-							<imagedata fileref="images/jumping_xspec_html_report.png" width="100%" />
+							<imagedata fileref="images/jumping_xspec_html_report.png" width="100%" scalefit='1' contentdepth='100%'/>
 						</imageobject>
 					</mediaobject>
 				</figure>
@@ -212,7 +212,7 @@
 					<title>An example of an XSpec test file for iXML</title>
 					<mediaobject>
 						<imageobject>
-							<imagedata fileref="images/changes_for_ixml.png" width="100%" />
+							<imagedata fileref="images/changes_for_ixml.png" width="100%" scalefit='1' contentdepth='100%'/>
 						</imageobject>
 					</mediaobject>
 				</figure>
@@ -294,7 +294,7 @@
 				<title>iXML definition of whitespace, including Zs</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata fileref="images/ixml_whitespace_definition.png" width="200px" />
+						<imagedata fileref="images/ixml_whitespace_definition.png" width="100%" />
 					</imageobject>
 				</mediaobject>
 			</figure>
@@ -316,7 +316,7 @@
 				<title>Excerpts from the XML 1.0 Specification showing the rules for a DOCTYPE declaration</title>
 				<mediaobject>
 					<imageobject>
-						<imagedata fileref="images/xml_doctypedecl.png" width="100%" />
+						<imagedata fileref="images/xml_doctypedecl.png" width="100%" scalefit='1' contentdepth='100%'/>
 					</imageobject>
 				</mediaobject>
 			</figure>

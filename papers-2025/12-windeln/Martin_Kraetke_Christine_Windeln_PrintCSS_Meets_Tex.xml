@@ -235,7 +235,7 @@ by the quasars (CCSDS &lt;a href="#j_astro-2022-0200_ref_002" &gt;2019&lt;/a&gt;
         <title role="Beschriftung">Figure 1: The transformation of XHTML and CSS to TeX</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/diagram.svg"/>
+            <imagedata fileref="images/diagram.svg" width="100%" contentdepth="100%" scalefit="1"/>
           </imageobject>
         </mediaobject>
       </figure>
@@ -252,9 +252,9 @@ by the quasars (CCSDS &lt;a href="#j_astro-2022-0200_ref_002" &gt;2019&lt;/a&gt;
     <title>Appendix&#x202f;I: Supported PrintCSS Features</title>
     <informaltable role="Tabellenraster" frame="all">
       <tgroup cols="3" rowsep="1" colsep="1">
-        <colspec colnum="1" colname="col1" colwidth="87.43597773mm"/>
-        <colspec colnum="2" colname="col2" colwidth="37.09458567mm"/>
-        <colspec colnum="3" colname="col3" colwidth="35.31305778mm"/>
+        <colspec colnum="1" colname="col1" />
+        <colspec colnum="2" colname="col2" />
+        <colspec colnum="3" colname="col3" />
         <tbody>
           <row>
             <entry colname="col1">
@@ -398,9 +398,9 @@ by the quasars (CCSDS &lt;a href="#j_astro-2022-0200_ref_002" &gt;2019&lt;/a&gt;
     <title>Appendix II: Supported Standard CSS Features</title>
     <informaltable role="Tabellenraster" frame="all">
       <tgroup cols="3" rowsep="1" colsep="1">
-        <colspec colnum="1" colname="col1" colwidth="51.09986433mm"/>
-        <colspec colnum="2" colname="col2" colwidth="60.00750378mm"/>
-        <colspec colnum="3" colname="col3" colwidth="48.82444752mm"/>
+        <colspec colnum="1" colname="col1" />
+        <colspec colnum="2" colname="col2" />
+        <colspec colnum="3" colname="col3" />
         <tbody>
           <row>
             <entry colname="col1">
