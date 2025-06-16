@@ -1,0 +1,530 @@
+<?xml-model href="../../../../Downloads/paper.sch" type="application/xml" schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+  <info>
+    <title>InsurML</title>
+    
+    
+    <abstract>
+      <para>
+        Insurance contracts, often referred to as ‘policy wordings’, lie at
+        the heart of insurance – a global industry with total premiums
+        exceeding $7 trillion. Typically, these policy wordings are tens of
+        pages in length, often exceeding over one hundred pages, and are
+        currently managed by most insurance companies as monolithic,
+        quasi-static pdf documents.
+      </para>
+      <para>
+        For commercial insurance contracts, however, there is often a need
+        to customise these wordings to satisfy the needs of individual
+        customers, a process which is currently achieved through the
+        application of ‘endorsements’ (or customer-specific modifications),
+        which are detailed in a separate document known as the ‘schedule’.
+        Therefore, the only way to fully interpret the policy wording is to
+        consult the schedule and engage in a process of information
+        reconciliation.
+      </para>
+      <para>
+        Using structured authoring approaches with semantic enrichment, the
+        policy wordings could be transformed into dynamic, customisable
+        objects with greater levels of ‘computability’, thereby paving the
+        way towards a more robust, digital future for the insurance industry
+        with greater levels of structured data. This paper concerns the
+        context and initial development of InsurML, an XML markup language
+        that is being designed specifically for the creating computable
+        contracts for commercial insurance. With strong industry commitment
+        and funding from major players, the ambition is to establish InsurML
+        as an industry standard.
+      </para>
+    </abstract>
+  </info>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="introduction">
+  <title>Introduction</title>
+  <para>
+    Creating a digital future for the insurance industry has been a
+    strategic imperative now for over two decades. However, despite all
+    the progress that has been made, and all the digital solutions that
+    have been deployed, this future has still not really happened. In
+    short, the fundamental requirements for the digitalisation of
+    contracts have not been properly addressed, and until they are, a
+    true digital transformation of the insurance industry will lie
+    beyond our reach (Cummins, 2020<footnote>
+      <para>
+         Cummins, John. 2020. “Automating (Re)insurance through
+        Computable Contracting.”  Version 1.1.
+        https://axiomepartners.com/wp-content/uploads/2020/08/Automating-Reinsurance-through-Computable-Contracting.pdf.
+      </para>
+    </footnote>). 
+  </para>
+  <para>
+    An insurance policy is essentially a contract that promises to
+    indemnify the holder in the event of loss. Most of the contractual
+    details are contained in the policy wording, usually a monolithic
+    document that can often be over one hundred pages in length, and in
+    the schedule, which itself may be considered as a proxy for a
+    summary of the contract. A general description of each of these
+    fundamental objects is shown in <xref linkend="fig1"/>.
+  </para>
+  <figure xml:id="fig1">
+    <title>The two principal insurance contract objects: the policy
+      schedule and the policy wording.</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="media/image1.png" scalefit="1" width="100%" contentdepth="100%"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+    All the details contained in the policy schedule are stored as
+    structured data in a policy administration system (PAS), while the
+    policy wording itself is stored as a pdf, either on the PAS or
+    elsewhere. It is important to recognise therefore that the policy
+    wording is essentially an inert object that contributes nothing
+    (other than performing the function as an accompanying reference
+    document) to the structured and dynamic dataset pertaining to the
+    schedule.
+  </para>
+  <para>
+    In their current form, the policy wordings of today suffer from
+    three major shortcomings:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        First, they are managed as stand-alone objects with little (if
+        any) application of component reusability. Consequently, the
+        same intended coverages may differ across the full set of
+        products, simply because they have evolved separately. This
+        makes the process of updating policy wordings an expensive and
+        time-consuming process.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Second, they are static documents, and it is often the case that
+        only parts of the policy wording will apply to individual
+        customers, while the remainder is irrelevant (or even in
+        contradiction with the schedule). The schedule performs the
+        dynamic function of customising (and overriding) the policy
+        wording through ‘endorsements’. Crucially, it may not be
+        entirely clear to customers as to whether they have coverage
+        against certain losses, simply because the process of
+        reconciling the policy schedule with any endorsements and the
+        policy wording can be extremely challenging.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        Third, the scope for supporting data analytics or automation for
+        a variety of purposes is limited. In their natural language
+        (unstructured data) form without semantic richness or associated
+        metadata, the policy wordings can only be analysed using natural
+        language processing, and more recently, generative AI. Adopting
+        structured data approaches to policy wordings will increase the
+        level of computability and will enhance the performance of data
+        analytics and levels of automation for both individual contracts
+        and bodies of contracts.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="increasing-the-computability-of-insurance-contracts">
+  <title>Increasing the Computability of Insurance Contracts</title>
+  <para>
+    The main objective here is to make commercial insurance contracts
+    more computable. This goal can be considered within the context of a
+    ‘contract innovation landscape<footnote>
+      <para>
+        Cummins, John, and Christopher Clack. 2022. “Transforming
+        commercial contracts through computable contracting.” Journal of
+        Strategic Contracting and Negotiation 6, no. 1 (February): 3-25.
+      </para>
+    </footnote>’, shown in <xref linkend="fig2"/>.
+  </para>
+  <para>
+    This two-dimensional landscape is created based on the:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <emphasis role="strong">Extent of contract
+        modularisation</emphasis>, essentially breaking the contract
+        down into smaller components, thus creating the foundations for
+        dynamic contract configuration.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Extent of contract
+        computability</emphasis> through building a formal (or machine
+        readable) representation of the contract.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Starting in the bottom left-hand corner of the contract innovation
+    landscape, it is argued that most (and if not all) policy wordings
+    in the commercial insurance space occupy this quadrant. Policy
+    wordings are stored as monolithic objects in pdf or Microsoft word
+    format, often with little content management discipline.
+  </para>
+  <para>
+    Most of the contract innovation to date, and particularly in the
+    insurance space, has taken the form of ‘automating around the
+    contract’ in order to increase levels of computability (shown as
+    transition ‘1’ in <xref linkend="fig2"/>). Importantly, the increased
+    computability is achieved through building a largely separate
+    representation of the contract. A good example here are smart
+    contracts, essentially pieces of computer code that enable the
+    performance of parts of the contract to be undertaken e.g. monthly
+    payments on an automatic basis. One could argue that direct debit
+    payments are smart contracts, a technology that has been around for
+    decades.
+  </para>
+  <para>
+    The ’hard yards’ of increasing contract modularity (i.e. moving from
+    the bottom-left to the bottom-right quadrant) have yet to be taken
+    by most companies in the insurance industry. The monolithic nature
+    of policy wordings means than contract component reusability rarely
+    happens and that the updating of policy wordings (even for very
+    minor changes such as an address) is extremely inefficient. Where
+    modular approaches are adopted in commercial insurance, the level of
+    granularity tends to be low i.e. the modular objects are still
+    relatively large in terms of the amount of content.
+  </para>
+  <figure xml:id="fig2">
+    <title>The Contract Innovation Landscape</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="media/image2.png" contentdepth="100%" width="100%" scalefit="1"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+    The top-right quadrant is the home of computable contracts, and
+    where the contract object and its digital representation are one and
+    the same thing. Keeping the ‘contract close to the code’ means that
+    there is a greater guarantee that any automated functions will be
+    faithful to the intent of the contract. It should be noted that the
+    optimal path to computable contracts in insurance is transition 2
+    followed by transition 3.
+  </para>
+</section>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="the-nature-intent-and-content-of-insurance-contracts">
+  <title>The Nature (Intent and Content) of Insurance
+  Contracts</title>
+  <para>
+    Making an insurance contract computable requires a solid
+    understanding of its constituent parts and how they operate together
+    to establish the overall function of expressing coverage against
+    loss. A visual representation of an insurance contract<footnote>
+      <para>
+        Cummins, John et al, 2024. “Computable Contracts for Insurance:
+        Establishing an Insurance-specific Controlled Natural Language –
+        InsurLE”. Journal of British Insurance Law Association
+      </para>
+    </footnote> (shown in <xref linkend="fig3"/>) may help to promote this
+    understanding.
+  </para>
+  <para>
+    At the heart of an insurance contract lies the
+    <emphasis role="strong">insuring clause</emphasis>, which describes
+    the core coverage offered to the insured. This is shown in <xref linkend="fig3"/>
+    with ‘I’ as the basic set (or scope) of coverage. This scope of
+    coverage expressed by the insuring clause is often modified using
+    <emphasis role="strong">coverage extensions</emphasis> (denoted by C
+    in the Figure). These extensions are additional coverages beyond the
+    scope of the core insuring clause, defined by additional clauses in
+    the contract. They may be offered as standard, or on an optional
+    basis, in which case their selection may result in an increase in
+    the premium.
+  </para>
+  <para>
+    Coverages expressed by the insuring clause or coverage extension
+    clauses are normally subject to
+    <emphasis role="strong">conditions</emphasis>, which, if not met,
+    will invalidate (shown as ‘G’ in the Figure) the coverage offered by
+    the contract and therewith the promise of indemnification. These
+    conditions may be expressed locally, directly in the coverage
+    clauses themselves, or globally, as <emphasis role="strong">general
+    conditions</emphasis> that apply to all the coverage clauses.
+  </para>
+  <para>
+    Most insurance contracts also contain exclusions, which specify
+    losses or costs of losses that are not covered by the contract (i.e.
+    areas of non-coverage). Like coverage conditions, coverage
+    exclusions, can be local or general and are represented by ‘E’ in
+    the Figure.
+  </para>
+  <para>
+    Finally, some exclusions may have
+    <emphasis role="strong">exemptions</emphasis>, usually expressed
+    locally to the exclusion, using phrases such as ‘except for’. These
+    can be understood as coverages that are excluded at first, but then
+    reinstated (known as ‘writebacks’ in the industry). As shown in
+    <xref linkend="fig3"/>, the exclusion exemption, ‘C<subscript>E</subscript>‘ is
+    shown within the general exclusion ‘E’, which is unshaded and
+    indicative of its status as a form of coverage.
+  </para>
+  <figure xml:id="fig3">
+    <title>Visual representation of coverage offered by an insurance
+      contract.</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="media/image3.png" width="100%" scalefit="1" contentdepth="100%"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+    In prose form, the indemnification promise shown in <xref linkend="fig3"/> may be
+    stated as follows:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        We will cover you for the costs (to cover one or more losses) in
+        I, which are specified in the insuring clause and which also
+        satisfy the general conditions, usually not referred to
+        explicitly in the insuring clause.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        We will also cover you for the additional costs in C, which are
+        specified in additional clauses and which satisfy both the
+        general conditions and the conditions that are local to those
+        clauses.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        We will not cover you for specific exclusions (E) except for
+        C<subscript>E</subscript> in respect of E.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="modular-content-modelling-for-insurance-contract-computability">
+  <title>Modular Content Modelling for Insurance Contract
+  Computability</title>
+  <para>
+    Having outlined the path towards contract computability, as well as
+    the basic functioning of insurance contracts, we can now look at
+    abstract information modelling.
+  </para>
+  <para>
+    The process of modularisation (i.e. the breaking an insurance
+    contract down into its constituent parts) is essential for the
+    modelling of contracts. This important step may be assisted using an
+    Entity Relationship Diagram (ERD) as indicated in <xref linkend="fig4"/>.
+  </para>
+  <para>
+    The ERD might be considered as having two distinct parts: an upper
+    part that is primarily concerned with the overall structure of the
+    contract object through a series of nested ‘component groups’; and a
+    lower part that is concerned more with the content (although there
+    are structural considerations here too).
+  </para>
+  <para>
+    The lower, content-focussed part consists of ‘components’ and
+    ‘elements’ (or sub-components). Components<footnote>
+      <para>
+        ‘Components’ here may be thought of in a similar way to ‘topics’
+        in the DITA World.
+      </para>
+    </footnote> represent the fundamental ‘building blocks’ of an
+    insurance policy wording. And, within a taxonomy of components, the
+    main types are definition components; coverage components; exclusion
+    components and condition components (thus reflecting the earlier
+    part of this document on the nature of insurance contracts). The
+    element level (beneath the component level) essentially allows for a
+    finer granularity of typing. In <xref linkend="fig4"/>, we see that a coverage
+    component has two statements: a coverage statement and an exclusion
+    statement, which can be modelled by typing the elements in a similar
+    fashion to components. This finer level of granularity allows for a
+    greater level of semantic enrichment, which in turn can support a
+    more refined set of tasks for searching and retrieval.
+  </para>
+  <figure xml:id="fig4">
+    <title>Representation of the Policy Wording using an Entity
+      Relationship diagram.</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="media/image4.png" width="100%" scalefit="1" contentdepth="100%"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+  <para>
+    <emphasis role="strong">Within the components (or
+    elements)</emphasis>, a body of text may take the form of a
+    ‘composite construct’. A simple example might be the phrase ‘a
+    maximum of £50,000 any one claim’ to limit the level of
+    indemnification. This construct would have a type (e.g. a limit,
+    deductible or excess) with four parts where the nature of the
+    language used is based on industry standard terms and phrases:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        An initial phrase – ‘a maximum of’;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        A currency – in this case GBP;
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        A value – in this case, 50,000; and
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        A final phrase – ‘any one claim’.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Embedded variables may be used within components (and may also be
+    part of the composite constructs shown above). The value for a
+    variable could be the limit for a particular coverage e.g. damage
+    due to flooding.
+  </para>
+  <para>
+    It should be noted that the ERD has been used to model a single
+    contract; in reality, there may be several tens of policy wordings
+    within the overall insurance product estate, thereby changing the
+    cardinality for the contract object from ‘one’ to ‘one to many’, in
+    respect of both components and component groups.
+  </para>
+  <para>
+    In the policy wording snippet (shown in <xref linkend="fig5"/>), an example of
+    nesting within a component is shown. Examples with five (or even
+    six) levels of nesting are not uncommon. The example also shows
+    several examples of cross-referencing, both for defined terms (which
+    are modelled as components) and for referencing another part of the
+    contract object.
+  </para>
+  <figure xml:id="fig5">
+    <title>Policy wording snippet showing cross-referencing and
+      nesting within a component.</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="media/image5.png" width="100%" scalefit="1" contentdepth="100%"/>
+      </imageobject>
+    </mediaobject>
+  </figure>
+</section>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="establishing-the-main-requirements-for-an-insurance-markup-language---insurml">
+  <title>Establishing the Main Requirements for an Insurance Markup
+  Language - InsurML</title>
+  <para>
+    Following on from the content modelling (and having reviewed well
+    over 100 policy wordings), we have started to outline a set of
+    requirements for InsurML, a markup language specifically for the
+    commercial Insurance industry. These include the following:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <emphasis role="strong">Contract object structuring</emphasis>
+        using component groups, components (topics) and elements (or
+        sub-components) i.e. reflecting the ERD shown earlier in the
+        document.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Content objects</emphasis> that are both
+        text-based and table-based. There will be a need for extensive
+        nested listing capabilities, and in some instances, nested
+        tables will be needed.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">A flexible profiling strategy</emphasis>
+        that allows for component variants to be configured differently
+        in (typically) 10 to 20 different products or policy wordings.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Handling of composite
+        constructs</emphasis>, that permits the authoring of
+        industry-specific phrases in accordance with schemas.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Embedded variables</emphasis>, which may
+        well be in the form of an array, and that operate well in
+        conjunction with the profiling strategy.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Cross-referencing</emphasis> to other
+        components and to document locations (including footnotes).
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Foreign code</emphasis> should be
+        embeddable within InsurML. This will include InsurLE, a
+        Prolog-based controlled natural language to expose the
+        conditional logic expressed in the wording.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Standard modes of emphasis</emphasis> –
+        bold, italics, underlining and colour.
+      </para>
+    </listitem>
+  </itemizedlist>
+</section>
+<section xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" xml:id="progress-and-plans">
+  <title>Progress and Plans</title>
+  <para>
+    InsurML is currently being advanced by Axiome Partners with the
+    ambition of establishing an insurance industry standard. In some
+    prototyping work, some of the requirements outlined above have
+    already been implemented as a DITA specialisation, using Oxygen Web
+    Author as an authoring environment and GitHub for content
+    management.
+  </para>
+  <para>
+    The development of InsurML will be undertaken in three phases:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        <emphasis role="strong">Phase 1</emphasis> - Establishing a
+        baseline and 'planting the flag' – undertaken by a small group
+        of specialists and supported with a limited budget.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Phase 2</emphasis> - Building on the
+        baseline and bringing collaborators (‘early adopters’) on board
+        – this would have more extensive funding that will be provided
+        by key players in the London Market.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        <emphasis role="strong">Phase 3</emphasis> - Establishing
+        InsurML as the de facto insurance contract standard (for policy
+        wordings) and rolling it out across the market – funded by the
+        London Market and a broader consortium of carriers, brokers etc.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    We have already received commitment from key players in the
+    insurance industry to move forward with Phase 2 later in the year.
+  </para>
+</section>
+</article>
