@@ -96,12 +96,12 @@ content type. So far, everything is looking pretty good for surfing the web with
 <para>But Andy had run up against a real problem, one best illustrated by an example.
 Consider the web page shown in <xref linkend="city-table"/>.
 </para>
-
+<?hard-pagebreak?>
 <figure xml:id="city-table">
 <title>A table of cities</title>
 <mediaobject>
 <imageobject>
-<imagedata fileref="img/city-table.png" contentwidth="8in"/>
+<imagedata fileref="img/city-table.png" width="100%"/>
 </imageobject>
 </mediaobject>
 </figure>

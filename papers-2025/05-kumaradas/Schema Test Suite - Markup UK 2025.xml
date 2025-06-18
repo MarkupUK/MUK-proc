@@ -45,7 +45,7 @@
 </keywordset>
 
 <abstract role="blurb">
-<para>This paper examines the need for stronger foundations in XML schema design, particularly when working with complex content models such as DocBook, TEI, or VRA<footnote><para>Visual Resources Association, a metadata schema.</para></footnote>. These models are based on element and attribute relationships, requiring validation scenarios that enforce structural and semantic accuracy. While significant effort goes into developing schemas to represent these complex models, their accuracy in capturing data requirements is often assumed.</para>
+<para>This paper examines the need for stronger foundations in XML schema design, particularly when working with complex content models such as DocBook, TEI, or VRA<footnote><para>Visual Resources Association</para></footnote>. These models are based on element and attribute relationships, requiring validation scenarios that enforce structural and semantic accuracy. While significant effort goes into developing schemas to represent these complex models, their accuracy in capturing data requirements is often assumed.</para>
 <para>To address this, the Content Architecture team at Bloomsbury Publishing have introduced a unit test-driven methodology for validating the structural integrity of Bloomsbury XML schemas. Our initial implementation of this schema test suite has proven effective in supporting schema modifications by providing reliable feedback to verify the reliability of our schemas.</para>
 </abstract>
 </info>
@@ -60,7 +60,7 @@
 
 <blockquote><para>"Write tests for everything."</para></blockquote>
 
-<para>Although we had existing frameworks in place to validate the integrity of our extensive Schematron schema, we identified a gap in the lack of structured testing for the RELAX NG and XML schemas that we work with. To address this, we decided to develop a test suite to verify and validate our customised schemas, ensuring that our content validation standards are met now and for any future schema modifications, for every stage of our content workflow.</para>
+<para>Although we had existing frameworks in place to validate the integrity of our extensive Schematron schema, we identified a gap in the lack of structured testing for the RELAX NG and XSD schemas that we work with. To address this, we decided to develop a test suite to verify and validate our customised schemas, ensuring that our content validation standards are met now and for any future schema modifications, for every stage of our content workflow.</para>
 
 <section> 
 <title>Structural Validation vs. Schematron</title>
@@ -80,16 +80,16 @@
 
 <example>
   <title>DocBook Schematron Invalid Markup</title>
-  <programlisting language="xml">&lt;figure @xml:id="b-figure1"&gt; 
-      &lt;info&gt; 
-        &lt;title&gt;Image&lt;/title&gt; 
-      &lt;/info&gt; 
-      &lt;mediaobject&gt; 
-        &lt;imageobject&gt; 
-          &lt;imagedata fileref="images/f001.jpg" format="image/jpeg"/&gt; 
-        &lt;/imageobject&gt; 
-      &lt;/mediaobject&gt; 
-    &lt;/figure&gt;</programlisting>
+  <programlisting language="xml">&lt;figure xml:id="b-figure1"&gt; 
+  &lt;info&gt; 
+    &lt;title&gt;Image&lt;/title&gt; 
+  &lt;/info&gt; 
+  &lt;mediaobject&gt; 
+    &lt;imageobject&gt; 
+      &lt;imagedata fileref="images/f001.jpg" format="image/jpeg"/&gt; 
+    &lt;/imageobject&gt; 
+  &lt;/mediaobject&gt; 
+&lt;/figure&gt;</programlisting>
   <para><emphasis role="bold">Validation Error</emphasis>: figure with @fileref value of "images/f001.jpg" must contain correct markup for descriptive text to ensure accessibility. Check element with id "b-figure1".</para>
 </example>
 
@@ -106,7 +106,7 @@
 <para><emphasis role="bold">TEI</emphasis>: The Text Encoding Initiative is an XML application designed for the markup of classic literature, widely used by libraries, museums, publishers, and individual scholars to represent all textual material for online research and teaching. The guidelines define and document a markup language for representing the structural, renditional, and conceptual features of texts. <citation>TEI</citation></para>
 </listitem>
 <listitem>
-  <para xml:id="vra-def"><emphasis role="bold">VRA (Visual Resources Association) Core</emphasis>: An XML-compatible metadata schema for organising works of art, namely visual resources.</para>
+<para><emphasis role="bold">VRA (Visual Resources Association) Core</emphasis>: An XML-compatible metadata schema for organising works of art, namely visual resources. <citation>VRAC</citation></para>
 </listitem>
 </itemizedlist>  
 <para>For specific publishing workflows, we implement a customisation layer to our structural schemas by extending core schemas such as the DocBook Publishers schema <citation>DBR</citation>. This customisation is achieved with the use of an <code>include</code> statement in our customised schemas, and it allows us to build on the core standard structures whilst incorporating specific requirements and constraints that align with our publishing requirements <citation>CDB</citation>. Over time, the customised schemas have evolved to address the increasing complexity of the content we process; therefore, our commitment to ensuring comprehensive and accurate validation throughout the content lifecycle is vital.</para>
@@ -194,7 +194,7 @@
       &lt;biblioset role="series"/&gt;
       &lt;biblioset role="companionWebsite"/&gt;
     &lt;/info&gt;
-  &lt;/book&gt;</programlisting>
+&lt;/book&gt;</programlisting>
 </section> 
   
 <section>
@@ -206,7 +206,7 @@
       &lt;title&gt;biblioset-role-attribute-tests&lt;/title&gt;
       &lt;biblioset role="isbn"/&gt;
     &lt;/info&gt;
-  &lt;/book&gt;</programlisting>
+&lt;/book&gt;</programlisting>
 </section> 
 </section> 
 <section>
@@ -397,14 +397,11 @@
 <para>Expansion - incrementally developing test cases to reflect the full breadth of the schemas, ensuring complete rule coverage. </para>
 </listitem>
 </orderedlist>
-</section>
-<section>
-<title>Accessibility</title>
 <para>The test suite has been intentionally designed for accessibility across varying technical backgrounds, so users only require a basic understanding of XML to run and interpret test results. Embedding validation into the wider development workflow encourages shared ownership of schema quality and accuracy, and by lowering the technical barrier to make schema validation more accessible, it can be adopted more broadly within multidisciplinary teams.</para>
 </section>
 </section>
    
-  <bibliography>
+  <bibliography xml:id="references">
     <bibliomixed>
       <abbrev>D5TDG</abbrev>
       Walsh, N. and Hamilton, R.L. (2010). <title>DocBook 5: The Definitive Guide</title>. O’Reilly Media, Inc
@@ -417,7 +414,7 @@
     
     <bibliomixed>
       <abbrev>VRAC</abbrev>
-      Visual Resources Association (VRA) Core. (n.d.). Available at: <bibliomisc><link xl:href="https://elizabethbradshaw.wordpress.com/wp-content/uploads/2015/12/final_paper_pdf.pdf"/></bibliomisc>
+      www.loc.gov. (n.d.). <title>VRA CORE</title>. [online] Available at: <bibliomisc><link xl:href="https://www.loc.gov/standards/vracore/"/></bibliomisc>.
     </bibliomixed>
     
     <bibliomixed>

@@ -235,7 +235,7 @@ by the quasars (CCSDS &lt;a href="#j_astro-2022-0200_ref_002" &gt;2019&lt;/a&gt;
         <title role="Beschriftung">Figure 1: The transformation of XHTML and CSS to TeX</title>
         <mediaobject>
           <imageobject>
-            <imagedata fileref="images/diagram.svg"/>
+            <imagedata width="100%" fileref="images/diagram.svg"/>
           </imageobject>
         </mediaobject>
       </figure>

@@ -303,19 +303,19 @@
          produces
       </para>
       <programlisting language="xml">&lt;date>
-            &lt;day>31&lt;/day>
-            &lt;month>12&lt;/month>
-            &lt;year>1999&lt;/year>
-         &lt;/date></programlisting>
+   &lt;day>31&lt;/day>
+   &lt;month>12&lt;/month>
+   &lt;year>1999&lt;/year>
+&lt;/date></programlisting>
       <para>
          <literal>31</literal> <literal>December</literal>
          <literal>1999</literal> produces
       </para>
       <programlisting language="xml">&lt;date>
-            &lt;day>31&lt;/day>
-            &lt;tmonth>12&lt;/tmonth>
-            &lt;year>1999&lt;/year>
-         &lt;/date></programlisting>
+   &lt;day>31&lt;/day>
+   &lt;tmonth>12&lt;/tmonth>
+   &lt;year>1999&lt;/year>
+&lt;/date></programlisting>
       <para>
          where the difference is because it is produced from a different
          input syntax. Using renaming, you can specify that both have the
@@ -354,10 +354,10 @@
          form such as
       </para>
       <programlisting language="xml">&lt;date>
-            &lt;day>31&lt;/day>
-            &lt;month>12&lt;/month>
-            &lt;year>1999&lt;/year>
-         &lt;/date></programlisting>
+   &lt;day>31&lt;/day>
+   &lt;month>12&lt;/month>
+   &lt;year>1999&lt;/year>
+&lt;/date></programlisting>
       <para>
          can have been produced by two different input syntaxes, the
          roundtripping process has to choose one of them. Where necessary
@@ -375,10 +375,10 @@
          <literal>December</literal> <literal>1999</literal> style of input
       </para>
       <programlisting language="xml">&lt;date>
-            &lt;day>31&lt;/day>
-            &lt;month style='text'>12&lt;/month>
-            &lt;year>1999&lt;/year>
-         &lt;/date></programlisting>
+   &lt;day>31&lt;/day>
+   &lt;month style='text'>12&lt;/month>
+   &lt;year>1999&lt;/year>
+&lt;/date></programlisting>
       <para>
          which can be uniquely round-tripped.
       </para>
@@ -454,16 +454,16 @@
          this produces a resulting structure like
       </para>
       <programlisting language="xml">&lt;uses>
-            &lt;from source='css.ixml'>
-               &lt;share name='css'/>
-            &lt;/from>
-            &lt;from source='iri.ixml'>
-               &lt;share name='iri'/>
-               &lt;share name='url'/>
-               &lt;share name='uri'/>
-               &lt;share name='urn'/>
-            &lt;/from>
-         &lt;/uses></programlisting>
+   &lt;from source='css.ixml'>
+      &lt;share name='css'/>
+   &lt;/from>
+   &lt;from source='iri.ixml'>
+      &lt;share name='iri'/>
+      &lt;share name='url'/>
+      &lt;share name='uri'/>
+      &lt;share name='urn'/>
+   &lt;/from>
+&lt;/uses></programlisting>
       <para>
          Alternatively, the grammar could look like:
       </para>
@@ -478,14 +478,14 @@
          where the resulting structure then looks like:
       </para>
       <programlisting language="xml">&lt;uses from='css.ixml'>
-            &lt;share name='css'/>
-         &lt;/uses>
-         &lt;uses from='uri.ixml'>
-            &lt;share name='iri'/>
-            &lt;share name='url'/>
-            &lt;share name='uri'/>
-            &lt;share name='urn'/>
-         &lt;/uses></programlisting>
+   &lt;share name='css'/>
+&lt;/uses>
+&lt;uses from='uri.ixml'>
+   &lt;share name='iri'/>
+   &lt;share name='url'/>
+   &lt;share name='uri'/>
+   &lt;share name='urn'/>
+&lt;/uses></programlisting>
       <para>
          The advantage of the latter version is that processing is slightly
          easier, since shallower, with a slight disadvantage with respect
@@ -920,25 +920,25 @@
          and so on. Giving output like:
       </para>
       <programlisting language="xml">&lt;html xmlns='http://www.w3.org/1999/xhtml'>
-            &lt;head>
-               &lt;title>Example XForm&lt;/title>
-               &lt;link type='text/css' rel='stylesheet' href='xform.css'/>
-               &lt;model id='M' xmlns='http://www.w3.org/2002/xforms'>
-		  &lt;instance id='data' resource='data.xml'/>
-		  &lt;submission id='save' method='put' resource='data.xml' replace='none'/>
-               &lt;/model>
-            &lt;/head>
-            &lt;body>
-               &lt;group xmlns='http://www.w3.org/2002/xforms'>
-		  &lt;input ref='name'>
-		     &lt;label>What is your name?&lt;/label>
-		  &lt;/input>
-		  &lt;submit>
-		     &lt;label>OK&lt;/label>
-		  &lt;/submit>
-               &lt;/group>
-            &lt;/body>
-         &lt;/html></programlisting>
+   &lt;head>
+      &lt;title>Example XForm&lt;/title>
+      &lt;link type='text/css' rel='stylesheet' href='xform.css'/>
+      &lt;model id='M' xmlns='http://www.w3.org/2002/xforms'>
+      &lt;instance id='data' resource='data.xml'/>
+      &lt;submission id='save' method='put' resource='data.xml' replace='none'/>
+      &lt;/model>
+   &lt;/head>
+   &lt;body>
+      &lt;group xmlns='http://www.w3.org/2002/xforms'>
+         &lt;input ref='name'>
+            &lt;label>What is your name?&lt;/label>
+         &lt;/input>
+         &lt;submit>
+            &lt;label>OK&lt;/label>
+         &lt;/submit>
+      &lt;/group>
+   &lt;/body>
+&lt;/html></programlisting>
    </section>
    <section xml:id="other-possible-approaches">
       <title>Other Possible Approaches</title>

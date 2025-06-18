@@ -448,6 +448,7 @@
         </imageobject>
       </mediaobject>
     </figure>
+    <?hard-pagebreak?>
     <figure>
       <title>Element Frequency</title>
       <para>This report has one line for each element name seen, sorted by
@@ -457,10 +458,11 @@
         on a single fifty-megabyte XML document.</para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="quin02-freqx-top-level-elements.png"/>
+          <imagedata width="100%" fileref="quin02-freqx-top-level-elements.png"/>
         </imageobject>
       </mediaobject>
     </figure>
+    <?hard-pagebreak?>
     <figure>
       <title>Element Details</title>
       <para>In this figure the user has clicked on the <emphasis>fr</emphasis>
@@ -474,10 +476,11 @@
         attribute usually represents an error.</para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="quin03-freqx-elements.png"/>
+          <imagedata width="100%" fileref="quin03-freqx-elements.png"/>
         </imageobject>
       </mediaobject>
     </figure>
+    <?hard-pagebreak?>
     <figure>
       <title>Attribute Values</title>
       <para>The part of the report showing attributes is not included in this
@@ -486,7 +489,7 @@
         The entry for <emphasis>xml:lang</emphasis> has been expanded.</para>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="quin04-freqx-attribute-values.png"/>
+          <imagedata width="100%" fileref="quin04-freqx-attribute-values.png"/>
         </imageobject>
       </mediaobject>
     </figure>
