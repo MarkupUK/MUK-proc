@@ -2,7 +2,13 @@
 <article xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
   <info>
     <title>InsurML</title>
-    
+    <author>
+      <personname>
+        <firstname>John</firstname>
+        <surname>Cummins</surname>
+      </personname>
+    </author>
+    <affiliation><orgname>Axiome Partners</orgname></affiliation>
     
     <abstract>
       <para>
@@ -69,7 +75,7 @@
       schedule and the policy wording.</title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="media/image1.png" scalefit="1" width="100%" contentdepth="100%"/>
+        <imagedata fileref="media/image1.svg" scalefit="1" width="100%" contentdepth="100%"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -190,15 +196,15 @@
     modular approaches are adopted in commercial insurance, the level of
     granularity tends to be low i.e. the modular objects are still
     relatively large in terms of the amount of content.
-  </para>
-  <figure xml:id="fig2">
+  </para><figure xml:id="fig2">
     <title>The Contract Innovation Landscape</title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="media/image2.png" contentdepth="100%" width="100%" scalefit="1"/>
+        <imagedata fileref="media/image2.svg" contentdepth="100%" width="100%" scalefit="1"/>
       </imageobject>
     </mediaobject>
   </figure>
+  
   <para>
     The top-right quadrant is the home of computable contracts, and
     where the contract object and its digital representation are one and
@@ -270,7 +276,7 @@
       contract.</title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="media/image3.png" width="100%" scalefit="1" contentdepth="100%"/>
+        <imagedata fileref="media/image3.svg" width="100%" scalefit="1" contentdepth="100%"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -349,7 +355,7 @@
       Relationship diagram.</title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="media/image4.png" width="100%" scalefit="1" contentdepth="100%"/>
+        <imagedata fileref="media/image4.svg" width="100%" scalefit="1" contentdepth="100%"/>
       </imageobject>
     </mediaobject>
   </figure>
@@ -410,7 +416,7 @@
       nesting within a component.</title>
     <mediaobject>
       <imageobject>
-        <imagedata fileref="media/image5.png" width="100%" scalefit="1" contentdepth="100%"/>
+        <imagedata fileref="media/image5.svg" width="100%" scalefit="1" contentdepth="100%"/>
       </imageobject>
     </mediaobject>
   </figure>
