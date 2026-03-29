@@ -269,9 +269,9 @@
           <para>If there&#x2019;s any syntactic sugar in your language that makes expressions easier
             to read, by all means, use it. For instance, since version&#160;3.0, XPath has the
               <code>=></code> operator. So instead of:</para>
-          <programlisting>lower-case(normalize-space(translate($name,&#160;'\',&#160;'/')))</programlisting>
+          <programlisting language="xquery">lower-case(normalize-space(translate($name,&#160;'\',&#160;'/')))</programlisting>
           <para>We can now write the, IMHO much clearer:</para>
-          <programlisting>$name => translate('\', '/') => normalize-space() => lower-case()</programlisting>
+          <programlisting language="xquery">$name => translate('\', '/') => normalize-space() => lower-case()</programlisting>
         </listitem>
       </itemizedlist>
 
@@ -323,7 +323,7 @@
         <listitem>
           <para>Use empty lines and comment headers to give code inside a template/function/… a
             &#x201c;rhythm&#x201d;:</para>
-          <programlisting xml:space="preserve"><![CDATA[(: Initialize: :)
+          <programlisting xml:space="preserve" language="xquery"><![CDATA[(: Initialize: :)
 …
 
 (: Compute the value for … :)
@@ -402,11 +402,11 @@
         <listitem>
           <para>Break a long and complicated expression into smaller parts using aptly named
             variables. For instance:</para>
-          <programlisting xml:space="preserve"><![CDATA[if (($status eq $status-success) or 
+          <programlisting xml:space="preserve" language="xquery"><![CDATA[if (($status eq $status-success) or 
   (($amount ge $amount-limit) and (not($special-account-type)))) 
 then …]]></programlisting>
           <para>We can make its intent more clear if we rewrite it to:</para>
-          <programlisting xml:space="preserve"><![CDATA[let $successful-attempt as xs:boolean := $status eq $status-success
+          <programlisting xml:space="preserve" language="xquery"><![CDATA[let $successful-attempt as xs:boolean := $status eq $status-success
 let $large-withdrawal-permitted as xs:boolean := 
   ($amount ge $amount-limit) and (not($special-account-type))    
 return
@@ -443,12 +443,12 @@ return
 
           <para role="keep-with-next">Sometimes there is grumbling (me included) about having to
             create long and boring lists of magic name declarations, like this:</para>
-          <programlisting xml:space="preserve"><![CDATA[declare variable $mod:status-error as xs:string := 'error';
+          <programlisting xml:space="preserve" language="xquery"><![CDATA[declare variable $mod:status-error as xs:string := 'error';
 declare variable $mod:status-warning as xs:string := 'warning';
 …]]></programlisting>
           <para>That looks superfluous, until you make a hard to spot &#x201c;typo&#x201d;
             bug:</para>
-          <programlisting xml:space="preserve"><![CDATA[if ($status eq 'errror') then …]]></programlisting>
+          <programlisting xml:space="preserve" language="xquery"><![CDATA[if ($status eq 'errror') then …]]></programlisting>
         </listitem>
 
         <listitem>
@@ -538,7 +538,7 @@ declare variable $mod:status-warning as xs:string := 'warning';
           <para>Use comments as the equivalent of <emphasis>section titles</emphasis>, even if what
             the comment says is obvious when you <emphasis>know</emphasis> the code. Remember, the
             reader is&#x2019;t always that knowledgeable.</para>
-          <programlisting xml:space="preserve"><![CDATA[<!-- Initialize: -->
+          <programlisting xml:space="preserve" language="xml"><![CDATA[<!-- Initialize: -->
 …
 
 <!-- Compute the values for … -->
