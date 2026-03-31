@@ -1,3 +1,5 @@
 build-paths.xml
 *.fo
+__MACOSX
+.DS_Store
 *~
