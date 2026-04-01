@@ -17,6 +17,7 @@
      previously declared either earlier in the build process or
      earlier in the current property file. -->
 
+<!-- DocBook XML file to process. -->
 <entry key="single">proceedings-2021.xml</entry>
 
 <!-- <oXygen/>-related properties. -->
@@ -31,7 +32,9 @@
 <entry key="saxon.jar.mac">/usr/share/java/saxon9.jar</entry>
 <entry key="saxon.jar.windows">/E:/saxon/saxon9he.jar</entry>
 
+<!-- Location of AH Formatter. -->
 <entry key="ahformatter.windows">AHFCmd.exe</entry>
 <entry key="ahformatter.unix">/usr/AHFormatterV66_64/run.sh</entry>
+<entry key="ahfgui.windows">AHFormatter.exe</entry>
 
 </properties>
